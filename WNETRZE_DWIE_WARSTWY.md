@@ -111,3 +111,7 @@ Docelowo podgląd ma mieć dwa niezależne przełączniki:
 oraz filtrowanie per strefa: kuchnia, salon, spiżarnia, wiatrołap.
 
 Warstwa elementów może być włączona razem z blokami do porównania, ale domyślnie ma zastępować bryły blokowe w codziennej prezentacji.
+
+## Status implementacji
+
+Generator i podgląd HTML obsługują dwie niezależne warstwy wnętrza oraz filtry dla kuchni, salonu, spiżarni i wiatrołapu. Wygenerowane pliki modelu są odtwarzane automatycznie na branchu roboczym po zmianach źródłowych.
