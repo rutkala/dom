@@ -29,6 +29,7 @@ DATA = json.loads((ROOT / 'dane_zrodlowe.json').read_text(encoding='utf-8'))
 PARAM = json.loads((ROOT / 'parametry_modelu.json').read_text(encoding='utf-8'))
 ROOF = json.loads((ROOT / 'obrys_dachu_z_pdf.json').read_text(encoding='utf-8'))
 WINDOWS = json.loads((ROOT / 'okna_projektowe.json').read_text(encoding='utf-8'))
+EXTERIOR_JOINERY = json.loads((ROOT / 'stolarka_zewnetrzna.json').read_text(encoding='utf-8'))
 
 COLORS = {
     'sciany': [0.84, 0.83, 0.80, 1.0],
@@ -39,6 +40,11 @@ COLORS = {
     'stolarka': [0.22, 0.23, 0.25, 1.0], # czarny / antracyt stolarki jak na budowie
     'szklo': [0.58, 0.74, 0.79, 0.35],
     'drzwi': [0.59, 0.57, 0.53, 1.0],
+    'drzwi_antracyt': [0.17, 0.19, 0.20, 1.0],
+    'brama': [0.16, 0.18, 0.20, 1.0],
+    'brama_linia': [0.07, 0.08, 0.09, 1.0],
+    'szklo_matowe': [0.78, 0.82, 0.80, 0.72],
+    'metal_czarny': [0.03, 0.03, 0.03, 1.0],
     'strop': [0.72, 0.73, 0.74, 1.0],
     'dach': [0.38, 0.41, 0.43, 1.0],
     'attyka': [0.91, 0.90, 0.86, 1.0],
@@ -256,10 +262,12 @@ def main():
         openings.append(op)
         make_window(rec, z0, z1)
 
-    # 3. Drzwi
+    # 3. Drzwi i brama
     for rec in DATA['doors']:
         a, b, c, d = map(float, rec['core_opening_bbox_mm'])
-        height = float(PARAM['door_opening_height_overrides_mm'].get(rec['id'], PARAM['door_opening_height_mm']))
+        spec = EXTERIOR_JOINERY.get(rec['id'])
+        height = float(spec['opening_height_mm'] if spec else PARAM['door_opening_height_overrides_mm'].get(rec['id'], PARAM['door_opening_height_mm']))
+        source_name = spec['source_file'] if spec else 'Projekt budowlany / zalozenia robocze'
         add(
             rec['id'] + '_mur_nad_drzwiami',
             'uzupelnienia',
@@ -267,29 +275,130 @@ def main():
             box(a, b, c, d),
             height,
             H,
-            source=f'Wysokosc otworu drzwiowego: {height/1000:.2f} m',
-            assumed=True,
+            source=f'{source_name}: wysokosc otworu {height/1000:.2f} m',
+            assumed=spec is None,
             source_id=rec['id'],
-            extras={'nominal_height_mm': rec['nominal_height_mm'], 'opening_height_used_mm': height}
+            note=(spec.get('note','') if spec else ''),
+            extras={'nominal_height_mm': (spec.get('product_height_mm') if spec else rec['nominal_height_mm']),
+                    'opening_height_used_mm': height,
+                    'offer_number': (spec.get('offer_number') if spec else None)}
         )
-        width = rec['nominal_width_mm']
-        thick = PARAM['symbolic_door_leaf_thickness_mm']
-        if rec['orientation_in_plan'] == 'horizontal':
-            g = box((a + c - width) / 2, (b + d - thick) / 2, (a + c + width) / 2, (b + d + thick) / 2)
+
+        thick = float(PARAM['symbolic_door_leaf_thickness_mm'])
+        if spec and spec['kind'] == 'garage_gate':
+            width = float(spec['product_width_mm'])
+            x0 = (a + c - width) / 2
+            x1 = x0 + width
+            y0 = (b + d - thick) / 2
+            y1 = (b + d + thick) / 2
+            common = dict(
+                source=spec['source_file'],
+                assumed=False,
+                source_id=rec['id'],
+                note=spec['note'],
+                extras={
+                    'offer_number': spec['offer_number'],
+                    'manufacturer': spec['manufacturer'],
+                    'product': spec['product'],
+                    'product_width_mm': width,
+                    'product_height_mm': spec['product_height_mm'],
+                    'panel_type': spec['panel_type'],
+                    'panel_thickness_mm': spec['panel_thickness_mm'],
+                    'exterior_color': spec['exterior_color'],
+                    'interior_color': spec['interior_color'],
+                    'drive': spec['drive'],
+                    'uw_w_m2k': spec['uw_w_m2k']
+                }
+            )
+            add(rec['id'] + '_brama_panel', 'stolarka', 'brama', box(x0, y0, x1, y1), 0, height, **common)
+            sections = int(spec.get('section_count_model', 5))
+            for j in range(1, sections):
+                z = height * j / sections
+                add(rec['id'] + f'_brama_linia_{j}', 'stolarka', 'brama_linia',
+                    box(x0 + 20, y0 - 3, x1 - 20, y1 + 3), z - 5, z + 5, **common)
+
+        elif spec and spec['kind'] == 'entrance_door':
+            width = float(spec['product_width_mm'])
+            x0 = (a + c - width) / 2
+            x1 = x0 + width
+            y0 = (b + d - thick) / 2
+            y1 = (b + d + thick) / 2
+            side_w = float(spec['sidelight_width_mm'])
+            leaf_w = float(spec['leaf_width_mm'])
+            sx0, sx1 = x0, x0 + side_w
+            lx0, lx1 = sx1, x1
+            frame = 65.0
+            common = dict(
+                source=spec['source_file'],
+                assumed=False,
+                source_id=rec['id'],
+                note=spec['note'],
+                extras={
+                    'offer_number': spec['offer_number'],
+                    'manufacturer': spec['manufacturer'],
+                    'system': spec['system'],
+                    'product_width_mm': width,
+                    'product_height_mm': spec['product_height_mm'],
+                    'leaf_width_mm': leaf_w,
+                    'sidelight_width_mm': side_w,
+                    'opening_direction': spec['opening_direction'],
+                    'leaf_color': spec['leaf_color'],
+                    'sidelight_glass': spec['sidelight_glass'],
+                    'pull_handle': spec['pull_handle'],
+                    'under_threshold_support_mm': spec['under_threshold_support_mm']
+                }
+            )
+            # Skrzydlo drzwiowe.
+            add(rec['id'] + '_skrzydlo_ALTUS', 'stolarka', 'drzwi_antracyt',
+                box(lx0, y0, lx1, y1), 0, height, **common)
+
+            # Doswietle po lewej w widoku zewnetrznym: rama + matowe szklo.
+            add(rec['id'] + '_doswietle_rama_dol', 'stolarka', 'drzwi_antracyt',
+                box(sx0, y0, sx1, y1), 0, frame, **common)
+            add(rec['id'] + '_doswietle_rama_gora', 'stolarka', 'drzwi_antracyt',
+                box(sx0, y0, sx1, y1), height-frame, height, **common)
+            add(rec['id'] + '_doswietle_rama_lewa', 'stolarka', 'drzwi_antracyt',
+                box(sx0, y0, sx0+frame, y1), frame, height-frame, **common)
+            add(rec['id'] + '_doswietle_rama_prawa', 'stolarka', 'drzwi_antracyt',
+                box(sx1-frame, y0, sx1, y1), frame, height-frame, **common)
+            glass_depth = 12.0
+            gy0, gy1 = (b+d-glass_depth)/2, (b+d+glass_depth)/2
+            add(rec['id'] + '_doswietle_szklo_matowe', 'stolarka', 'szklo_matowe',
+                box(sx0+frame, gy0, sx1-frame, gy1), frame, height-frame, **common)
+
+            # Trzy poziome frezy z widoku zewnetrznego - jako subtelne ciemne linie.
+            exterior_y0 = y0 - 5
+            exterior_y1 = y0 + 5
+            for j, z in enumerate((620.0, 1090.0, 1560.0), 1):
+                add(rec['id'] + f'_frez_{j}', 'stolarka', 'metal_czarny',
+                    box(lx0+300, exterior_y0, lx1-110, exterior_y1), z-4, z+4, **common)
+
+            # Pochwyt Amsterdam 1800 mm przy lewej krawedzi skrzydla (widok zewnetrzny).
+            hx = lx0 + 145
+            add(rec['id'] + '_pochwyt_Amsterdam_1800', 'stolarka', 'metal_czarny',
+                box(hx-14, y0-28, hx+14, y0-8), 150, 1950, **common)
+            add(rec['id'] + '_prog', 'stolarka', 'metal_czarny',
+                box(x0, y0, x1, y1), 0, 35, **common)
+
         else:
-            g = box((a + c - thick) / 2, (b + d - width) / 2, (a + c + thick) / 2, (b + d + width) / 2)
-        add(
-            rec['id'] + '_' + rec['source_tag'] + '_symbol',
-            'stolarka',
-            'drzwi',
-            g,
-            0,
-            height,
-            source='Skrzydlo drzwiowe na gotowo',
-            assumed=True,
-            source_id=rec['id'],
-            extras={'nominal_width_mm': width, 'nominal_height_mm': height}
-        )
+            width = rec['nominal_width_mm']
+            if rec['orientation_in_plan'] == 'horizontal':
+                g = box((a + c - width) / 2, (b + d - thick) / 2, (a + c + width) / 2, (b + d + thick) / 2)
+            else:
+                g = box((a + c - thick) / 2, (b + d - width) / 2, (a + c + thick) / 2, (b + d + width) / 2)
+            add(
+                rec['id'] + '_' + rec['source_tag'] + '_symbol',
+                'stolarka',
+                'drzwi',
+                g,
+                0,
+                height,
+                source='Skrzydlo drzwiowe na gotowo',
+                assumed=True,
+                source_id=rec['id'],
+                extras={'nominal_width_mm': width, 'nominal_height_mm': height}
+            )
+
         add(
             rec['id'] + '_powierzchnia_w_przejsciu',
             'podlogi',
@@ -301,7 +410,7 @@ def main():
             source_id=rec['id']
         )
         if rec['id'] in ['DR01', 'DR02']:
-            openings.append({'id': rec['id'], 'geometry': boundary_opening(rec, facade), 'bottom': 0, 'top': height, 'assumed': True})
+            openings.append({'id': rec['id'], 'geometry': boundary_opening(rec, facade), 'bottom': 0, 'top': height, 'assumed': spec is None})
 
     # 4. Przejscia otwarte
     for rec in DATA['unlabelled_passages']:
