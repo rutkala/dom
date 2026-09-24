@@ -1,0 +1,1001 @@
+{
+  "schema_version": 1,
+  "status": "v1 extraction from interior PDF; geometry proxies, not manufacturer models",
+  "source": {
+    "file": "Projekt wnętrza 20,10,2023.pdf",
+    "pages": {
+      "visualizations": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "kitchen": [
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "living": [
+        29,
+        30,
+        31
+      ],
+      "pantry": [
+        33,
+        34,
+        35,
+        36
+      ],
+      "entry": [
+        38,
+        39,
+        40,
+        41
+      ],
+      "furniture_plan": [
+        49
+      ],
+      "materials": [
+        50,
+        51,
+        52
+      ]
+    }
+  },
+  "rooms": {
+    "1": "Hol wejściowy / wiatrołap",
+    "10": "Salon",
+    "11": "Kuchnia + jadalnia",
+    "14": "Spiżarnia"
+  },
+  "materials": {
+    "oak_craft_gold": {
+      "label": "Dąb craft złoty",
+      "color": [
+        0.58,
+        0.39,
+        0.21,
+        1
+      ]
+    },
+    "black_matte": {
+      "label": "Czarny mat",
+      "color": [
+        0.075,
+        0.075,
+        0.075,
+        1
+      ]
+    },
+    "warm_white": {
+      "label": "Jasne płytki / Marmo White",
+      "color": [
+        0.9,
+        0.89,
+        0.85,
+        1
+      ]
+    },
+    "architectural_concrete": {
+      "label": "Beton architektoniczny / SAFARI",
+      "color": [
+        0.66,
+        0.64,
+        0.6,
+        1
+      ]
+    },
+    "cream_fabric": {
+      "label": "Jasna tkanina / Soro 21",
+      "color": [
+        0.82,
+        0.78,
+        0.7,
+        1
+      ]
+    },
+    "mustard_fabric": {
+      "label": "Akcent fotela / Soro 40",
+      "color": [
+        0.83,
+        0.62,
+        0.08,
+        1
+      ]
+    },
+    "black_metal": {
+      "label": "Czarny metal",
+      "color": [
+        0.03,
+        0.03,
+        0.03,
+        1
+      ]
+    }
+  },
+  "layers": {
+    "blocks": [
+      {
+        "id": "KUCH_RUN_WINDOW",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7080,
+            8750,
+            30
+          ],
+          [
+            10980,
+            9290,
+            840
+          ]
+        ],
+        "role": "dolna zabudowa pod oknem",
+        "source_pages": [
+          21,
+          22
+        ]
+      },
+      {
+        "id": "KUCH_TALL_ZONE",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            11020,
+            8730,
+            30
+          ],
+          [
+            12880,
+            9300,
+            2560
+          ]
+        ],
+        "role": "wysoka zabudowa lodówka + słupki",
+        "source_pages": [
+          21,
+          22
+        ]
+      },
+      {
+        "id": "KUCH_LEFT_RUN",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7080,
+            6180,
+            30
+          ],
+          [
+            7680,
+            8700,
+            900
+          ]
+        ],
+        "role": "ciąg roboczy L",
+        "source_pages": [
+          21,
+          23
+        ]
+      },
+      {
+        "id": "KUCH_OVEN_TOWER",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7080,
+            6180,
+            30
+          ],
+          [
+            7660,
+            6860,
+            2550
+          ]
+        ],
+        "role": "słupek piekarnik / mikrofala",
+        "source_pages": [
+          23
+        ]
+      },
+      {
+        "id": "KUCH_ISLAND",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            8910,
+            6860,
+            30
+          ],
+          [
+            11810,
+            7760,
+            900
+          ]
+        ],
+        "role": "wyspa 2900×900",
+        "source_pages": [
+          21,
+          25,
+          26
+        ]
+      },
+      {
+        "id": "KUCH_WINE_RACK",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            12350,
+            6050,
+            30
+          ],
+          [
+            12880,
+            6650,
+            2500
+          ]
+        ],
+        "role": "winiarka / witryna",
+        "source_pages": [
+          24
+        ]
+      },
+      {
+        "id": "KUCH_CHALKBOARD",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7080,
+            5935,
+            50
+          ],
+          [
+            8880,
+            5965,
+            2520
+          ]
+        ],
+        "role": "ściana tablicowa",
+        "source_pages": [
+          27
+        ]
+      },
+      {
+        "id": "KUCH_SLIDING_DOOR",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            9350,
+            5930,
+            30
+          ],
+          [
+            10350,
+            5970,
+            2280
+          ]
+        ],
+        "role": "drewniane drzwi przesuwne",
+        "source_pages": [
+          27
+        ]
+      },
+      {
+        "id": "SAL_DINING_TABLE",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            13380,
+            6550,
+            720
+          ],
+          [
+            14480,
+            9300,
+            790
+          ]
+        ],
+        "role": "stół jadalniany",
+        "source_pages": [
+          49
+        ]
+      },
+      {
+        "id": "SAL_SOFA_LONG",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            15550,
+            6650,
+            220
+          ],
+          [
+            16550,
+            9150,
+            540
+          ]
+        ],
+        "role": "główna część narożnika",
+        "source_pages": [
+          11,
+          12,
+          13,
+          14,
+          15,
+          49
+        ]
+      },
+      {
+        "id": "SAL_SOFA_CHAISE",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            15550,
+            6650,
+            220
+          ],
+          [
+            17900,
+            7550,
+            540
+          ]
+        ],
+        "role": "szezlong narożnika",
+        "source_pages": [
+          11,
+          12,
+          13,
+          14,
+          15,
+          49
+        ]
+      },
+      {
+        "id": "SAL_ARMCHAIR",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            17780,
+            8780,
+            350
+          ],
+          [
+            18720,
+            9550,
+            1220
+          ]
+        ],
+        "role": "fotel akcentowy",
+        "source_pages": [
+          11,
+          14,
+          15,
+          49
+        ]
+      },
+      {
+        "id": "SAL_RUG",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            16550,
+            7050,
+            18
+          ],
+          [
+            19050,
+            9550,
+            30
+          ]
+        ],
+        "role": "dywan",
+        "source_pages": [
+          49,
+          51
+        ]
+      },
+      {
+        "id": "SAL_COFFEE_90",
+        "room": 10,
+        "primitive": "cylinder",
+        "center_mm": [
+          17550,
+          8150,
+          425
+        ],
+        "radius_mm": 420,
+        "height_mm": 50,
+        "role": "stolik kawowy Ø90 proxy",
+        "source_pages": [
+          49,
+          51
+        ]
+      },
+      {
+        "id": "SAL_COFFEE_60",
+        "room": 10,
+        "primitive": "cylinder",
+        "center_mm": [
+          18150,
+          7720,
+          355
+        ],
+        "radius_mm": 320,
+        "height_mm": 50,
+        "role": "stolik kawowy Ø60 proxy",
+        "source_pages": [
+          49,
+          51
+        ]
+      },
+      {
+        "id": "SAL_TV_WALL",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            19820,
+            6680,
+            30
+          ],
+          [
+            19990,
+            9550,
+            2550
+          ]
+        ],
+        "role": "zabudowa TV / kominek",
+        "source_pages": [
+          29,
+          30
+        ]
+      },
+      {
+        "id": "SAL_ART_WALL",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            18500,
+            5940,
+            30
+          ],
+          [
+            19480,
+            5985,
+            2520
+          ]
+        ],
+        "role": "lamele / ściana obrazu",
+        "source_pages": [
+          31
+        ]
+      },
+      {
+        "id": "SPI_BASE",
+        "room": 14,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7100,
+            5080,
+            30
+          ],
+          [
+            9920,
+            5550,
+            790
+          ]
+        ],
+        "role": "dolna zabudowa spiżarni",
+        "source_pages": [
+          33,
+          34,
+          36
+        ]
+      },
+      {
+        "id": "SPI_TALL",
+        "room": 14,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            9340,
+            4280,
+            30
+          ],
+          [
+            9940,
+            5050,
+            2550
+          ]
+        ],
+        "role": "wysoka szafa spiżarni",
+        "source_pages": [
+          35,
+          36
+        ]
+      },
+      {
+        "id": "SPI_SHELVES",
+        "room": 14,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7120,
+            5180,
+            1200
+          ],
+          [
+            9300,
+            5500,
+            2385
+          ]
+        ],
+        "role": "górne półki",
+        "source_pages": [
+          34,
+          36
+        ]
+      },
+      {
+        "id": "HOL_WARDROBE",
+        "room": 1,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            10480,
+            3020,
+            30
+          ],
+          [
+            12980,
+            3580,
+            2550
+          ]
+        ],
+        "role": "szafa 2500",
+        "source_pages": [
+          38
+        ]
+      },
+      {
+        "id": "HOL_MIRROR",
+        "room": 1,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            14890,
+            3080,
+            320
+          ],
+          [
+            14940,
+            4180,
+            2320
+          ]
+        ],
+        "role": "lustro podświetlane",
+        "source_pages": [
+          39
+        ]
+      },
+      {
+        "id": "HOL_CONSOLE",
+        "room": 1,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            14620,
+            3300,
+            800
+          ],
+          [
+            14930,
+            3950,
+            900
+          ]
+        ],
+        "role": "konsola",
+        "source_pages": [
+          39
+        ]
+      },
+      {
+        "id": "HOL_SLAT_WALL",
+        "room": 1,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            10320,
+            4530,
+            30
+          ],
+          [
+            10370,
+            5470,
+            2520
+          ]
+        ],
+        "role": "lamele / ukryte drzwi",
+        "source_pages": [
+          40,
+          41
+        ]
+      },
+      {
+        "id": "HOL_POUF",
+        "room": 1,
+        "primitive": "cylinder",
+        "center_mm": [
+          11150,
+          4800,
+          230
+        ],
+        "radius_mm": 280,
+        "height_mm": 400,
+        "role": "pufa",
+        "source_pages": [
+          17,
+          18,
+          49
+        ]
+      }
+    ],
+    "selected": [
+      {
+        "id": "SEL_KITCHEN_CABINETRY",
+        "room": 11,
+        "based_on": [
+          "KUCH_RUN_WINDOW",
+          "KUCH_TALL_ZONE",
+          "KUCH_LEFT_RUN",
+          "KUCH_OVEN_TOWER",
+          "KUCH_ISLAND",
+          "KUCH_WINE_RACK"
+        ],
+        "product_type": "custom_cabinetry",
+        "materials": [
+          "black_matte",
+          "oak_craft_gold"
+        ],
+        "source_pages": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26
+        ]
+      },
+      {
+        "id": "SEL_KITCHEN_STOOLS",
+        "room": 11,
+        "product": "Hoker loft 60 KAM",
+        "quantity": 3,
+        "proxy": {
+          "primitive": "stool",
+          "centers_mm": [
+            [
+              10250,
+              6620
+            ],
+            [
+              10780,
+              6620
+            ],
+            [
+              11310,
+              6620
+            ]
+          ],
+          "seat_height_mm": 690
+        },
+        "source_pages": [
+          3,
+          7,
+          8,
+          50
+        ]
+      },
+      {
+        "id": "SEL_KITCHEN_SINK",
+        "room": 11,
+        "product": "Primagran Oslo 80 Pocket",
+        "proxy": {
+          "primitive": "box",
+          "bbox_mm": [
+            [
+              9280,
+              7080,
+              900
+            ],
+            [
+              9980,
+              7580,
+              930
+            ]
+          ]
+        },
+        "source_pages": [
+          21,
+          25,
+          26,
+          50
+        ]
+      },
+      {
+        "id": "SEL_DINING_CHAIRS",
+        "room": 10,
+        "product": "Alaska beżowe, nogi czarne",
+        "quantity": 8,
+        "proxy": {
+          "primitive": "chair_set",
+          "around": "SAL_DINING_TABLE"
+        },
+        "source_pages": [
+          12,
+          13,
+          49,
+          51
+        ]
+      },
+      {
+        "id": "SEL_SOFA",
+        "room": 10,
+        "product": "Liquid, tkanina Soro 21",
+        "proxy": {
+          "primitive": "sectional",
+          "based_on": [
+            "SAL_SOFA_LONG",
+            "SAL_SOFA_CHAISE"
+          ]
+        },
+        "material": "cream_fabric",
+        "source_pages": [
+          11,
+          12,
+          13,
+          14,
+          15,
+          51
+        ]
+      },
+      {
+        "id": "SEL_ARMCHAIR",
+        "room": 10,
+        "product": "Sensi, tkanina Soro 40",
+        "proxy": {
+          "primitive": "armchair",
+          "based_on": [
+            "SAL_ARMCHAIR"
+          ]
+        },
+        "material": "mustard_fabric",
+        "source_pages": [
+          11,
+          14,
+          15,
+          51
+        ]
+      },
+      {
+        "id": "SEL_COFFEE_TABLES",
+        "room": 10,
+        "product": "Okrągłe stoliki kawowe 60/90 cm",
+        "proxy": {
+          "based_on": [
+            "SAL_COFFEE_60",
+            "SAL_COFFEE_90"
+          ]
+        },
+        "material": "black_metal",
+        "source_pages": [
+          11,
+          14,
+          15,
+          49,
+          51
+        ]
+      },
+      {
+        "id": "SEL_RUG",
+        "room": 10,
+        "product": "Hector 200×300 cm",
+        "proxy": {
+          "based_on": [
+            "SAL_RUG"
+          ]
+        },
+        "source_pages": [
+          51
+        ]
+      },
+      {
+        "id": "SEL_FIREPLACE",
+        "room": 10,
+        "product": "Dimplex Sierra 72\"",
+        "proxy": {
+          "primitive": "fireplace",
+          "bbox_mm": [
+            [
+              19700,
+              7400,
+              480
+            ],
+            [
+              19815,
+              8720,
+              930
+            ]
+          ]
+        },
+        "source_pages": [
+          29,
+          30,
+          51
+        ]
+      },
+      {
+        "id": "SEL_TV_WALL",
+        "room": 10,
+        "product_type": "custom_media_wall",
+        "materials": [
+          "architectural_concrete",
+          "black_matte",
+          "oak_craft_gold"
+        ],
+        "proxy": {
+          "based_on": [
+            "SAL_TV_WALL"
+          ]
+        },
+        "source_pages": [
+          29,
+          30
+        ]
+      },
+      {
+        "id": "SEL_PANTRY_CABINETRY",
+        "room": 14,
+        "product_type": "custom_cabinetry",
+        "materials": [
+          "black_matte",
+          "oak_craft_gold"
+        ],
+        "proxy": {
+          "based_on": [
+            "SPI_BASE",
+            "SPI_TALL",
+            "SPI_SHELVES"
+          ]
+        },
+        "source_pages": [
+          33,
+          34,
+          35,
+          36,
+          50
+        ]
+      },
+      {
+        "id": "SEL_ENTRY_WARDROBE",
+        "room": 1,
+        "product_type": "custom_cabinetry",
+        "materials": [
+          "black_matte",
+          "oak_craft_gold"
+        ],
+        "proxy": {
+          "based_on": [
+            "HOL_WARDROBE"
+          ]
+        },
+        "source_pages": [
+          38,
+          40,
+          41
+        ]
+      },
+      {
+        "id": "SEL_ENTRY_MIRROR",
+        "room": 1,
+        "product_type": "backlit_mirror",
+        "proxy": {
+          "based_on": [
+            "HOL_MIRROR"
+          ]
+        },
+        "source_pages": [
+          39
+        ]
+      },
+      {
+        "id": "SEL_ENTRY_CONSOLE",
+        "room": 1,
+        "product_type": "custom_console",
+        "material": "oak_craft_gold",
+        "proxy": {
+          "based_on": [
+            "HOL_CONSOLE"
+          ]
+        },
+        "source_pages": [
+          39
+        ]
+      },
+      {
+        "id": "SEL_ENTRY_SLATS",
+        "room": 1,
+        "product_type": "wood_slats",
+        "material": "oak_craft_gold",
+        "proxy": {
+          "based_on": [
+            "HOL_SLAT_WALL"
+          ]
+        },
+        "source_pages": [
+          40,
+          41
+        ]
+      },
+      {
+        "id": "SEL_ENTRY_POUF",
+        "room": 1,
+        "product": "Pufa Puffy / podobna propozycja",
+        "proxy": {
+          "based_on": [
+            "HOL_POUF"
+          ]
+        },
+        "material": "cream_fabric",
+        "source_pages": [
+          17,
+          18,
+          51
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "Pozycje bazowe oparto na rzucie umeblowania s.49 oraz wcześniejszym dopasowaniu do geometrii pomieszczeń.",
+    "Rysunki techniczne są nadrzędne dla wymiarów zabudów; wizualizacje służą do wyglądu i podziałów.",
+    "Warstwa selected zawiera proxy wybranych produktów; nie są to modele producentów 1:1.",
+    "Okno kuchenne pozostaje zgodne z aktualnym modelem budynku, nie z historycznym rysunkiem wnętrza."
+  ]
+}
