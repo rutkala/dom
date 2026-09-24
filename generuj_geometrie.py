@@ -33,6 +33,7 @@ WINDOWS = json.loads((ROOT / 'okna_projektowe.json').read_text(encoding='utf-8')
 EXTERIOR_JOINERY = json.loads((ROOT / 'stolarka_zewnetrzna.json').read_text(encoding='utf-8'))
 SITE = json.loads((ROOT / 'pzt_zagospodarowanie.json').read_text(encoding='utf-8'))
 ELEVATIONS = json.loads((ROOT / 'elewacje_materialy.json').read_text(encoding='utf-8'))
+INTERIOR = json.loads((ROOT / 'wnetrze_projekt.json').read_text(encoding='utf-8'))
 
 COLORS = {
     'sciany': [0.84, 0.83, 0.80, 1.0],
@@ -62,6 +63,15 @@ COLORS = {
     'dach': [0.38, 0.41, 0.43, 1.0],
     'attyka': [0.99, 0.975, 0.93, 1.0],
     'sufity': [0.94, 0.94, 0.92, 1.0],
+    'interior_block': [0.28, 0.57, 0.72, 0.38],
+    'interior_black': [0.055, 0.058, 0.06, 1.0],
+    'interior_oak': [0.58, 0.39, 0.21, 1.0],
+    'interior_concrete': [0.66, 0.64, 0.60, 1.0],
+    'interior_cream': [0.84, 0.80, 0.74, 1.0],
+    'interior_mustard': [0.86, 0.64, 0.08, 1.0],
+    'interior_metal': [0.025, 0.025, 0.025, 1.0],
+    'interior_glass': [0.62, 0.72, 0.75, 0.35],
+    'interior_flame': [0.95, 0.42, 0.08, 0.9],
 }
 
 GROUP_NAMES = {
@@ -78,6 +88,8 @@ GROUP_NAMES = {
     'teren': '11_TEREN',
     'nawierzchnie': '12_NAWIERZCHNIE_I_TARAS',
     'schody': '13_SCHODY_ZEWNETRZNE',
+    'wnetrze_bloki': '14_WNETRZE_BLOKI',
+    'wnetrze_elementy': '15_WNETRZE_ELEMENTY',
 }
 
 parts: list[dict[str, Any]] = []
@@ -310,6 +322,144 @@ def make_window(rec: dict, z0: float, z1: float):
             y=(b+edge)+t*((d-edge)-(b+edge)); g=box(a,y-edge/2,c,y+edge/2)
         add(nm + f'_slupek_{j+1}', 'stolarka', 'stolarka', g, z0 + edge, z1 - edge, **common)
     add(nm + '_szklo', 'stolarka', 'szklo', pane, z0 + edge, z1 - edge, **common)
+
+
+def _interior_box(name, category, material, bbox_mm, source, room_number, layer, role='', source_pages=None, product=''):
+    a,b=bbox_mm
+    x0,y0,z0=map(float,a); x1,y1,z1=map(float,b)
+    extras={'room_number':int(room_number),'interior_layer':layer,'role':role,'source_pages':source_pages or []}
+    if product: extras['product']=product
+    add(name,category,material,box(x0,y0,x1,y1),z0,z1,source,True,role,name,extras)
+
+def _interior_cylinder(name, category, material, center_mm, radius_mm, height_mm, source, room_number, layer, role='', source_pages=None, product=''):
+    cx,cy,cz=map(float,center_mm)
+    h=float(height_mm); r=float(radius_mm)
+    mesh=trimesh.creation.cylinder(radius=r/1000.0,height=h/1000.0,sections=32)
+    mesh.apply_translation([cx/1000.0,cy/1000.0,cz/1000.0])
+    extras={'room_number':int(room_number),'interior_layer':layer,'role':role,'source_pages':source_pages or []}
+    if product: extras['product']=product
+    add_mesh_record(name,category,material,mesh,source,True,role,name,extras)
+
+def _block_material(block_id):
+    oak={'KUCH_TALL_ZONE','KUCH_WINE_RACK','SPI_TALL','SPI_SHELVES','HOL_CONSOLE','HOL_SLAT_WALL'}
+    concrete={'SAL_TV_WALL','SAL_ART_WALL'}
+    cream={'SAL_SOFA_LONG','SAL_SOFA_CHAISE','HOL_POUF'}
+    mustard={'SAL_ARMCHAIR'}
+    black={'KUCH_RUN_WINDOW','KUCH_LEFT_RUN','KUCH_OVEN_TOWER','KUCH_ISLAND','SPI_BASE','HOL_WARDROBE'}
+    if block_id in oak: return 'interior_oak'
+    if block_id in concrete: return 'interior_concrete'
+    if block_id in cream: return 'interior_cream'
+    if block_id in mustard: return 'interior_mustard'
+    if block_id in black: return 'interior_black'
+    return 'interior_black'
+
+def add_interior_layers():
+    source='Projekt wnętrza 20,10,2023.pdf'
+    blocks=INTERIOR['layers']['blocks']
+    block_map={b['id']:b for b in blocks}
+
+    # Layer 1: dimension / collision blocks.
+    for rec in blocks:
+        pages=rec.get('source_pages',[])
+        role=rec.get('role','')
+        if rec['primitive']=='box':
+            _interior_box('BLK_'+rec['id'],'wnetrze_bloki','interior_block',rec['bbox_mm'],source,rec['room'],'blocks',role,pages)
+        elif rec['primitive']=='cylinder':
+            _interior_cylinder('BLK_'+rec['id'],'wnetrze_bloki','interior_block',rec['center_mm'],rec['radius_mm'],rec['height_mm'],source,rec['room'],'blocks',role,pages)
+
+    # Utility for selected-layer proxies based on a block.
+    def clone_block(selected_id, block_id, material, product='', suffix=''):
+        rec=block_map[block_id]
+        name='SEL_'+selected_id+'_'+block_id+(('_'+suffix) if suffix else '')
+        role=rec.get('role','')
+        pages=rec.get('source_pages',[])
+        if rec['primitive']=='box':
+            _interior_box(name,'wnetrze_elementy',material,rec['bbox_mm'],source,rec['room'],'selected',role,pages,product)
+        else:
+            _interior_cylinder(name,'wnetrze_elementy',material,rec['center_mm'],rec['radius_mm'],rec['height_mm'],source,rec['room'],'selected',role,pages,product)
+
+    # Custom cabinetry: same verified envelope, materialized instead of blue blocks.
+    cabinet_materials={
+        'KUCH_RUN_WINDOW':'interior_black','KUCH_TALL_ZONE':'interior_oak','KUCH_LEFT_RUN':'interior_black',
+        'KUCH_OVEN_TOWER':'interior_black','KUCH_ISLAND':'interior_black','KUCH_WINE_RACK':'interior_oak',
+        'SPI_BASE':'interior_black','SPI_TALL':'interior_oak','SPI_SHELVES':'interior_oak',
+        'HOL_WARDROBE':'interior_black','HOL_CONSOLE':'interior_oak'
+    }
+    for rec in INTERIOR['layers']['selected']:
+        sid=rec['id']; product=rec.get('product',rec.get('product_type',''))
+        proxy=rec.get('proxy',{})
+        if sid in ('SEL_KITCHEN_CABINETRY','SEL_PANTRY_CABINETRY','SEL_ENTRY_WARDROBE','SEL_ENTRY_CONSOLE'):
+            refs=rec.get('based_on',proxy.get('based_on',[]))
+            for block_id in refs:
+                clone_block(sid,block_id,cabinet_materials.get(block_id,'interior_black'),product)
+
+    # Kitchen stools: recognizable seats + four slim legs.
+    stool_rec=next((x for x in INTERIOR['layers']['selected'] if x['id']=='SEL_KITCHEN_STOOLS'),None)
+    if stool_rec:
+        for idx,(cx,cy) in enumerate(stool_rec['proxy']['centers_mm'],1):
+            _interior_cylinder(f"SEL_HOKER_{idx}_seat",'wnetrze_elementy','interior_black',[cx,cy,695],190,70,source,11,'selected','siedzisko hokera',[50],stool_rec['product'])
+            for dx,dy in ((-120,-100),(120,-100),(-120,100),(120,100)):
+                _interior_box(f"SEL_HOKER_{idx}_leg_{dx}_{dy}",'wnetrze_elementy','interior_metal',
+                    [[cx+dx-12,cy+dy-12,40],[cx+dx+12,cy+dy+12,660]],source,11,'selected','noga hokera',[50],stool_rec['product'])
+
+    # Dining table gets oak top and eight selected-chair proxies.
+    clone_block('DINING','SAL_DINING_TABLE','interior_oak','stół - zamówienie indywidualne')
+    chair_y=[6820,7550,8280,9010]
+    for side,cx in (('L',13080),('R',14780)):
+        for idx,cy in enumerate(chair_y,1):
+            _interior_box(f"SEL_CHAIR_{side}_{idx}_seat",'wnetrze_elementy','interior_cream',
+                [[cx-240,cy-230,430],[cx+240,cy+230,510]],source,10,'selected','siedzisko krzesła',[49,51],'Alaska beżowe, nogi czarne')
+            back_y0=cy-50 if side=='L' else cy-50
+            _interior_box(f"SEL_CHAIR_{side}_{idx}_back",'wnetrze_elementy','interior_cream',
+                [[cx-240,back_y0,510],[cx+240,back_y0+100,940]],source,10,'selected','oparcie krzesła',[49,51],'Alaska beżowe, nogi czarne')
+            for dx,dy in ((-180,-160),(-180,160),(180,-160),(180,160)):
+                _interior_box(f"SEL_CHAIR_{side}_{idx}_leg_{dx}_{dy}",'wnetrze_elementy','interior_metal',
+                    [[cx+dx-15,cy+dy-15,30],[cx+dx+15,cy+dy+15,430]],source,10,'selected','noga krzesła',[51],'Alaska beżowe, nogi czarne')
+
+    # Sofa Liquid / Soro 21 proxy with backs and loose cushions.
+    clone_block('SOFA','SAL_SOFA_LONG','interior_cream','Liquid / tkanina Soro 21')
+    clone_block('SOFA','SAL_SOFA_CHAISE','interior_cream','Liquid / tkanina Soro 21')
+    _interior_box('SEL_SOFA_back_long','wnetrze_elementy','interior_cream',[[15420,6650,400],[15620,9150,930]],source,10,'selected','oparcie narożnika',[11,14,15,51],'Liquid / tkanina Soro 21')
+    _interior_box('SEL_SOFA_back_chaise','wnetrze_elementy','interior_cream',[[15550,6580,400],[17900,6780,830]],source,10,'selected','oparcie szezlonga',[11,14,15,51],'Liquid / tkanina Soro 21')
+    for idx,(y0,y1) in enumerate(((7550,8050),(8120,8620)),1):
+        _interior_box(f'SEL_SOFA_cushion_{idx}','wnetrze_elementy','interior_cream',[[15620,y0,580],[15840,y1,860]],source,10,'selected','poduszka',[14,51],'Liquid / tkanina Soro 21')
+
+    # Mustard accent armchair.
+    _interior_box('SEL_ARMCHAIR_seat','wnetrze_elementy','interior_mustard',[[17850,8780,350],[18650,9500,550]],source,10,'selected','siedzisko fotela',[11,14,15,51],'Sensi / Soro 40')
+    _interior_box('SEL_ARMCHAIR_back','wnetrze_elementy','interior_mustard',[[17950,9320,520],[18550,9550,1220]],source,10,'selected','oparcie fotela',[11,14,15,51],'Sensi / Soro 40')
+    _interior_box('SEL_ARMCHAIR_arm_L','wnetrze_elementy','interior_mustard',[[17780,8780,500],[18020,9450,860]],source,10,'selected','podłokietnik',[11,14,15,51],'Sensi / Soro 40')
+    _interior_box('SEL_ARMCHAIR_arm_R','wnetrze_elementy','interior_mustard',[[18480,8780,500],[18720,9450,860]],source,10,'selected','podłokietnik',[11,14,15,51],'Sensi / Soro 40')
+
+    # Rug and coffee tables.
+    clone_block('RUG','SAL_RUG','interior_cream','Hector 200×300 cm')
+    for block_id in ('SAL_COFFEE_60','SAL_COFFEE_90'):
+        clone_block('COFFEE',block_id,'interior_black','okrągły stolik kawowy 60/90 cm')
+
+    # TV/fireplace wall: central concrete, black side zones, screen, fireplace and flame.
+    _interior_box('SEL_TV_concrete','wnetrze_elementy','interior_concrete',[[19820,7180,40],[19980,8940,2530]],source,10,'selected','centralny panel betonowy',[29,30],'beton architektoniczny / SAFARI')
+    _interior_box('SEL_TV_left','wnetrze_elementy','interior_black',[[19820,6680,30],[19990,7180,2550]],source,10,'selected','lewa zabudowa TV',[29,30],'zabudowa meblowa')
+    _interior_box('SEL_TV_right','wnetrze_elementy','interior_black',[[19820,8940,30],[19990,9550,2550]],source,10,'selected','prawa zabudowa TV',[29,30],'zabudowa meblowa')
+    _interior_box('SEL_TV_screen','wnetrze_elementy','interior_black',[[19720,7420,1250],[19815,8700,2020]],source,10,'selected','telewizor',[29,30],'TV')
+    _interior_box('SEL_FIREPLACE_body','wnetrze_elementy','interior_black',[[19700,7400,480],[19815,8720,930]],source,10,'selected','kominek',[29,30,51],'Dimplex Sierra 72"')
+    _interior_box('SEL_FIREPLACE_flame','wnetrze_elementy','interior_flame',[[19685,7520,600],[19700,8600,790]],source,10,'selected','płomień - proxy',[29,30,51],'Dimplex Sierra 72"')
+
+    # Pantry selected layer.
+    for block_id in ('SPI_BASE','SPI_TALL','SPI_SHELVES'):
+        clone_block('PANTRY',block_id,cabinet_materials[block_id],'zabudowa na wymiar - dąb craft złoty / czarny mat')
+
+    # Entry selected layer.
+    clone_block('ENTRY_WARDROBE','HOL_WARDROBE','interior_black','zabudowa na wymiar')
+    clone_block('ENTRY_CONSOLE','HOL_CONSOLE','interior_oak','konsola na wymiar')
+    _interior_box('SEL_ENTRY_MIRROR','wnetrze_elementy','interior_glass',[[14890,3080,320],[14940,4230,2320]],source,1,'selected','lustro podświetlane',[39],'lustro 290×115 - projekt')
+    _interior_cylinder('SEL_ENTRY_POUF','wnetrze_elementy','interior_cream',[11150,4800,230],280,400,source,1,'selected','pufa',[17,18,51],'Pufa Puffy / podobna propozycja')
+
+    # Full 1.5 m slatted wall with concealed door (drawing p.41).
+    y0,y1=4120.0,5620.0; count=24; step=(y1-y0)/count
+    for i in range(count):
+        sy=y0+i*step+step*0.18
+        ey=y0+(i+1)*step-step*0.18
+        _interior_box(f'SEL_ENTRY_SLAT_{i+1:02}','wnetrze_elementy','interior_oak',
+            [[10320,sy,30],[10370,ey,2520]],source,1,'selected','lamela / drzwi ukryte',[40,41],'dąb craft złoty')
 
 def main():
     print("Rozpoczynanie generowania geometrii z aktualnym zestawieniem okien...")
@@ -656,6 +806,9 @@ def main():
         for i in range(1,count+1):
             top=ttop-i*rise; x0=start+(i-1)*run; x1=start+i*run
             add(f'SCHODY_tarasu_{i:02}','schody','schody',box(x0,cy-width/2,x1,cy+width/2),base,top,'DWK_2021-001-PZT_PAB.pdf s.26-27 - schody przy tarasie',True,st.get('note',''),'STAIRS_NORTH')
+
+    # 11. Wnętrze z projektu — dwie niezależne warstwy: bloki i elementy.
+    add_interior_layers()
 
     print(f"Wygenerowano {len(parts)} elementow.")
 
