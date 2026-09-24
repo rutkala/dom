@@ -162,7 +162,7 @@ def make_window(rec: dict, z0: float, z1: float):
     opening = box(a, b, c, d)
     short_note = f"{rec.get('note', '')} (wymiary {rec['nominal_width_mm']/10:.0f}×{h/10:.0f} cm, dół +{z0/1000:.2f} m, góra +{z1/1000:.2f} m)."
     common = dict(
-        source='Aktualne zestawienie stolarki okiennej',
+        source='okna.pdf - oferta 2024/510 v. 8 po pomiarze',
         assumed=False,
         note=short_note,
         source_id=rec['id'],
@@ -172,7 +172,15 @@ def make_window(rec: dict, z0: float, z1: float):
             'sill_source_mm': rec['sill_mm'],
             'sill_used_mm': z0,
             'nominal_width_mm': rec['nominal_width_mm'],
-            'nominal_height_mm': h
+            'nominal_height_mm': h,
+            'offer_position': rec.get('offer_position'),
+            'offer_position_candidates': rec.get('offer_position_candidates'),
+            'product': rec.get('product'),
+            'configuration': rec.get('configuration'),
+            'joinery_color': rec.get('color'),
+            'assembly_id': rec.get('assembly_id'),
+            'assembly_width_mm': rec.get('assembly_width_mm'),
+            'assembly_height_mm': rec.get('assembly_height_mm')
         }
     )
     nm = f"{rec['id']}_{rec['source_tag']}_pokoj_{rec['room_number']:02}"
@@ -186,6 +194,14 @@ def make_window(rec: dict, z0: float, z1: float):
         pane = box((a + c - glass) / 2, b + edge, (a + c + glass) / 2, d - edge)
     for j, g in enumerate(ends):
         add(nm + f'_rama_bok_{j+1}', 'stolarka', 'stolarka', g, z0 + edge, z1 - edge, **common)
+    # Schematic mullions from the measured order; not manufacturer profile sections.
+    for j in range(int(rec.get('model_mullion_count', 0) or 0)):
+        t=(j+1)/(int(rec.get('model_mullion_count',0))+1)
+        if horizontal:
+            x=(a+edge)+t*((c-edge)-(a+edge)); g=box(x-edge/2,b,x+edge/2,d)
+        else:
+            y=(b+edge)+t*((d-edge)-(b+edge)); g=box(a,y-edge/2,c,y+edge/2)
+        add(nm + f'_slupek_{j+1}', 'stolarka', 'stolarka', g, z0 + edge, z1 - edge, **common)
     add(nm + '_szklo', 'stolarka', 'szklo', pane, z0 + edge, z1 - edge, **common)
 
 def main():
