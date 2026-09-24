@@ -59,12 +59,6 @@ Model zewnętrzny zawiera teraz strefy materiałowe elewacji z rysunków projekt
 
 Uwzględniono również ustalenie z budowy o różnicy jednej warstwy pustaka: garaż ma 12 warstw do attyki, a pozostała część domu 13. Roboczy offset poziomu garażu wynosi 238,462 mm (3100 / 13) i jest zapisany w `parametry_modelu.json`.
 
-## Elewacja i zagospodarowanie terenu
-
-Model zewnętrzny obejmuje teraz wykończenie elewacji z projektu, teren i utwardzenia z PZT, taras ze schodami, żelbetowy daszek nad wejściem z `daszek.jpg` oraz podniesiony poziom garażu wynikający z 12 warstw pustaka wobec 13 w części mieszkalnej. Szczegóły i zakres założeń opisano w `ELEWACJA_TEREN_PODWORKO.md`.
-
-Dane pomocnicze są rozdzielone na `elewacje_materialy.json` i `pzt_zagospodarowanie.json`, dzięki czemu można później modyfikować wygląd elewacji i podwórka bez ponownego odczytywania PDF.
-
 ## Co zawiera model
 
 27 profili z rzutu: 26 fragmentów ścian i 1 słup. Ściany zostały wyciągnięte do wyliczonego poziomu 2900 mm, a nie tylko do sufitu 2600 mm. Odtworzono mur pod znanymi parapetami i nad otworami. Otwory przechodzą również przez odtworzoną izolację zewnętrzną. Stolarka okienna odpowiada 10 zamówionym zestawom z okna.pdf; zestawy HST sa w modelu reprezentowane przez po dwa techniczne segmenty. Zachowano 13 symboli drzwi/bramy i nieoznaczone przejście PR01. Nie dodano ściany na funkcjonalnej granicy kuchni i salonu.
