@@ -1,0 +1,1311 @@
+{
+  "source": {
+    "file": "DWK_2021-001-PZT_PAB.pdf",
+    "pages": [
+      26,
+      27
+    ]
+  },
+  "project_top_mm": 3940.0,
+  "patches": [
+    {
+      "id": "west_1_0",
+      "side": "west",
+      "material": "elewacja_szara",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 1,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            28147.236,
+            0.024
+          ],
+          [
+            27997.134,
+            0.024
+          ],
+          [
+            27997.134,
+            2600.023
+          ],
+          [
+            28297.338,
+            2600.023
+          ],
+          [
+            28297.338,
+            0.024
+          ],
+          [
+            28147.236,
+            0.024
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "west_2_0",
+      "side": "west",
+      "material": "elewacja_szara",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 2,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            27997.134,
+            2900.024
+          ],
+          [
+            27997.134,
+            3940.023
+          ],
+          [
+            28297.338,
+            3940.023
+          ],
+          [
+            28297.338,
+            2900.024
+          ],
+          [
+            27997.134,
+            2900.024
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "west_4_0",
+      "side": "west",
+      "material": "elewacja_drewno",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 4,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            2399.985,
+            3330.023
+          ],
+          [
+            7269.984,
+            3330.023
+          ],
+          [
+            7269.984,
+            0.0
+          ],
+          [
+            2399.985,
+            0.0
+          ],
+          [
+            2399.985,
+            3330.023
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": true
+    },
+    {
+      "id": "west_28_0",
+      "side": "west",
+      "material": "elewacja_biala",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 28,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            7269.984,
+            0.024
+          ],
+          [
+            7269.984,
+            3940.023
+          ],
+          [
+            12399.984,
+            3940.023
+          ],
+          [
+            12399.984,
+            0.024
+          ],
+          [
+            11183.559,
+            0.024
+          ],
+          [
+            7269.984,
+            0.024
+          ]
+        ],
+        "holes": [
+          [
+            [
+              10223.557,
+              2200.024
+            ],
+            [
+              10223.557,
+              1200.023
+            ],
+            [
+              12223.56,
+              1200.023
+            ],
+            [
+              12223.56,
+              2200.024
+            ],
+            [
+              10223.557,
+              2200.024
+            ]
+          ]
+        ]
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "west_29_0",
+      "side": "west",
+      "material": "elewacja_biala",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 29,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            2399.985,
+            3940.023
+          ],
+          [
+            2399.985,
+            3600.023
+          ],
+          [
+            2399.985,
+            0.0
+          ],
+          [
+            0.835,
+            0.0
+          ],
+          [
+            0.0,
+            0.023
+          ],
+          [
+            0.0,
+            3940.023
+          ],
+          [
+            2399.985,
+            3940.023
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "west_30_0",
+      "side": "west",
+      "material": "elewacja_biala",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 30,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            27997.134,
+            0.024
+          ],
+          [
+            22319.984,
+            0.024
+          ],
+          [
+            22319.984,
+            3940.023
+          ],
+          [
+            27997.134,
+            3940.023
+          ],
+          [
+            27997.134,
+            3600.023
+          ],
+          [
+            27997.134,
+            0.024
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "west_31_0",
+      "side": "west",
+      "material": "elewacja_biala",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 31,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            7269.984,
+            3330.023
+          ],
+          [
+            2319.985,
+            3330.023
+          ],
+          [
+            2319.985,
+            3940.023
+          ],
+          [
+            7269.984,
+            3940.023
+          ],
+          [
+            7269.984,
+            3330.023
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "west_32_0",
+      "side": "west",
+      "material": "elewacja_szara",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 32,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            28297.338,
+            2599.818
+          ],
+          [
+            27997.134,
+            2599.818
+          ],
+          [
+            27997.134,
+            2900.024
+          ],
+          [
+            28297.338,
+            2900.024
+          ],
+          [
+            28297.338,
+            2599.818
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "west_33_0",
+      "side": "west",
+      "material": "elewacja_szara",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 33,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            12399.984,
+            0.024
+          ],
+          [
+            12399.984,
+            3940.023
+          ],
+          [
+            22319.984,
+            3940.023
+          ],
+          [
+            22319.984,
+            0.024
+          ],
+          [
+            19859.985,
+            0.024
+          ],
+          [
+            19859.985,
+            2600.023
+          ],
+          [
+            13259.985,
+            2600.023
+          ],
+          [
+            13259.985,
+            0.024
+          ],
+          [
+            12399.984,
+            0.024
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "east_425_0",
+      "side": "east",
+      "material": "elewacja_drewno",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 425,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            12933.849,
+            550.039
+          ],
+          [
+            12933.849,
+            0.039
+          ],
+          [
+            10569.923,
+            0.039
+          ],
+          [
+            10569.923,
+            550.039
+          ],
+          [
+            12933.849,
+            550.039
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": true
+    },
+    {
+      "id": "east_430_0",
+      "side": "east",
+      "material": "elewacja_drewno",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 430,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            18349.924,
+            550.069
+          ],
+          [
+            18349.924,
+            0.069
+          ],
+          [
+            16309.923,
+            0.125
+          ],
+          [
+            16309.923,
+            550.069
+          ],
+          [
+            18349.924,
+            550.069
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": true
+    },
+    {
+      "id": "east_436_0",
+      "side": "east",
+      "material": "elewacja_biala",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 436,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            18499.923,
+            3330.039
+          ],
+          [
+            18349.924,
+            3330.039
+          ],
+          [
+            18349.924,
+            550.069
+          ],
+          [
+            16309.923,
+            550.069
+          ],
+          [
+            16309.932,
+            3180.928
+          ],
+          [
+            10569.93,
+            3180.928
+          ],
+          [
+            10569.923,
+            3940.039
+          ],
+          [
+            18499.932,
+            3940.039
+          ],
+          [
+            18499.923,
+            3330.039
+          ]
+        ],
+        "holes": [
+          [
+            [
+              17709.924,
+              2400.039
+            ],
+            [
+              16809.923,
+              2400.039
+            ],
+            [
+              16809.923,
+              950.039
+            ],
+            [
+              17709.924,
+              950.039
+            ],
+            [
+              17709.924,
+              2400.039
+            ]
+          ]
+        ]
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "east_453_0",
+      "side": "east",
+      "material": "elewacja_biala",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 453,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            934.925,
+            2300.039
+          ],
+          [
+            934.925,
+            0.039
+          ],
+          [
+            0.0,
+            0.039
+          ],
+          [
+            0.0,
+            3940.039
+          ],
+          [
+            6461.795,
+            3940.039
+          ],
+          [
+            6461.795,
+            0.039
+          ],
+          [
+            6034.924,
+            0.039
+          ],
+          [
+            6034.924,
+            2300.039
+          ],
+          [
+            934.925,
+            2300.039
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "east_454_0",
+      "side": "east",
+      "material": "elewacja_drewno",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 454,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            10569.923,
+            3180.928
+          ],
+          [
+            10569.923,
+            0.0
+          ],
+          [
+            6462.601,
+            0.0
+          ],
+          [
+            6461.795,
+            0.039
+          ],
+          [
+            6461.795,
+            3180.928
+          ],
+          [
+            10569.923,
+            3180.928
+          ]
+        ],
+        "holes": [
+          [
+            [
+              9409.924,
+              2447.82
+            ],
+            [
+              7609.924,
+              2447.82
+            ],
+            [
+              7609.924,
+              897.82
+            ],
+            [
+              9409.924,
+              897.82
+            ],
+            [
+              9409.924,
+              2447.82
+            ]
+          ]
+        ]
+      },
+      "wood_horizontal_slats": true
+    },
+    {
+      "id": "east_490_0",
+      "side": "east",
+      "material": "elewacja_drewno",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 490,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            28297.277,
+            0.0
+          ],
+          [
+            25602.158,
+            0.0
+          ],
+          [
+            25599.929,
+            3940.039
+          ],
+          [
+            28297.277,
+            3940.039
+          ],
+          [
+            28297.277,
+            0.0
+          ]
+        ],
+        "holes": [
+          [
+            [
+              27737.277,
+              2600.039
+            ],
+            [
+              26837.28,
+              2600.039
+            ],
+            [
+              26837.125,
+              0.039
+            ],
+            [
+              27737.277,
+              0.039
+            ],
+            [
+              27737.277,
+              2600.039
+            ]
+          ]
+        ]
+      },
+      "wood_horizontal_slats": true
+    },
+    {
+      "id": "east_539_0",
+      "side": "east",
+      "material": "elewacja_biala",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 539,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            18499.932,
+            3940.039
+          ],
+          [
+            25599.929,
+            3940.039
+          ],
+          [
+            25602.158,
+            0.0
+          ],
+          [
+            24762.433,
+            0.0
+          ],
+          [
+            24762.433,
+            3330.039
+          ],
+          [
+            19597.423,
+            3330.039
+          ],
+          [
+            19597.423,
+            900.044
+          ],
+          [
+            18499.929,
+            900.044
+          ],
+          [
+            18499.932,
+            3940.039
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "east_540_0",
+      "side": "east",
+      "material": "elewacja_szara",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 540,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            18499.919,
+            900.046
+          ],
+          [
+            21397.423,
+            900.032
+          ],
+          [
+            21397.423,
+            2450.039
+          ],
+          [
+            22622.425,
+            2450.039
+          ],
+          [
+            22622.425,
+            900.039
+          ],
+          [
+            24462.432,
+            900.039
+          ],
+          [
+            24462.432,
+            0.0
+          ],
+          [
+            18499.928,
+            0.0
+          ],
+          [
+            18499.919,
+            900.046
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "east_541_0",
+      "side": "east",
+      "material": "elewacja_biala",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 541,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            10569.923,
+            3940.039
+          ],
+          [
+            10569.923,
+            3180.928
+          ],
+          [
+            6461.795,
+            3180.928
+          ],
+          [
+            6461.795,
+            3940.039
+          ],
+          [
+            10569.923,
+            3940.039
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "east_545_0",
+      "side": "east",
+      "material": "elewacja_szara",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 26,
+        "drawing_index_0based": 545,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            16309.923,
+            0.125
+          ],
+          [
+            16010.056,
+            0.125
+          ],
+          [
+            16010.056,
+            0.039
+          ],
+          [
+            14433.849,
+            0.039
+          ],
+          [
+            14433.849,
+            2050.539
+          ],
+          [
+            12933.849,
+            2050.539
+          ],
+          [
+            12933.849,
+            550.039
+          ],
+          [
+            10569.923,
+            550.039
+          ],
+          [
+            10569.923,
+            2800.927
+          ],
+          [
+            10569.93,
+            2800.927
+          ],
+          [
+            10569.93,
+            3180.928
+          ],
+          [
+            16309.932,
+            3180.928
+          ],
+          [
+            16309.932,
+            2800.927
+          ],
+          [
+            16309.923,
+            2800.927
+          ],
+          [
+            16309.923,
+            0.125
+          ]
+        ],
+        "holes": [
+          [
+            [
+              16009.924,
+              1400.483
+            ],
+            [
+              16009.924,
+              0.125
+            ],
+            [
+              16010.056,
+              0.125
+            ],
+            [
+              16009.924,
+              1400.483
+            ]
+          ],
+          [
+            [
+              16009.924,
+              2800.927
+            ],
+            [
+              16009.792,
+              2800.927
+            ],
+            [
+              16009.924,
+              1400.483
+            ],
+            [
+              16009.924,
+              2800.927
+            ]
+          ]
+        ]
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "south_34_0",
+      "side": "south",
+      "material": "elewacja_biala",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 27,
+        "drawing_index_0based": 34,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            3009.985,
+            3939.924
+          ],
+          [
+            10310.756,
+            3939.924
+          ],
+          [
+            10310.756,
+            0.0
+          ],
+          [
+            8291.529,
+            0.0
+          ],
+          [
+            8291.529,
+            3329.924
+          ],
+          [
+            3009.985,
+            3329.924
+          ],
+          [
+            3009.985,
+            2999.924
+          ],
+          [
+            3009.985,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            3939.924
+          ],
+          [
+            3009.985,
+            3939.924
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "south_35_0",
+      "side": "south",
+      "material": "elewacja_biala",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 27,
+        "drawing_index_0based": 35,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            10310.756,
+            3939.924
+          ],
+          [
+            11919.984,
+            3939.924
+          ],
+          [
+            11919.984,
+            0.0
+          ],
+          [
+            10310.756,
+            0.0
+          ],
+          [
+            10310.756,
+            3939.924
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "south_36_0",
+      "side": "south",
+      "material": "elewacja_drewno",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 27,
+        "drawing_index_0based": 36,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            3009.985,
+            3329.924
+          ],
+          [
+            8291.529,
+            3329.924
+          ],
+          [
+            8291.529,
+            0.0
+          ],
+          [
+            3009.985,
+            0.0
+          ],
+          [
+            3009.985,
+            3329.924
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": true
+    },
+    {
+      "id": "north_0_0",
+      "side": "north",
+      "material": "elewacja_drewno",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 27,
+        "drawing_index_0based": 0,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            0.061,
+            3940.034
+          ],
+          [
+            1609.289,
+            3940.034
+          ],
+          [
+            1609.289,
+            0.0
+          ],
+          [
+            0.061,
+            0.0
+          ],
+          [
+            0.061,
+            3940.034
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": true
+    },
+    {
+      "id": "north_31_0",
+      "side": "north",
+      "material": "elewacja_szara",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 27,
+        "drawing_index_0based": 31,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            10920.061,
+            0.035
+          ],
+          [
+            10920.061,
+            3940.034
+          ],
+          [
+            11920.0,
+            3940.034
+          ],
+          [
+            11920.0,
+            0.035
+          ],
+          [
+            10920.061,
+            0.035
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "north_32_0",
+      "side": "north",
+      "material": "elewacja_biala",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 27,
+        "drawing_index_0based": 32,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            10920.061,
+            3940.034
+          ],
+          [
+            10920.061,
+            0.035
+          ],
+          [
+            10239.675,
+            0.035
+          ],
+          [
+            10239.675,
+            3940.034
+          ],
+          [
+            10920.061,
+            3940.034
+          ]
+        ],
+        "holes": []
+      },
+      "wood_horizontal_slats": false
+    },
+    {
+      "id": "north_59_0",
+      "side": "north",
+      "material": "elewacja_szara",
+      "source": {
+        "file": "DWK_2021-001-PZT_PAB.pdf",
+        "pdf_page": 27,
+        "drawing_index_0based": 59,
+        "scale": "1:50"
+      },
+      "polygon_sz_mm": {
+        "exterior": [
+          [
+            10239.675,
+            2600.034
+          ],
+          [
+            7139.675,
+            2600.034
+          ],
+          [
+            7139.675,
+            0.035
+          ],
+          [
+            3628.517,
+            0.035
+          ],
+          [
+            3628.517,
+            0.0
+          ],
+          [
+            1609.289,
+            0.0
+          ],
+          [
+            1609.289,
+            3940.034
+          ],
+          [
+            10239.675,
+            3940.034
+          ],
+          [
+            10239.675,
+            2600.034
+          ]
+        ],
+        "holes": [
+          [
+            [
+              3069.287,
+              2600.034
+            ],
+            [
+              2169.289,
+              2600.034
+            ],
+            [
+              2169.136,
+              0.035
+            ],
+            [
+              3069.287,
+              0.035
+            ],
+            [
+              3069.287,
+              2600.034
+            ]
+          ]
+        ]
+      },
+      "wood_horizontal_slats": false
+    }
+  ],
+  "note": "Strefy białe, szare i drewniane odtworzone z wektorowych wypełnień rysunków elewacji."
+}

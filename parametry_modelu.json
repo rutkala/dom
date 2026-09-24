@@ -38,10 +38,29 @@
   "omitted": [
     "fundamenty",
     "szczegółowe spadki i odwodnienie dachu",
-    "taras i schody zewnętrzne",
-    "teren",
     "instalacje",
     "meble"
   ],
-  "coordinate_policy": "Odwzorowanie z rzutu wektorowego z zachowaniem współrzędnych osi."
+  "coordinate_policy": "Odwzorowanie z rzutu wektorowego z zachowaniem współrzędnych osi.",
+  "masonry_course_height_mm": 238.462,
+  "house_masonry_courses_to_parapet": 13,
+  "garage_masonry_courses_to_parapet": 12,
+  "garage_floor_offset_mm": 238.462,
+  "garage_level_note": "Ustalenie inwestora: garaż ma 12 warstw pustaka do wspólnej attyki, pozostała część domu 13. Offset garażu wyliczono jako modelowa wysokość muru 3100 mm / 13 = 238,462 mm. To odwzorowanie różnicy jednej warstwy; po pomiarze rzeczywistego modułu warstwy parametr można skorygować.",
+  "entrance_canopy": {
+    "x_min_mm": 10570,
+    "x_max_mm": 16310,
+    "y_min_mm": 1360,
+    "y_max_mm": 2960,
+    "z_bottom_mm": 3100,
+    "z_top_mm": 3280,
+    "note": "Daszek wg daszek.jpg; obrys oparty na wnęce wejściowej i słupie P01, grubość 180 mm jak płyta żelbetowa.",
+    "column": {
+      "x_mm": 16160,
+      "y_mm": 1510,
+      "size_mm": 300,
+      "z_bottom_mm": -250,
+      "note": "Pozycja robocza z daszek.jpg: slup przy zewnetrznym prawym narozniku plyty."
+    }
+  }
 }

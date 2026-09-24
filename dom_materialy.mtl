@@ -1,84 +1,189 @@
-# Neutralne, robocze materialy; nie oznaczaja finalnego wykonczenia.
+# Materialy modelu domu i otoczenia.
 newmtl sciany
 Kd 0.84 0.83 0.8
 d 1.0
-Ka 0.1 0.1 0.1
-Ks 0.1 0.1 0.1
-Ns 20
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
 
 newmtl izolacja
 Kd 0.93 0.92 0.88
 d 1.0
-Ka 0.1 0.1 0.1
-Ks 0.1 0.1 0.1
-Ns 20
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
 
 newmtl uzupelnienia
 Kd 0.84 0.83 0.8
 d 1.0
-Ka 0.1 0.1 0.1
-Ks 0.1 0.1 0.1
-Ns 20
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
 
 newmtl podlogi
 Kd 0.66 0.66 0.64
 d 1.0
-Ka 0.1 0.1 0.1
-Ks 0.1 0.1 0.1
-Ns 20
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
 
 newmtl progi
 Kd 0.66 0.66 0.64
 d 1.0
-Ka 0.1 0.1 0.1
-Ks 0.1 0.1 0.1
-Ns 20
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
 
 newmtl stolarka
-Kd 0.27 0.31 0.33
+Kd 0.22 0.23 0.25
 d 1.0
-Ka 0.1 0.1 0.1
-Ks 0.1 0.1 0.1
-Ns 20
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
 
 newmtl szklo
 Kd 0.58 0.74 0.79
 d 0.35
-Ka 0.1 0.1 0.1
-Ks 0.1 0.1 0.1
-Ns 20
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
 
 newmtl drzwi
 Kd 0.59 0.57 0.53
 d 1.0
-Ka 0.1 0.1 0.1
-Ks 0.1 0.1 0.1
-Ns 20
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl drzwi_antracyt
+Kd 0.17 0.19 0.2
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl brama
+Kd 0.16 0.18 0.2
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl brama_linia
+Kd 0.07 0.08 0.09
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl szklo_matowe
+Kd 0.78 0.82 0.8
+d 0.72
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl metal_czarny
+Kd 0.03 0.03 0.03
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl elewacja_biala
+Kd 0.92 0.92 0.9
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl elewacja_szara
+Kd 0.38 0.39 0.4
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl elewacja_drewno
+Kd 0.63 0.43 0.29
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl elewacja_drewno_fuga
+Kd 0.25 0.17 0.11
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl teren_trawa
+Kd 0.43 0.55 0.34
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl kostka
+Kd 0.58 0.59 0.59
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl ziemia
+Kd 0.34 0.25 0.18
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl taras
+Kd 0.62 0.49 0.39
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl schody
+Kd 0.67 0.67 0.65
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl daszek_beton
+Kd 0.7 0.71 0.7
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
 
 newmtl strop
 Kd 0.72 0.73 0.74
 d 1.0
-Ka 0.1 0.1 0.1
-Ks 0.1 0.1 0.1
-Ns 20
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
 
 newmtl dach
 Kd 0.38 0.41 0.43
 d 1.0
-Ka 0.1 0.1 0.1
-Ks 0.1 0.1 0.1
-Ns 20
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
 
 newmtl attyka
 Kd 0.91 0.9 0.86
 d 1.0
-Ka 0.1 0.1 0.1
-Ks 0.1 0.1 0.1
-Ns 20
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
 
 newmtl sufity
 Kd 0.94 0.94 0.92
 d 1.0
-Ka 0.1 0.1 0.1
-Ks 0.1 0.1 0.1
-Ns 20
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
