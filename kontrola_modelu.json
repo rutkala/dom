@@ -1,0 +1,213 @@
+{
+  "source_sha256": "7f08b08ce23005a5d67db2a47e35adfd253c533141631d65b40e2453ac46f373",
+  "model_objects": 232,
+  "solid_objects": 188,
+  "surface_objects": 44,
+  "all_brep_valid": true,
+  "all_solid_meshes_watertight": true,
+  "step_reimport_valid": true,
+  "step_reimport_solids": 188,
+  "facade_outline_span_mm": [
+    28297.4,
+    11920.0
+  ],
+  "declared_source_span_mm": [
+    28300,
+    11920
+  ],
+  "not_rescaled_to_declared_length": true,
+  "roof_outer_span_mm": [
+    28297.4,
+    11920.0
+  ],
+  "room_count": 15,
+  "assumptions_file": "parametry_modelu.json",
+  "source_issues": [
+    {
+      "id": "U01",
+      "topic": "Łańcuchy osi",
+      "priority": "check",
+      "source_pages": [
+        26
+      ],
+      "observation": "Górny łańcuch zawiera 405 i 330 cm, dolny 404 i 328 cm dla odpowiadających sobie odcinków.",
+      "handling": "Obie wersje zapisane. Nie skorygowano arbitralnie położenia ścian."
+    },
+    {
+      "id": "U02",
+      "topic": "Domknięcie długości",
+      "priority": "check",
+      "source_pages": [
+        26
+      ],
+      "observation": "Wymiar całkowity 2830 cm. Dolny łańcuch pośredni sumuje się do 2831 cm, łańcuch otworów i filarków do 2832 cm.",
+      "handling": "Sumy podano jako kontrolę arytmetyczną. Różnic 1–2 cm nie rozdzielono między odcinki."
+    },
+    {
+      "id": "U03",
+      "topic": "Różne poziomy fundamentów",
+      "priority": "check",
+      "source_pages": [
+        15,
+        27,
+        28
+      ],
+      "observation": "A-A: -1.00 m. B-B: -1.40 m. PZT: wejście 254.00 m n.p.m., posadowienie 252.60 m n.p.m.",
+      "handling": "Zachowano oddzielne poziomy; plik nie rozstrzyga pełnej geometrii wszystkich ław. Nie stwierdzono na tej podstawie błędu projektu."
+    },
+    {
+      "id": "U04",
+      "topic": "Wysokość górnej krawędzi",
+      "priority": "check",
+      "source_pages": [
+        21,
+        27,
+        28,
+        31
+      ],
+      "observation": "Rzędna +3.95 m i opis 3.95 m, ale na B-B także 394 cm oraz 2.6 + 1.34 m.",
+      "handling": "3950 mm i 3940 mm są oddzielnymi rekordami. Do końcowego modelu budowlanego potrzebne potwierdzenie."
+    },
+    {
+      "id": "U05",
+      "topic": "Nominał stolarki a otwór",
+      "priority": "distinction",
+      "source_pages": [
+        26,
+        27
+      ],
+      "observation": "Drzwi 90 cm są rysowane w otworach około 100 cm; DZ 140 cm w 150 cm; brama 500 cm w 510 cm; D5 100 cm w przerwie około 120 cm. Rzut podaje wysokość drzwi 200 cm, wybrany otwór w A-A ma 205 cm.",
+      "handling": "Osobne pola dla wymiarów przy symbolu i dla geometrii otworu. Nie są to wymiary do zamówienia stolarki."
+    },
+    {
+      "id": "U06",
+      "topic": "Grubość membrany",
+      "priority": "check",
+      "source_pages": [
+        27,
+        28
+      ],
+      "observation": "W tej samej pozycji zestawienia: kolumna 15 mm oraz opis membrany EPDM SuperSeal 2.3mm.",
+      "handling": "Ostateczna grubość pozostawiona jako null; zachowano oba zapisy."
+    },
+    {
+      "id": "U07",
+      "topic": "Spadki dachu",
+      "priority": "distinction",
+      "source_pages": [
+        27,
+        28,
+        31
+      ],
+      "observation": "Występują osobno spadki 5° oraz 0.5%. Nie są tą samą wielkością.",
+      "handling": "Zapisano z jednostkami; nie zamieniono 5° na 5%. Brak wszystkich rzędnych narożników i wpustów."
+    },
+    {
+      "id": "U08",
+      "topic": "Wysokości dolnej krawędzi przeszkleń",
+      "priority": "missing",
+      "source_pages": [
+        26,
+        29,
+        30
+      ],
+      "observation": "hp=90 cm podano dla O1/O2, hp=120 cm dla O8. Przy O3–O7 nie ma osobnego liczbowego hp.",
+      "handling": "Dla O3–O7 sill_mm=null. Wygląd elewacji nie został zamieniony na potwierdzoną rzędną 0."
+    },
+    {
+      "id": "U09",
+      "topic": "Wykończenie a geometria pomieszczeń",
+      "priority": "missing",
+      "source_pages": [
+        26,
+        27,
+        28
+      ],
+      "observation": "Opis podaje tynk 15 mm, ale brak pełnych grubości okładzin, posadzki i sufitu g-k oraz jednoznacznej specyfikacji wszystkich powierzchni wykończonych.",
+      "handling": "Nie pomniejszano automatycznie pokoi o tynki. Wymiary po wykończeniu trzeba potwierdzić przed doborem zabudowy."
+    },
+    {
+      "id": "U10",
+      "topic": "Obrys elewacji a powierzchnia zabudowy",
+      "priority": "check",
+      "source_pages": [
+        21,
+        26
+      ],
+      "observation": "Zrekonstruowany obrys ścian zewnętrznych ma około 271.28 m²; opis podaje powierzchnię zabudowy 277.25 m². To nie muszą być te same zakresy elementów.",
+      "handling": "Nie zastąpiono wartości urzędowej polem obrysu. Należy wyjaśnić zakres bilansu, m.in. elementy wysunięte i zadaszenia, oraz potwierdzić rekonstrukcję."
+    },
+    {
+      "id": "U11",
+      "topic": "Dokładność zapisów",
+      "priority": "distinction",
+      "source_pages": [
+        26
+      ],
+      "observation": "Etykiety w cm są zaokrąglone. Przykład: 288 cm dla pokoju dziecięcego, podczas gdy odstęp między wektorami wynosi około 2875 mm.",
+      "handling": "Nie utożsamiono dokładności współrzędnych 0.1 mm z dokładnością projektu ani budowy."
+    },
+    {
+      "id": "U12",
+      "topic": "Stan rzeczywisty i brakujące detale",
+      "priority": "missing",
+      "source_pages": [
+        24,
+        26,
+        27,
+        28,
+        31
+      ],
+      "observation": "To dokumentacja projektowa, nie inwentaryzacja. Brak w tym pliku kompletu detali konstrukcyjnych, wymiarów wszystkich ław/nadproży, tabel stolarki i końcowego wykończenia. Strona 24 nakazuje ustalić wymiary na budowie.",
+      "handling": "Dane służą do odtworzenia projektu i planowania wnętrza; nie do zamawiania elementów na wymiar bez pomiaru."
+    }
+  ],
+  "exports": {
+    "dom_wnetrze.glb": {
+      "nodes": 213,
+      "bounds_m": [
+        [
+          0.0,
+          0.0,
+          -11.920000076293945
+        ],
+        [
+          28.297399520874023,
+          2.9000000953674316,
+          0.0
+        ]
+      ],
+      "size_bytes": 417360
+    },
+    "dom_bryla.glb": {
+      "nodes": 217,
+      "bounds_m": [
+        [
+          0.0,
+          0.0,
+          -11.920000076293945
+        ],
+        [
+          28.297399520874023,
+          3.950000047683716,
+          0.0
+        ]
+      ],
+      "size_bytes": 456540
+    }
+  },
+  "status": "Model roboczy; test geometrii plików nie jest kontrolą budowlaną.",
+  "source_sha256_verified_against_uploaded_pdf": true,
+  "viewer_tests": {
+    "browser": "Chromium",
+    "renderer_exercised": "Canvas2D depth-buffer fallback; WebGL unavailable in test environment",
+    "interior_view": true,
+    "exterior_view": true,
+    "top_view": true,
+    "orbit_zoom_toggles": true,
+    "object_selection": true,
+    "embedded_glb_download_hash_match": true,
+    "javascript_errors": [],
+    "native_blender_script_executed": false
+  }
+}

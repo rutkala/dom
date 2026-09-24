@@ -1,0 +1,4399 @@
+{
+  "schema": "archtool_dimension_extraction_v1",
+  "schema_note": "Niezależny schemat ekstrakcji, nie deklaracja zgodności z aktualnym walidatorem repozytorium archtool.",
+  "source_document": {
+    "filename": "Projekt budowlany PZT_PAB_2024.02.01.pdf",
+    "sha256": "7f08b08ce23005a5d67db2a47e35adfd253c533141631d65b40e2453ac46f373",
+    "page_count": 31,
+    "basis": "Wyłącznie załączony PZT/PAB. Bez danych z repozytorium i bez łączenia z odrębnym projektem wnętrza."
+  },
+  "units": {
+    "coordinates": "mm",
+    "linear_dimensions": "mm unless field says otherwise",
+    "area": "m2",
+    "volume": "m3",
+    "roof_slope": "explicit degrees or percent"
+  },
+  "coordinate_system": {
+    "description_pl": "X w prawo na rzucie PDF; Y do góry. Z=0 oznacza projektowe ±0.00 posadzki. Brak automatycznego przypisania kierunków geograficznych.",
+    "origin_pl": "Przecięcie pionu skrajnej lewej elewacji z poziomem najniższej na arkuszu elewacji (dolna krawędź wysuniętych pokoi). Punkt nie musi leżeć w narożniku budynku.",
+    "pdf_page": 26,
+    "pdf_origin_top_left_points": [
+      378.2631530761719,
+      913.8797607421875
+    ],
+    "mm_per_pdf_point": 17.63888888888889,
+    "formula": "x_mm=(x_pt-OX)*50*25.4/72; y_mm=(OY-y_pt)*50*25.4/72",
+    "scale_basis": "Skala rysunku 1:50. Zapis 300 cm odpowiada około 170.079 pt.",
+    "rounding_mm": 0.1,
+    "rounding_is_not_accuracy": true
+  },
+  "status_legend": {
+    "explicit": "Wartość przepisana z opisu lub etykiety wymiaru.",
+    "computed_from_dimensions": "Wynik jawnego działania na wartościach opisanych.",
+    "extracted_from_vector": "Bezpośrednie współrzędne wektorów PDF po przeliczeniu skali; nie wymiar wykonawczy.",
+    "reconstructed_from_vector": "Ręcznie przypisany / połączony obrys na podstawie wektorów i znaczenia rysunku; wymaga kontroli.",
+    "unresolved": "Rozbieżność lub brak jednoznacznej wartości. null nie oznacza zera."
+  },
+  "building": {
+    "storeys": {
+      "value": 1,
+      "status": "explicit",
+      "source": {
+        "pdf_page": 21,
+        "location": "Część II, strona wewnętrzna 5: parametry charakterystyczne"
+      }
+    },
+    "length_mm": {
+      "value": 28300,
+      "status": "explicit",
+      "sources": [
+        {
+          "pdf_page": 21,
+          "location": "Część II, strona wewnętrzna 5: parametry charakterystyczne"
+        },
+        {
+          "pdf_page": 26,
+          "sheet": "A-AA-0-01",
+          "location": "Rzut parteru, skala 1:50"
+        }
+      ]
+    },
+    "width_mm": {
+      "value": 11920,
+      "status": "explicit",
+      "source": {
+        "pdf_page": 21,
+        "location": "Część II, strona wewnętrzna 5: parametry charakterystyczne"
+      }
+    },
+    "height_mm": {
+      "value": 3950,
+      "status": "explicit",
+      "sources": [
+        {
+          "pdf_page": 21,
+          "location": "Część II, strona wewnętrzna 5: parametry charakterystyczne"
+        },
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        },
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        },
+        {
+          "pdf_page": 31,
+          "sheet": "A-AA-0-02",
+          "location": "Rzut dachu, skala 1:50"
+        }
+      ],
+      "issue": "U04"
+    },
+    "front_elevation_width_mm_as_described": {
+      "value": 8310,
+      "status": "explicit",
+      "source": {
+        "pdf_page": 21,
+        "location": "Część II, strona wewnętrzna 5: parametry charakterystyczne"
+      },
+      "note": "Nazwa i wartość zachowane z opisu; nie służy do automatycznego orientowania osi modelu."
+    },
+    "usable_area_m2": {
+      "value": 208.6,
+      "status": "explicit",
+      "sources": [
+        {
+          "pdf_page": 21,
+          "location": "Część II, strona wewnętrzna 5: parametry charakterystyczne"
+        },
+        {
+          "pdf_page": 26,
+          "sheet": "A-AA-0-01",
+          "location": "Rzut parteru, skala 1:50"
+        }
+      ]
+    },
+    "net_area_m2": {
+      "value": 214.16,
+      "status": "explicit",
+      "source": {
+        "pdf_page": 21,
+        "location": "Część II, strona wewnętrzna 5: parametry charakterystyczne"
+      }
+    },
+    "building_footprint_area_m2_as_reported": {
+      "value": 277.25,
+      "status": "explicit",
+      "source": {
+        "pdf_page": 21,
+        "location": "Część II, strona wewnętrzna 5: parametry charakterystyczne"
+      }
+    },
+    "volume_m3": {
+      "value": 1095.14,
+      "status": "explicit",
+      "source": {
+        "pdf_page": 21,
+        "location": "Część II, strona wewnętrzna 5: parametry charakterystyczne"
+      }
+    },
+    "roof_form": {
+      "value": "dach płaski",
+      "status": "explicit",
+      "source": {
+        "pdf_page": 21,
+        "location": "Część II, strona wewnętrzna 5: parametry charakterystyczne"
+      }
+    },
+    "entrance_direction_as_described": {
+      "value": "wschód",
+      "status": "explicit",
+      "source": {
+        "pdf_page": 21,
+        "location": "Część II, strona wewnętrzna 5: parametry charakterystyczne"
+      }
+    }
+  },
+  "facade_reference_outline": {
+    "polygon_mm": [
+      [
+        0,
+        1609.2
+      ],
+      [
+        6450,
+        1609.2
+      ],
+      [
+        6450,
+        0
+      ],
+      [
+        10570,
+        0
+      ],
+      [
+        10570,
+        2400
+      ],
+      [
+        18500,
+        2400
+      ],
+      [
+        18500,
+        0
+      ],
+      [
+        25520,
+        0
+      ],
+      [
+        25520,
+        1609.2
+      ],
+      [
+        28297.4,
+        1609.2
+      ],
+      [
+        28297.4,
+        6979.2
+      ],
+      [
+        27997.1,
+        6979.2
+      ],
+      [
+        27997.1,
+        10920
+      ],
+      [
+        12400,
+        10920
+      ],
+      [
+        12400,
+        9920
+      ],
+      [
+        7270,
+        9920
+      ],
+      [
+        7270,
+        11920
+      ],
+      [
+        2400,
+        11920
+      ],
+      [
+        2400,
+        9920
+      ],
+      [
+        0,
+        9920
+      ]
+    ],
+    "status": "reconstructed_from_vector",
+    "source": {
+      "pdf_page": 26,
+      "sheet": "A-AA-0-01",
+      "location": "Rzut parteru, skala 1:50"
+    },
+    "area_m2": 271.28345,
+    "is_declared_building_footprint": false,
+    "note": "Obrys orientacyjny elewacji z rzutu, bez tarasu i bez pełnego bilansu zadaszeń. Nie zastępuje powierzchni zabudowy 277.25 m². Patrz U10."
+  },
+  "wall_cut_profiles": [
+    {
+      "id": "P01",
+      "kind": "column",
+      "polygon_mm": [
+        [
+          16310.0,
+          1660.0
+        ],
+        [
+          16310.0,
+          1360.0
+        ],
+        [
+          16010.0,
+          1360.0
+        ],
+        [
+          16010.0,
+          1660.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.09,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 83
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P02",
+      "kind": "partition",
+      "polygon_mm": [
+        [
+          5110.0,
+          8900.9
+        ],
+        [
+          5110.0,
+          8750.9
+        ],
+        [
+          6710.0,
+          8750.9
+        ],
+        [
+          6710.0,
+          8900.9
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.24,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 4049
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P03",
+      "kind": "partition",
+      "polygon_mm": [
+        [
+          7010.0,
+          4210.0
+        ],
+        [
+          7010.0,
+          4060.0
+        ],
+        [
+          10010.0,
+          4060.0
+        ],
+        [
+          10010.0,
+          4210.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.45,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 4369
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P04",
+      "kind": "partition",
+      "polygon_mm": [
+        [
+          12810.0,
+          5620.0
+        ],
+        [
+          12960.0,
+          5620.0
+        ],
+        [
+          12960.0,
+          4610.0
+        ],
+        [
+          13433.9,
+          4610.0
+        ],
+        [
+          13433.9,
+          4460.0
+        ],
+        [
+          12810.0,
+          4460.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.24508,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 4371
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P05",
+      "kind": "partition",
+      "polygon_mm": [
+        [
+          14433.9,
+          4610.0
+        ],
+        [
+          14960.0,
+          4610.0
+        ],
+        [
+          14960.0,
+          5620.0
+        ],
+        [
+          15110.0,
+          5620.0
+        ],
+        [
+          15110.0,
+          2960.0
+        ],
+        [
+          14960.0,
+          2960.0
+        ],
+        [
+          14960.0,
+          4460.0
+        ],
+        [
+          14433.9,
+          4460.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.47791,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 4372
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P06",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          12223.6,
+          9360.0
+        ],
+        [
+          12223.6,
+          9660.0
+        ],
+        [
+          12660.0,
+          9660.0
+        ],
+        [
+          12660.0,
+          10660.0
+        ],
+        [
+          13260.0,
+          10660.0
+        ],
+        [
+          13260.0,
+          10360.0
+        ],
+        [
+          12960.0,
+          10360.0
+        ],
+        [
+          12960.0,
+          9360.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.61092,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5149
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P07",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          19859.8,
+          10360.0
+        ],
+        [
+          27437.2,
+          10360.0
+        ],
+        [
+          27437.2,
+          10239.6
+        ],
+        [
+          27737.1,
+          10239.6
+        ],
+        [
+          27737.1,
+          10660.0
+        ],
+        [
+          19859.8,
+          10660.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 2.3993,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5150
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P08",
+      "kind": "partition",
+      "polygon_mm": [
+        [
+          2810.0,
+          9360.0
+        ],
+        [
+          2960.0,
+          9360.0
+        ],
+        [
+          2960.0,
+          8900.9
+        ],
+        [
+          4110.0,
+          8900.9
+        ],
+        [
+          4110.0,
+          8750.9
+        ],
+        [
+          2810.0,
+          8750.9
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.26387,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5152
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P09",
+      "kind": "partition",
+      "polygon_mm": [
+        [
+          21935.0,
+          4310.0
+        ],
+        [
+          21185.0,
+          4310.0
+        ],
+        [
+          21185.0,
+          4460.0
+        ],
+        [
+          22835.0,
+          4460.0
+        ],
+        [
+          22835.0,
+          4310.0
+        ],
+        [
+          22085.0,
+          4310.0
+        ],
+        [
+          22085.0,
+          560.0
+        ],
+        [
+          21935.0,
+          560.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.81,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5153
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P10",
+      "kind": "partition",
+      "polygon_mm": [
+        [
+          23810.0,
+          8460.0
+        ],
+        [
+          23810.0,
+          6719.2
+        ],
+        [
+          23960.0,
+          6719.2
+        ],
+        [
+          23960.0,
+          8460.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.26112,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5154
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P11",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          10310.0,
+          5620.0
+        ],
+        [
+          10310.0,
+          4010.0
+        ],
+        [
+          10010.0,
+          4010.0
+        ],
+        [
+          10010.0,
+          5620.0
+        ],
+        [
+          9910.0,
+          5620.0
+        ],
+        [
+          9910.0,
+          5920.0
+        ],
+        [
+          12960.0,
+          5920.0
+        ],
+        [
+          12960.0,
+          5620.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 1.398,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5156
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P12",
+      "kind": "partition",
+      "polygon_mm": [
+        [
+          24960.0,
+          6419.2
+        ],
+        [
+          25110.0,
+          6419.2
+        ],
+        [
+          25110.0,
+          4460.0
+        ],
+        [
+          25110.0,
+          2169.2
+        ],
+        [
+          24960.0,
+          2169.2
+        ],
+        [
+          24960.0,
+          4310.0
+        ],
+        [
+          23835.0,
+          4310.0
+        ],
+        [
+          23835.0,
+          4460.0
+        ],
+        [
+          24960.0,
+          4460.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.80625,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5157
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P13",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          27010.0,
+          6419.2
+        ],
+        [
+          27437.2,
+          6419.2
+        ],
+        [
+          27737.4,
+          6419.2
+        ],
+        [
+          27737.4,
+          3069.2
+        ],
+        [
+          28037.4,
+          3069.2
+        ],
+        [
+          28037.4,
+          6719.2
+        ],
+        [
+          27737.4,
+          6719.2
+        ],
+        [
+          27737.1,
+          7139.6
+        ],
+        [
+          27437.2,
+          7139.6
+        ],
+        [
+          27437.2,
+          6719.2
+        ],
+        [
+          27010.0,
+          6719.2
+        ]
+      ],
+      "closed": true,
+      "area_m2": 1.43936,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5158
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P14",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          27737.4,
+          2169.2
+        ],
+        [
+          27737.4,
+          1869.2
+        ],
+        [
+          28037.4,
+          1869.2
+        ],
+        [
+          28037.4,
+          2169.2
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.09,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5159
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P15",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          21397.5,
+          560.0
+        ],
+        [
+          21397.5,
+          260.0
+        ],
+        [
+          22622.5,
+          260.0
+        ],
+        [
+          22622.5,
+          560.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.3675,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5160
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P16",
+      "kind": "partition",
+      "polygon_mm": [
+        [
+          16610.0,
+          4620.0
+        ],
+        [
+          16610.0,
+          2960.0
+        ],
+        [
+          16760.0,
+          2960.0
+        ],
+        [
+          16760.0,
+          4620.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.249,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5162
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P17",
+      "kind": "partition",
+      "polygon_mm": [
+        [
+          19060.0,
+          4460.0
+        ],
+        [
+          19060.0,
+          4310.0
+        ],
+        [
+          20185.0,
+          4310.0
+        ],
+        [
+          20185.0,
+          4460.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.16875,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5163
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P18",
+      "kind": "partition",
+      "polygon_mm": [
+        [
+          20060.0,
+          10360.0
+        ],
+        [
+          20060.0,
+          6719.2
+        ],
+        [
+          20210.0,
+          6719.2
+        ],
+        [
+          20210.0,
+          10360.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.54612,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5164
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P19",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          14433.9,
+          2960.0
+        ],
+        [
+          14433.9,
+          2660.0
+        ],
+        [
+          16760.0,
+          2660.0
+        ],
+        [
+          16760.0,
+          2960.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.69783,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5165
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P20",
+      "kind": "partition",
+      "polygon_mm": [
+        [
+          23810.0,
+          10360.0
+        ],
+        [
+          23810.0,
+          9660.0
+        ],
+        [
+          23960.0,
+          9660.0
+        ],
+        [
+          23960.0,
+          10360.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.105,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5166
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P21",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          26837.4,
+          2169.2
+        ],
+        [
+          24960.0,
+          2169.2
+        ],
+        [
+          24960.0,
+          560.0
+        ],
+        [
+          24422.5,
+          560.0
+        ],
+        [
+          24422.5,
+          260.0
+        ],
+        [
+          25260.0,
+          260.0
+        ],
+        [
+          25260.0,
+          1869.2
+        ],
+        [
+          26837.4,
+          1869.2
+        ]
+      ],
+      "closed": true,
+      "area_m2": 1.20723,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5167
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P22",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          7010.0,
+          5620.0
+        ],
+        [
+          7010.0,
+          560.0
+        ],
+        [
+          7610.0,
+          560.0
+        ],
+        [
+          7610.0,
+          260.0
+        ],
+        [
+          6710.0,
+          260.0
+        ],
+        [
+          6710.0,
+          1869.2
+        ],
+        [
+          6035.0,
+          1869.2
+        ],
+        [
+          6035.0,
+          2169.2
+        ],
+        [
+          6710.0,
+          2169.2
+        ],
+        [
+          6710.0,
+          11360.0
+        ],
+        [
+          2960.0,
+          11360.0
+        ],
+        [
+          2960.0,
+          9360.0
+        ],
+        [
+          560.0,
+          9360.0
+        ],
+        [
+          560.0,
+          2169.2
+        ],
+        [
+          935.0,
+          2169.2
+        ],
+        [
+          935.0,
+          1869.2
+        ],
+        [
+          260.0,
+          1869.2
+        ],
+        [
+          260.0,
+          9660.0
+        ],
+        [
+          2660.0,
+          9660.0
+        ],
+        [
+          2660.0,
+          11660.0
+        ],
+        [
+          7010.0,
+          11660.0
+        ],
+        [
+          7010.0,
+          9660.0
+        ],
+        [
+          10223.6,
+          9660.0
+        ],
+        [
+          10223.6,
+          9360.0
+        ],
+        [
+          7010.0,
+          9360.0
+        ],
+        [
+          7010.0,
+          5920.0
+        ],
+        [
+          8910.0,
+          5920.0
+        ],
+        [
+          8910.0,
+          5620.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 10.23132,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5168
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P23",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          18760.0,
+          5620.0
+        ],
+        [
+          14960.0,
+          5620.0
+        ],
+        [
+          14960.0,
+          5920.0
+        ],
+        [
+          19060.0,
+          5920.0
+        ],
+        [
+          19060.0,
+          5540.0
+        ],
+        [
+          18760.0,
+          5540.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 1.254,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5170
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P24",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          18761.4,
+          2960.0
+        ],
+        [
+          17760.0,
+          2960.0
+        ],
+        [
+          17760.0,
+          2660.0
+        ],
+        [
+          18760.0,
+          2660.0
+        ],
+        [
+          18760.0,
+          260.0
+        ],
+        [
+          19597.5,
+          260.0
+        ],
+        [
+          19597.5,
+          560.0
+        ],
+        [
+          19060.0,
+          560.0
+        ],
+        [
+          19060.0,
+          4540.0
+        ],
+        [
+          18761.4,
+          4540.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 1.74304,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5173
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P25",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          10310.0,
+          2960.0
+        ],
+        [
+          12933.9,
+          2960.0
+        ],
+        [
+          12933.9,
+          2660.0
+        ],
+        [
+          10310.0,
+          2660.0
+        ],
+        [
+          10310.0,
+          260.0
+        ],
+        [
+          9410.0,
+          260.0
+        ],
+        [
+          9410.0,
+          560.0
+        ],
+        [
+          10010.0,
+          560.0
+        ],
+        [
+          10010.0,
+          3010.0
+        ],
+        [
+          10310.0,
+          3010.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 1.79217,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5177
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P26",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          20060.0,
+          5620.0
+        ],
+        [
+          20060.0,
+          6719.2
+        ],
+        [
+          23960.0,
+          6719.2
+        ],
+        [
+          23960.0,
+          6419.2
+        ],
+        [
+          20360.0,
+          6419.2
+        ],
+        [
+          20360.0,
+          5620.0
+        ]
+      ],
+      "closed": true,
+      "area_m2": 1.40976,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5336
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    },
+    {
+      "id": "P27",
+      "kind": "wall_core",
+      "polygon_mm": [
+        [
+          24960.0,
+          6719.2
+        ],
+        [
+          24960.0,
+          6419.2
+        ],
+        [
+          26010.0,
+          6419.2
+        ],
+        [
+          26010.0,
+          6719.2
+        ]
+      ],
+      "closed": true,
+      "area_m2": 0.315,
+      "z_bottom_mm": null,
+      "z_top_mm": null,
+      "status": "extracted_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50",
+        "pymupdf_drawing_index_0based": 5842
+      },
+      "note": "Przekrój poziomy rdzenia ściany / słupa. Bez automatycznego dodawania tynków, izolacji, podokienników i nadproży. Klasyfikacja ściany według grafiki, nie opinia konstrukcyjna."
+    }
+  ],
+  "rooms": [
+    {
+      "id": "R01",
+      "number": 1,
+      "name": "Hol wejściowy",
+      "reported_area_m2": 9.87,
+      "dimension_note_pl": "Kształt L: 250 × (116 + 150) cm oraz 215 × 150 cm. 266 cm i pole figury są wyliczeniem.",
+      "printed_dimensions": [
+        {
+          "raw": "250",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "116",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "150",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "215",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          10310,
+          2960
+        ],
+        [
+          14960,
+          2960
+        ],
+        [
+          14960,
+          4460
+        ],
+        [
+          12810,
+          4460
+        ],
+        [
+          12810,
+          5620
+        ],
+        [
+          10310,
+          5620
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 4650.0,
+      "reference_bbox_depth_mm": 2660.0,
+      "reference_area_m2": 9.875,
+      "reference_area_minus_reported_m2": 0.005,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R02",
+      "number": 2,
+      "name": "Pralnia",
+      "reported_area_m2": 3.99,
+      "dimension_note_pl": "150 × 266 cm.",
+      "printed_dimensions": [
+        {
+          "raw": "150",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "266",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          15110,
+          2960
+        ],
+        [
+          16610,
+          2960
+        ],
+        [
+          16610,
+          5620
+        ],
+        [
+          15110,
+          5620
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 1500.0,
+      "reference_bbox_depth_mm": 2660.0,
+      "reference_area_m2": 3.99,
+      "reference_area_minus_reported_m2": 0.0,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R03",
+      "number": 3,
+      "name": "Łazienka",
+      "reported_area_m2": 5.32,
+      "dimension_note_pl": "200 × 266 cm. Niewielka różnica wektorowa przy prawym ościeżu pozostawiona w geometrii.",
+      "printed_dimensions": [
+        {
+          "raw": "200",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "266",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          16760,
+          2960
+        ],
+        [
+          18761.4,
+          2960
+        ],
+        [
+          18761.4,
+          5540
+        ],
+        [
+          18760,
+          5540
+        ],
+        [
+          18760,
+          5620
+        ],
+        [
+          16760,
+          5620
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 2001.4,
+      "reference_bbox_depth_mm": 2660.0,
+      "reference_area_m2": 5.32361,
+      "reference_area_minus_reported_m2": 0.00361,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R04",
+      "number": 4,
+      "name": "Sypialnia dziecięca",
+      "reported_area_m2": 10.78,
+      "dimension_note_pl": "288 × 375 cm na rzucie; szerokość między krawędziami wektorowymi 2875 mm.",
+      "printed_dimensions": [
+        {
+          "raw": "288",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "375",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          19060,
+          560
+        ],
+        [
+          21935,
+          560
+        ],
+        [
+          21935,
+          4310
+        ],
+        [
+          19060,
+          4310
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 2875.0,
+      "reference_bbox_depth_mm": 3750.0,
+      "reference_area_m2": 10.78125,
+      "reference_area_minus_reported_m2": 0.00125,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R05",
+      "number": 5,
+      "name": "Sypialnia dziecięca",
+      "reported_area_m2": 10.78,
+      "dimension_note_pl": "288 × 375 cm na rzucie; szerokość między krawędziami wektorowymi 2875 mm.",
+      "printed_dimensions": [
+        {
+          "raw": "288",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "375",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          22085,
+          560
+        ],
+        [
+          24960,
+          560
+        ],
+        [
+          24960,
+          4310
+        ],
+        [
+          22085,
+          4310
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 2875.0,
+      "reference_bbox_depth_mm": 3750.0,
+      "reference_area_m2": 10.78125,
+      "reference_area_minus_reported_m2": 0.00125,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R06",
+      "number": 6,
+      "name": "Komunikacja",
+      "reported_area_m2": 10.51,
+      "dimension_note_pl": "Obrys z uskokiem: 590 cm szerokości całkowitej, 460 cm górnego odcinka, 196 cm maksymalnej głębokości. Nie jest prostokątem 590 × 196 cm.",
+      "printed_dimensions": [
+        {
+          "raw": "590",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "460",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "196",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          19060,
+          4460
+        ],
+        [
+          24960,
+          4460
+        ],
+        [
+          24960,
+          6419.2
+        ],
+        [
+          20360,
+          6419.2
+        ],
+        [
+          20360,
+          5620
+        ],
+        [
+          19060,
+          5620
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 5900.0,
+      "reference_bbox_depth_mm": 1959.2,
+      "reference_area_m2": 10.52032,
+      "reference_area_minus_reported_m2": 0.01032,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R07",
+      "number": 7,
+      "name": "Łazienka",
+      "reported_area_m2": 11.17,
+      "dimension_note_pl": "263 cm × 4,25 m. Wektorowo szerokość około 2627,4 mm.",
+      "printed_dimensions": [
+        {
+          "raw": "263",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "4.25",
+          "unit": "m",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          25110,
+          2169.2
+        ],
+        [
+          27737.4,
+          2169.2
+        ],
+        [
+          27737.4,
+          6419.2
+        ],
+        [
+          25110,
+          6419.2
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 2627.4,
+      "reference_bbox_depth_mm": 4250.0,
+      "reference_area_m2": 11.16645,
+      "reference_area_minus_reported_m2": -0.00355,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R08",
+      "number": 8,
+      "name": "Sypialnia",
+      "reported_area_m2": 12.66,
+      "dimension_note_pl": "348 × 364 cm; szerokość wektorowa około 3477,1 mm, głębokość około 3640,8 mm.",
+      "printed_dimensions": [
+        {
+          "raw": "348",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "364",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          23960,
+          6719.2
+        ],
+        [
+          27437.1,
+          6719.2
+        ],
+        [
+          27437.1,
+          10360
+        ],
+        [
+          23960,
+          10360
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 3477.1,
+      "reference_bbox_depth_mm": 3640.8,
+      "reference_area_m2": 12.65943,
+      "reference_area_minus_reported_m2": -0.00057,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R09",
+      "number": 9,
+      "name": "Garderoba",
+      "reported_area_m2": 13.11,
+      "dimension_note_pl": "360 × 364 cm; głębokość wektorowa około 3640,8 mm.",
+      "printed_dimensions": [
+        {
+          "raw": "360",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "364",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          20210,
+          6719.2
+        ],
+        [
+          23810,
+          6719.2
+        ],
+        [
+          23810,
+          10360
+        ],
+        [
+          20210,
+          10360
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 3600.0,
+      "reference_bbox_depth_mm": 3640.8,
+      "reference_area_m2": 13.10688,
+      "reference_area_minus_reported_m2": -0.00312,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R10",
+      "number": 10,
+      "name": "Salon",
+      "reported_area_m2": 34.14,
+      "dimension_note_pl": "Część główna 710 × (100 + 344) cm oraz wnęka 200 × 131 cm. Odcinek 590 cm na rzucie sięga dalej, do dolnej krawędzi przegrody holu; nie jest jednolitą głębokością salonu. Dodatkowe napisy: 660, 30, 20 cm.",
+      "printed_dimensions": [
+        {
+          "raw": "710",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "100",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "344",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "131",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "2",
+          "unit": "m",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "590",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "660",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "30",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "20",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          12960,
+          4610
+        ],
+        [
+          14960,
+          4610
+        ],
+        [
+          14960,
+          5920
+        ],
+        [
+          20060,
+          5920
+        ],
+        [
+          20060,
+          10360
+        ],
+        [
+          12960,
+          10360
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 7100.0,
+      "reference_bbox_depth_mm": 5750.0,
+      "reference_area_m2": 34.144,
+      "reference_area_minus_reported_m2": 0.004,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R11",
+      "number": 11,
+      "name": "Kuchnia + jadalnia",
+      "reported_area_m2": 20.47,
+      "dimension_note_pl": "595 × 344 cm. Granica z salonem jest podziałem funkcjonalnym, nie ścianą.",
+      "printed_dimensions": [
+        {
+          "raw": "595",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "344",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          7010,
+          5920
+        ],
+        [
+          12960,
+          5920
+        ],
+        [
+          12960,
+          9360
+        ],
+        [
+          7010,
+          9360
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 5950.0,
+      "reference_bbox_depth_mm": 3440.0,
+      "reference_area_m2": 20.468,
+      "reference_area_minus_reported_m2": -0.002,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R12",
+      "number": 12,
+      "name": "Pom. gosp.",
+      "reported_area_m2": 9.22,
+      "dimension_note_pl": "375 × 246 cm; głębokość wektorowa około 2459,1 mm.",
+      "printed_dimensions": [
+        {
+          "raw": "375",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "246",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          2960,
+          8900.9
+        ],
+        [
+          6710,
+          8900.9
+        ],
+        [
+          6710,
+          11360
+        ],
+        [
+          2960,
+          11360
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 3750.0,
+      "reference_bbox_depth_mm": 2459.1,
+      "reference_area_m2": 9.22163,
+      "reference_area_minus_reported_m2": 0.00163,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R13",
+      "number": 13,
+      "name": "Garaż",
+      "reported_area_m2": 41.85,
+      "dimension_note_pl": "Obrys z wnęką: 615 cm szerokości i 719 cm maksymalnej głębokości; górny odcinek 225 cm. Nie jest prostokątem 615 × 719 cm.",
+      "printed_dimensions": [
+        {
+          "raw": "615",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "719",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "225",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          560,
+          2169.2
+        ],
+        [
+          6710,
+          2169.2
+        ],
+        [
+          6710,
+          8750.9
+        ],
+        [
+          2810,
+          8750.9
+        ],
+        [
+          2810,
+          9360
+        ],
+        [
+          560,
+          9360
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 6150.0,
+      "reference_bbox_depth_mm": 7190.8,
+      "reference_area_m2": 41.84793,
+      "reference_area_minus_reported_m2": -0.00207,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R14",
+      "number": 14,
+      "name": "Spiżarnia",
+      "reported_area_m2": 4.23,
+      "dimension_note_pl": "300 × 141 cm.",
+      "printed_dimensions": [
+        {
+          "raw": "300",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "141",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          7010,
+          4210
+        ],
+        [
+          10010,
+          4210
+        ],
+        [
+          10010,
+          5620
+        ],
+        [
+          7010,
+          5620
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 3000.0,
+      "reference_bbox_depth_mm": 1410.0,
+      "reference_area_m2": 4.23,
+      "reference_area_minus_reported_m2": 0.0,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    },
+    {
+      "id": "R15",
+      "number": 15,
+      "name": "Gabinet",
+      "reported_area_m2": 10.5,
+      "dimension_note_pl": "300 × 350 cm; na rysunku szerokość dodatkowo oznaczono jako 3 m.",
+      "printed_dimensions": [
+        {
+          "raw": "3",
+          "unit": "m",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        },
+        {
+          "raw": "350",
+          "unit": "cm",
+          "status": "explicit",
+          "source": {
+            "pdf_page": 26,
+            "sheet": "A-AA-0-01",
+            "location": "Rzut parteru, skala 1:50"
+          }
+        }
+      ],
+      "floor_reference_polygon_mm": [
+        [
+          7010,
+          560
+        ],
+        [
+          10010,
+          560
+        ],
+        [
+          10010,
+          4060
+        ],
+        [
+          7010,
+          4060
+        ]
+      ],
+      "geometry_status": "reconstructed_from_vector",
+      "reference_bbox_width_mm": 3000.0,
+      "reference_bbox_depth_mm": 3500.0,
+      "reference_area_m2": 10.5,
+      "reference_area_minus_reported_m2": 0.0,
+      "clear_height_reference_mm": 2600,
+      "height_source": {
+        "pdf_page": 27,
+        "sheet": "A-AA-4-01",
+        "location": "Przekrój A-A, skala 1:50"
+      },
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "geometry_note": "Obrys kontrolny do modelowania, nie inwentaryzacja. Granice funkcjonalne między otwartymi strefami i w świetle drzwi zrekonstruowano; nie są dodatkowymi ścianami."
+    }
+  ],
+  "windows": [
+    {
+      "id": "W01",
+      "source_tag": "O1.",
+      "room_number": 15,
+      "nominal_width_mm": 1800,
+      "nominal_height_mm": 1550,
+      "width_height_status": "explicit",
+      "sill_mm": 900,
+      "sill_status": "explicit",
+      "top_mm_from_explicit_sill": 2450,
+      "opening_system_as_labelled": null,
+      "core_opening_bbox_mm": [
+        7610,
+        260,
+        9410,
+        560
+      ],
+      "orientation_in_plan": "horizontal",
+      "vector_opening_width_mm": 1800,
+      "geometry_status": "reconstructed_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "hp przepisano z rzutu; nie określa grubości parapetu.",
+      "assembly_id": null
+    },
+    {
+      "id": "W02",
+      "source_tag": "O1.",
+      "room_number": 4,
+      "nominal_width_mm": 1800,
+      "nominal_height_mm": 1550,
+      "width_height_status": "explicit",
+      "sill_mm": 900,
+      "sill_status": "explicit",
+      "top_mm_from_explicit_sill": 2450,
+      "opening_system_as_labelled": null,
+      "core_opening_bbox_mm": [
+        19597.5,
+        260,
+        21397.5,
+        560
+      ],
+      "orientation_in_plan": "horizontal",
+      "vector_opening_width_mm": 1800.0,
+      "geometry_status": "reconstructed_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "hp przepisano z rzutu; nie określa grubości parapetu.",
+      "assembly_id": null
+    },
+    {
+      "id": "W03",
+      "source_tag": "O1.",
+      "room_number": 5,
+      "nominal_width_mm": 1800,
+      "nominal_height_mm": 1550,
+      "width_height_status": "explicit",
+      "sill_mm": 900,
+      "sill_status": "explicit",
+      "top_mm_from_explicit_sill": 2450,
+      "opening_system_as_labelled": null,
+      "core_opening_bbox_mm": [
+        22622.5,
+        260,
+        24422.5,
+        560
+      ],
+      "orientation_in_plan": "horizontal",
+      "vector_opening_width_mm": 1800.0,
+      "geometry_status": "reconstructed_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "hp przepisano z rzutu; nie określa grubości parapetu.",
+      "assembly_id": null
+    },
+    {
+      "id": "W04",
+      "source_tag": "O2.",
+      "room_number": 3,
+      "nominal_width_mm": 1000,
+      "nominal_height_mm": 1550,
+      "width_height_status": "explicit",
+      "sill_mm": 900,
+      "sill_status": "explicit",
+      "top_mm_from_explicit_sill": 2450,
+      "opening_system_as_labelled": null,
+      "core_opening_bbox_mm": [
+        16760,
+        2660,
+        17760,
+        2960
+      ],
+      "orientation_in_plan": "horizontal",
+      "vector_opening_width_mm": 1000,
+      "geometry_status": "reconstructed_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "hp przepisano z rzutu; nie określa grubości parapetu.",
+      "assembly_id": null
+    },
+    {
+      "id": "W05",
+      "source_tag": "O3.",
+      "room_number": 7,
+      "nominal_width_mm": 900,
+      "nominal_height_mm": 2600,
+      "width_height_status": "explicit",
+      "sill_mm": null,
+      "sill_status": "not_explicitly_dimensioned",
+      "top_mm_from_explicit_sill": null,
+      "opening_system_as_labelled": null,
+      "core_opening_bbox_mm": [
+        26837.4,
+        1869.2,
+        27737.4,
+        2169.2
+      ],
+      "orientation_in_plan": "horizontal",
+      "vector_opening_width_mm": 900.0,
+      "geometry_status": "reconstructed_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Brak liczbowego hp. Elewacje pokazują przeszklenie nisko, ale nie zamieniono tego na potwierdzony poziom 0.",
+      "assembly_id": null
+    },
+    {
+      "id": "W06",
+      "source_tag": "O3.",
+      "room_number": 7,
+      "nominal_width_mm": 900,
+      "nominal_height_mm": 2600,
+      "width_height_status": "explicit",
+      "sill_mm": null,
+      "sill_status": "not_explicitly_dimensioned",
+      "top_mm_from_explicit_sill": null,
+      "opening_system_as_labelled": null,
+      "core_opening_bbox_mm": [
+        27737.4,
+        2169.2,
+        28037.4,
+        3069.2
+      ],
+      "orientation_in_plan": "vertical",
+      "vector_opening_width_mm": 900.0,
+      "geometry_status": "reconstructed_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Brak liczbowego hp. Elewacje pokazują przeszklenie nisko, ale nie zamieniono tego na potwierdzony poziom 0.",
+      "assembly_id": null
+    },
+    {
+      "id": "W07",
+      "source_tag": "O4.",
+      "room_number": 8,
+      "nominal_width_mm": 1550,
+      "nominal_height_mm": 2600,
+      "width_height_status": "explicit",
+      "sill_mm": null,
+      "sill_status": "not_explicitly_dimensioned",
+      "top_mm_from_explicit_sill": null,
+      "opening_system_as_labelled": "HST",
+      "core_opening_bbox_mm": [
+        27437.1,
+        7139.6,
+        27737.1,
+        8689.6
+      ],
+      "orientation_in_plan": "vertical",
+      "vector_opening_width_mm": 1550.0,
+      "geometry_status": "reconstructed_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Brak liczbowego hp. Elewacje pokazują przeszklenie nisko, ale nie zamieniono tego na potwierdzony poziom 0.",
+      "assembly_id": "HST_SYPIALNIA"
+    },
+    {
+      "id": "W08",
+      "source_tag": "O5.",
+      "room_number": 8,
+      "nominal_width_mm": 1550,
+      "nominal_height_mm": 2600,
+      "width_height_status": "explicit",
+      "sill_mm": null,
+      "sill_status": "not_explicitly_dimensioned",
+      "top_mm_from_explicit_sill": null,
+      "opening_system_as_labelled": "HST",
+      "core_opening_bbox_mm": [
+        27437.1,
+        8689.6,
+        27737.1,
+        10239.6
+      ],
+      "orientation_in_plan": "vertical",
+      "vector_opening_width_mm": 1550.0,
+      "geometry_status": "reconstructed_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Brak liczbowego hp. Elewacje pokazują przeszklenie nisko, ale nie zamieniono tego na potwierdzony poziom 0.",
+      "assembly_id": "HST_SYPIALNIA"
+    },
+    {
+      "id": "W09",
+      "source_tag": "O6.",
+      "room_number": 10,
+      "nominal_width_mm": 3300,
+      "nominal_height_mm": 2600,
+      "width_height_status": "explicit",
+      "sill_mm": null,
+      "sill_status": "not_explicitly_dimensioned",
+      "top_mm_from_explicit_sill": null,
+      "opening_system_as_labelled": "FIX",
+      "core_opening_bbox_mm": [
+        16559.9,
+        10360,
+        19859.8,
+        10660
+      ],
+      "orientation_in_plan": "horizontal",
+      "vector_opening_width_mm": 3299.9,
+      "geometry_status": "reconstructed_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Brak liczbowego hp. Elewacje pokazują przeszklenie nisko, ale nie zamieniono tego na potwierdzony poziom 0.",
+      "assembly_id": "FIX_SALON"
+    },
+    {
+      "id": "W10",
+      "source_tag": "O7.",
+      "room_number": 10,
+      "nominal_width_mm": 3300,
+      "nominal_height_mm": 2600,
+      "width_height_status": "explicit",
+      "sill_mm": null,
+      "sill_status": "not_explicitly_dimensioned",
+      "top_mm_from_explicit_sill": null,
+      "opening_system_as_labelled": "FIX",
+      "core_opening_bbox_mm": [
+        13260,
+        10360,
+        16559.9,
+        10660
+      ],
+      "orientation_in_plan": "horizontal",
+      "vector_opening_width_mm": 3299.9,
+      "geometry_status": "reconstructed_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Brak liczbowego hp. Elewacje pokazują przeszklenie nisko, ale nie zamieniono tego na potwierdzony poziom 0.",
+      "assembly_id": "FIX_SALON"
+    },
+    {
+      "id": "W11",
+      "source_tag": "O8.",
+      "room_number": 11,
+      "nominal_width_mm": 2000,
+      "nominal_height_mm": 1000,
+      "width_height_status": "explicit",
+      "sill_mm": 1200,
+      "sill_status": "explicit",
+      "top_mm_from_explicit_sill": 2200,
+      "opening_system_as_labelled": null,
+      "core_opening_bbox_mm": [
+        10223.6,
+        9360,
+        12223.6,
+        9660
+      ],
+      "orientation_in_plan": "horizontal",
+      "vector_opening_width_mm": 2000.0,
+      "geometry_status": "reconstructed_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "hp przepisano z rzutu; nie określa grubości parapetu.",
+      "assembly_id": null
+    }
+  ],
+  "doors": [
+    {
+      "id": "DR01",
+      "source_tag": "D1.",
+      "adjacent_room_numbers": [
+        13
+      ],
+      "location": "Brama garażowa",
+      "nominal_width_mm": 5000,
+      "nominal_height_mm": 2250,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        935,
+        1869.2,
+        6035,
+        2169.2
+      ],
+      "vector_opening_width_mm": 5100,
+      "orientation_in_plan": "horizontal",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    },
+    {
+      "id": "DR02",
+      "source_tag": "DZ.",
+      "adjacent_room_numbers": [
+        1
+      ],
+      "location": "Drzwi zewnętrzne",
+      "nominal_width_mm": 1400,
+      "nominal_height_mm": 2000,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        12933.9,
+        2660,
+        14433.9,
+        2960
+      ],
+      "vector_opening_width_mm": 1500.0,
+      "orientation_in_plan": "horizontal",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    },
+    {
+      "id": "DR03",
+      "source_tag": "D2.",
+      "adjacent_room_numbers": [
+        13,
+        12
+      ],
+      "location": "Garaż / pom. gosp.",
+      "nominal_width_mm": 900,
+      "nominal_height_mm": 2000,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        4110,
+        8750.9,
+        5110,
+        8900.9
+      ],
+      "vector_opening_width_mm": 1000,
+      "orientation_in_plan": "horizontal",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    },
+    {
+      "id": "DR04",
+      "source_tag": "D2.",
+      "adjacent_room_numbers": [
+        1,
+        10
+      ],
+      "location": "Hol / salon",
+      "nominal_width_mm": 900,
+      "nominal_height_mm": 2000,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        13433.9,
+        4460,
+        14433.9,
+        4610
+      ],
+      "vector_opening_width_mm": 1000.0,
+      "orientation_in_plan": "horizontal",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    },
+    {
+      "id": "DR05",
+      "source_tag": "D2.",
+      "adjacent_room_numbers": [
+        6,
+        4
+      ],
+      "location": "Komunikacja / pokój 4",
+      "nominal_width_mm": 900,
+      "nominal_height_mm": 2000,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        20185,
+        4310,
+        21185,
+        4460
+      ],
+      "vector_opening_width_mm": 1000,
+      "orientation_in_plan": "horizontal",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    },
+    {
+      "id": "DR06",
+      "source_tag": "D2.",
+      "adjacent_room_numbers": [
+        6,
+        8
+      ],
+      "location": "Komunikacja / sypialnia",
+      "nominal_width_mm": 900,
+      "nominal_height_mm": 2000,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        23960,
+        6419.2,
+        24960,
+        6719.2
+      ],
+      "vector_opening_width_mm": 1000,
+      "orientation_in_plan": "horizontal",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    },
+    {
+      "id": "DR07",
+      "source_tag": "D3.",
+      "adjacent_room_numbers": [
+        1,
+        15
+      ],
+      "location": "Hol / gabinet",
+      "nominal_width_mm": 900,
+      "nominal_height_mm": 2000,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        10010,
+        3010,
+        10310,
+        4010
+      ],
+      "vector_opening_width_mm": 1000,
+      "orientation_in_plan": "vertical",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    },
+    {
+      "id": "DR08",
+      "source_tag": "D3.",
+      "adjacent_room_numbers": [
+        6,
+        3
+      ],
+      "location": "Komunikacja / łazienka 3",
+      "nominal_width_mm": 900,
+      "nominal_height_mm": 2000,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        18760,
+        4540,
+        19060,
+        5540
+      ],
+      "vector_opening_width_mm": 1000,
+      "orientation_in_plan": "vertical",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    },
+    {
+      "id": "DR09",
+      "source_tag": "D3.",
+      "adjacent_room_numbers": [
+        6,
+        5
+      ],
+      "location": "Komunikacja / pokój 5",
+      "nominal_width_mm": 900,
+      "nominal_height_mm": 2000,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        22835,
+        4310,
+        23835,
+        4460
+      ],
+      "vector_opening_width_mm": 1000,
+      "orientation_in_plan": "horizontal",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    },
+    {
+      "id": "DR10",
+      "source_tag": "D4.",
+      "adjacent_room_numbers": [
+        11,
+        14
+      ],
+      "location": "Kuchnia / spiżarnia",
+      "nominal_width_mm": 900,
+      "nominal_height_mm": 2000,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        8910,
+        5620,
+        9910,
+        5920
+      ],
+      "vector_opening_width_mm": 1000,
+      "orientation_in_plan": "horizontal",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    },
+    {
+      "id": "DR11",
+      "source_tag": "D4.",
+      "adjacent_room_numbers": [
+        10,
+        6
+      ],
+      "location": "Salon / komunikacja",
+      "nominal_width_mm": 900,
+      "nominal_height_mm": 2000,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        19060,
+        5620,
+        20060,
+        5920
+      ],
+      "vector_opening_width_mm": 1000,
+      "orientation_in_plan": "horizontal",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    },
+    {
+      "id": "DR12",
+      "source_tag": "D4.",
+      "adjacent_room_numbers": [
+        8,
+        7
+      ],
+      "location": "Sypialnia / łazienka 7",
+      "nominal_width_mm": 900,
+      "nominal_height_mm": 2000,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        26010,
+        6419.2,
+        27010,
+        6719.2
+      ],
+      "vector_opening_width_mm": 1000,
+      "orientation_in_plan": "horizontal",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    },
+    {
+      "id": "DR13",
+      "source_tag": "D5.",
+      "adjacent_room_numbers": [
+        8,
+        9
+      ],
+      "location": "Sypialnia / garderoba",
+      "nominal_width_mm": 1000,
+      "nominal_height_mm": 2000,
+      "width_height_status": "explicit",
+      "core_opening_bbox_mm": [
+        23810,
+        8460,
+        23960,
+        9660
+      ],
+      "vector_opening_width_mm": 1200,
+      "orientation_in_plan": "vertical",
+      "geometry_status": "reconstructed_from_vector",
+      "structural_opening_height_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Wymiary przy symbolu są oddzielone od szerokości przerwy w murze. Przekrój A-A zawiera 205 cm przy wybranym otworze; brak pełnego zestawienia wysokości otworów konstrukcyjnych."
+    }
+  ],
+  "unlabelled_passages": [
+    {
+      "id": "PR01",
+      "adjacent_room_numbers": [
+        2,
+        3
+      ],
+      "core_opening_bbox_mm": [
+        16610,
+        4620,
+        16760,
+        5620
+      ],
+      "vector_opening_width_mm": 1000,
+      "height_mm": null,
+      "source_tag": null,
+      "status": "reconstructed_from_vector",
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Nieopisane przejście między pralnią a łazienką. Nie dodano wymyślonego skrzydła drzwi ani jego wysokości."
+    }
+  ],
+  "height_and_level_dimensions": [
+    {
+      "id": "H01",
+      "name": "Poziom posadzki odniesienia",
+      "value_mm": 0,
+      "raw_label": "±0.00",
+      "sources": [
+        {
+          "pdf_page": 26,
+          "sheet": "A-AA-0-01",
+          "location": "Rzut parteru, skala 1:50"
+        },
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        },
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": ""
+    },
+    {
+      "id": "H02",
+      "name": "Wysokość w świetle do sufitu podwieszanego",
+      "value_mm": 2600,
+      "raw_label": "260 cm",
+      "sources": [
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        },
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": "Przekroje; nie jest to wysokość do płyty konstrukcyjnej."
+    },
+    {
+      "id": "H03",
+      "name": "Przestrzeń instalacyjna",
+      "value_mm": 300,
+      "raw_label": "30 cm / 300 mm",
+      "sources": [
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        },
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": "Grubość samej płyty g-k nie jest podana."
+    },
+    {
+      "id": "H04",
+      "name": "Spód płyty stropowej, poziom orientacyjny",
+      "value_mm": 2900,
+      "raw_label": "2600 + 300",
+      "sources": [
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        },
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "status": "computed_from_dimensions",
+      "note": "Wyliczenie z wysokości w świetle i przestrzeni instalacyjnej; nie osobna rzędna zapisana w PDF."
+    },
+    {
+      "id": "H05",
+      "name": "Płyta żelbetowa, grubość",
+      "value_mm": 180,
+      "raw_label": "180 mm",
+      "sources": [
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        },
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": "Warstwa D."
+    },
+    {
+      "id": "H06",
+      "name": "Wierzch płyty, poziom orientacyjny",
+      "value_mm": 3080,
+      "raw_label": "2600 + 300 + 180",
+      "sources": [
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        },
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "status": "computed_from_dimensions",
+      "note": "Bez dodawania niepodanych grubości wykończeń."
+    },
+    {
+      "id": "H07",
+      "name": "Wysokość budynku / rzędna górna",
+      "value_mm": 3950,
+      "raw_label": "3.95 m / +3.95",
+      "sources": [
+        {
+          "pdf_page": 21,
+          "location": "Część II, strona wewnętrzna 5: parametry charakterystyczne"
+        },
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        },
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        },
+        {
+          "pdf_page": 31,
+          "sheet": "A-AA-0-02",
+          "location": "Rzut dachu, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": "Na B-B obok występuje także wymiar 394 cm."
+    },
+    {
+      "id": "H08",
+      "name": "Wymiar pionowy na B-B",
+      "value_mm": 3940,
+      "raw_label": "394 cm / 2.6 + 1.34 m",
+      "sources": [
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": "Różnica 10 mm względem oznaczenia +3.95; pozostawiona do wyjaśnienia."
+    },
+    {
+      "id": "H09",
+      "name": "Punkt na rzucie dachu",
+      "value_mm": 3710,
+      "raw_label": "+3.71",
+      "sources": [
+        {
+          "pdf_page": 31,
+          "sheet": "A-AA-0-02",
+          "location": "Rzut dachu, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": "Rzędna lokalna przy linii połaci, nie stała wysokość całego dachu."
+    },
+    {
+      "id": "H10",
+      "name": "Posadowienie na A-A",
+      "value_mm": -1000,
+      "raw_label": "-1.00",
+      "sources": [
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": "Nie ujednolicono z B-B. Mogą występować różne poziomy; brak szczegółowego planu fundamentów w tym pliku."
+    },
+    {
+      "id": "H11",
+      "name": "Posadowienie na B-B",
+      "value_mm": -1400,
+      "raw_label": "-1.40",
+      "sources": [
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": "PZT podaje 252.60 m n.p.m. przy wejściu 254.00 m n.p.m."
+    },
+    {
+      "id": "H12",
+      "name": "Wysokość wybranego otworu na A-A",
+      "value_mm": 2050,
+      "raw_label": "205 cm",
+      "sources": [
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": "Przy symbolach drzwi na rzucie wysokość wynosi 200 cm; nie przeniesiono 205 cm na wszystkie otwory."
+    },
+    {
+      "id": "H13",
+      "name": "Odcinek ponad otworem na A-A",
+      "value_mm": 550,
+      "raw_label": "55 cm",
+      "sources": [
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": "205 + 55 = 260 cm."
+    },
+    {
+      "id": "H14",
+      "name": "Odcinek ponad oknem na B-B",
+      "value_mm": 450,
+      "raw_label": "45 cm",
+      "sources": [
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": "90 + 155 + 45 = 290 cm; kontrola do spodu stropu, nie do sufitu podwieszanego."
+    },
+    {
+      "id": "H15",
+      "name": "Głębokość dolnego odcinka fundamentu na B-B",
+      "value_mm": 400,
+      "raw_label": "0.4 m",
+      "sources": [
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "status": "explicit",
+      "note": "Odcinek wymiarowany, nie samodzielne odtworzenie wszystkich ław."
+    }
+  ],
+  "assemblies": [
+    {
+      "assembly": "A",
+      "name": "Ściana zewnętrzna",
+      "source": [
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        },
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "order": "od wnętrza na zewnątrz",
+      "layers": [
+        {
+          "material": "tynk cementowo-gipsowy",
+          "thickness_mm": 15
+        },
+        {
+          "material": "pustak Porotherm P+W",
+          "thickness_mm": 300
+        },
+        {
+          "material": "styropian λ = 0.031",
+          "thickness_mm": 260
+        },
+        {
+          "material": "siatka z włókna szklanego",
+          "thickness_mm": null
+        },
+        {
+          "material": "tynk silikonowy",
+          "thickness_mm": null
+        }
+      ],
+      "sum_known_thickness_mm": 575,
+      "note": "575 mm to suma opisanych trzech warstw, nie pełna grubość ze wszystkimi cienkimi warstwami. Geometria rzutu odpowiada rdzeniowi 300 mm + izolacji 260 mm; nie dodano ani nie odjęto automatycznie tynku."
+    },
+    {
+      "assembly": "B",
+      "name": "Ściana fundamentowa",
+      "source": [
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        },
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "order": "kolejność w zestawieniu",
+      "layers": [
+        {
+          "material": "bloczek fundamentowy",
+          "thickness_mm": 240
+        },
+        {
+          "material": "izolacja przeciwwilgociowa wodorozpuszczalna",
+          "thickness_mm": null
+        },
+        {
+          "material": "styropian aqua",
+          "thickness_mm": 150
+        },
+        {
+          "material": "siatka z włókna szklanego",
+          "thickness_mm": null
+        },
+        {
+          "material": "izolacja przeciwwilgociowa wodorozpuszczalna",
+          "thickness_mm": null
+        }
+      ],
+      "sum_known_thickness_mm": 390
+    },
+    {
+      "assembly": "C",
+      "name": "Podłoga na gruncie",
+      "source": [
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        },
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "order": "od góry w dół",
+      "layers": [
+        {
+          "material": "warstwy wykończeniowe",
+          "thickness_mm": null
+        },
+        {
+          "material": "wylewka cementowa",
+          "thickness_mm": 70
+        },
+        {
+          "material": "folia PE",
+          "thickness_mm": null
+        },
+        {
+          "material": "styropian EPS100",
+          "thickness_mm": 250
+        },
+        {
+          "material": "folia EP (zapis w PDF)",
+          "thickness_mm": null
+        },
+        {
+          "material": "beton C12/15",
+          "thickness_mm": 150
+        },
+        {
+          "material": "piasek",
+          "thickness_mm": 150
+        },
+        {
+          "material": "pospółka Is=1.0",
+          "thickness_mm": 500
+        }
+      ],
+      "sum_known_thickness_mm": 1120
+    },
+    {
+      "assembly": "D",
+      "name": "Dach / stropodach",
+      "source": [
+        {
+          "pdf_page": 27,
+          "sheet": "A-AA-4-01",
+          "location": "Przekrój A-A, skala 1:50"
+        },
+        {
+          "pdf_page": 28,
+          "sheet": "A-AA-4-02",
+          "location": "Przekrój B-B, skala 1:50"
+        }
+      ],
+      "order": "od góry w dół",
+      "layers": [
+        {
+          "material": "membrana EPDM SuperSeal 2.3mm",
+          "thickness_mm": null,
+          "printed_thickness_column_mm": 15,
+          "product_description_thickness_mm": 2.3,
+          "status": "unresolved",
+          "raw": "15 mm | membrana EPDM SuperSeal 2.3mm"
+        },
+        {
+          "material": "warstwa spadkowa ze styropianu EPS200",
+          "thickness_mm": null,
+          "slope_degrees": 5
+        },
+        {
+          "material": "styropian EPS200 - płyta nawierzchniowa",
+          "thickness_mm": 150
+        },
+        {
+          "material": "styropian EPS200 - płyta podkładowa",
+          "thickness_mm": 150
+        },
+        {
+          "material": "paroizolacja samoprzylepna",
+          "thickness_mm": null
+        },
+        {
+          "material": "płyta żelbetowa",
+          "thickness_mm": 180
+        },
+        {
+          "material": "przestrzeń instalacyjna",
+          "thickness_mm": 300
+        },
+        {
+          "material": "sufit podwieszany g-k",
+          "thickness_mm": null
+        }
+      ],
+      "note": "Nie obliczono jednolitej całkowitej grubości dachu: warstwa spadkowa zmienna, część grubości niepodana, membrana ma dwa zapisy."
+    }
+  ],
+  "dimension_chains": [
+    {
+      "id": "C01",
+      "name": "Osie, łańcuch górny",
+      "source_unit": "cm",
+      "values_as_printed": [
+        240,
+        405,
+        330,
+        265,
+        610,
+        620,
+        248,
+        30
+      ],
+      "values_mm": [
+        2400,
+        4050,
+        3300,
+        2650,
+        6100,
+        6200,
+        2480,
+        300
+      ],
+      "sum_mm": 27480,
+      "status": "explicit",
+      "sum_status": "computed_from_dimensions",
+      "source": {
+        "pdf_page": 26
+      },
+      "note": "Wartości przepisane. Nie zastąpiono nimi automatycznie współrzędnych."
+    },
+    {
+      "id": "C02",
+      "name": "Osie, łańcuch dolny",
+      "source_unit": "cm",
+      "values_as_printed": [
+        240,
+        404,
+        328,
+        265,
+        610,
+        620,
+        248,
+        30
+      ],
+      "values_mm": [
+        2400,
+        4040,
+        3280,
+        2650,
+        6100,
+        6200,
+        2480,
+        300
+      ],
+      "sum_mm": 27450,
+      "status": "explicit",
+      "sum_status": "computed_from_dimensions",
+      "source": {
+        "pdf_page": 26
+      },
+      "note": "Odcinki 404/405 i 328/330 różnią się od łańcucha górnego."
+    },
+    {
+      "id": "C03",
+      "name": "Dolny łańcuch pośredni",
+      "source_unit": "cm",
+      "values_as_printed": [
+        349,
+        503,
+        517,
+        358,
+        324,
+        303,
+        374,
+        103
+      ],
+      "values_mm": [
+        3490,
+        5030,
+        5170,
+        3580,
+        3240,
+        3030,
+        3740,
+        1030
+      ],
+      "sum_mm": 28310,
+      "status": "explicit",
+      "sum_status": "computed_from_dimensions",
+      "source": {
+        "pdf_page": 26
+      },
+      "note": "Suma opisanych odcinków 2831 cm, wymiar całkowity 2830 cm."
+    },
+    {
+      "id": "C04",
+      "name": "Dolny łańcuch otworów i filarków",
+      "source_unit": "cm",
+      "values_as_printed": [
+        94,
+        510,
+        42,
+        116,
+        180,
+        116,
+        236,
+        150,
+        233,
+        100,
+        74,
+        110,
+        180,
+        123,
+        180,
+        110,
+        132,
+        90,
+        30,
+        26
+      ],
+      "values_mm": [
+        940,
+        5100,
+        420,
+        1160,
+        1800,
+        1160,
+        2360,
+        1500,
+        2330,
+        1000,
+        740,
+        1100,
+        1800,
+        1230,
+        1800,
+        1100,
+        1320,
+        900,
+        300,
+        260
+      ],
+      "sum_mm": 28320,
+      "status": "explicit",
+      "sum_status": "computed_from_dimensions",
+      "source": {
+        "pdf_page": 26
+      },
+      "note": "Suma opisanych odcinków 2832 cm. Nie rozdzielono 2 cm różnicy pomiędzy odcinki."
+    },
+    {
+      "id": "C05",
+      "name": "Górny łańcuch ścian i przeszklenia",
+      "source_unit": "cm",
+      "values_as_printed": [
+        240,
+        487,
+        295,
+        200,
+        104,
+        660,
+        814
+      ],
+      "values_mm": [
+        2400,
+        4870,
+        2950,
+        2000,
+        1040,
+        6600,
+        8140
+      ],
+      "sum_mm": 28000,
+      "status": "explicit",
+      "sum_status": "computed_from_dimensions",
+      "source": {
+        "pdf_page": 26
+      },
+      "note": "Zachować jego własne punkty odniesienia; nie jest to prosty zamiennik wymiaru całkowitego."
+    },
+    {
+      "id": "C06",
+      "name": "Prawa strona, łańcuch najbliższy",
+      "source_unit": "cm",
+      "values_as_printed": [
+        68,
+        310,
+        407,
+        146
+      ],
+      "values_mm": [
+        680,
+        3100,
+        4070,
+        1460
+      ],
+      "sum_mm": 9310,
+      "status": "explicit",
+      "sum_status": "computed_from_dimensions",
+      "source": {
+        "pdf_page": 26
+      },
+      "note": "Kolejność od góry arkusza. Suma 931 cm. W źródle dodatkowo widnieje izolowany napis 0; zachowany w pełnej ekstrakcji tekstu, nie uznany za odcinek."
+    },
+    {
+      "id": "C07",
+      "name": "Prawa strona, łańcuch pośredni",
+      "source_unit": "cm",
+      "values_as_printed": [
+        223,
+        605,
+        103
+      ],
+      "values_mm": [
+        2230,
+        6050,
+        1030
+      ],
+      "sum_mm": 9310,
+      "status": "explicit",
+      "sum_status": "computed_from_dimensions",
+      "source": {
+        "pdf_page": 26
+      },
+      "note": "Kolejność od góry; suma 931 cm."
+    },
+    {
+      "id": "C08",
+      "name": "Przekrój A-A: 1-3-4-6-8a",
+      "source_unit": "cm",
+      "values_as_printed": [
+        645,
+        330,
+        875,
+        898
+      ],
+      "values_mm": [
+        6450,
+        3300,
+        8750,
+        8980
+      ],
+      "sum_mm": 27480,
+      "status": "explicit",
+      "sum_status": "computed_from_dimensions",
+      "source": {
+        "pdf_page": 27
+      },
+      "note": "Łańcuch z przekroju, odrębny od rzutu parteru."
+    },
+    {
+      "id": "C09",
+      "name": "Przekrój B-B: F-E-B",
+      "source_unit": "cm",
+      "values_as_printed": [
+        296,
+        474
+      ],
+      "values_mm": [
+        2960,
+        4740
+      ],
+      "sum_mm": 7700,
+      "status": "explicit",
+      "sum_status": "computed_from_dimensions",
+      "source": {
+        "pdf_page": 28
+      },
+      "note": "Oznaczenia osi przepisane z przekroju; nie utożsamiono automatycznie z osiami rzutu."
+    },
+    {
+      "id": "C10",
+      "name": "Wewnętrzny łańcuch przy kuchni i salonie",
+      "source_unit": "m",
+      "values_as_printed": [
+        1.9,
+        1,
+        3.05,
+        2,
+        4.1,
+        1
+      ],
+      "values_mm": [
+        1900.0,
+        1000,
+        3050.0,
+        2000,
+        4100.0,
+        1000
+      ],
+      "sum_mm": 13050.0,
+      "status": "explicit",
+      "sum_status": "computed_from_dimensions",
+      "source": {
+        "pdf_page": 26
+      },
+      "note": "Na rysunku wartości zapisano w metrach, mimo centymetrowych opisów w innych miejscach."
+    }
+  ],
+  "roof": {
+    "source": {
+      "pdf_page": 31,
+      "sheet": "A-AA-0-02",
+      "location": "Rzut dachu, skala 1:50"
+    },
+    "slope_labels": [
+      {
+        "value": 5,
+        "unit": "degree"
+      },
+      {
+        "value": 0.5,
+        "unit": "percent"
+      }
+    ],
+    "level_labels_mm": [
+      3950,
+      3710
+    ],
+    "vertices_xyz_mm": null,
+    "note": "Nie zbudowano pełnego modelu spadków ze zgadywanymi rzędnymi wpustów."
+  },
+  "exterior_and_site": {
+    "terrace_area_m2": {
+      "value": 88.14,
+      "source": {
+        "pdf_page": 9
+      },
+      "status": "explicit"
+    },
+    "entrance_elevation_m_asl": {
+      "value": 254.0,
+      "source": {
+        "pdf_page": 15
+      },
+      "status": "explicit"
+    },
+    "foundation_elevation_m_asl": {
+      "value": 252.6,
+      "source": {
+        "pdf_page": 15
+      },
+      "status": "explicit"
+    },
+    "building_boundary_distances_description_m": [
+      {
+        "adjacent_plot": "4/10",
+        "distance": 3.03
+      },
+      {
+        "adjacent_plot": "4/12",
+        "distance": 8.02
+      },
+      {
+        "adjacent_plot": "5/8",
+        "distance": 4.46
+      }
+    ],
+    "boundary_distances_source": {
+      "pdf_page": 8
+    },
+    "boundary_note": "To wartości z opisu, nie automatycznie uzgodnione z wszystkimi wymiarami na PZT.",
+    "terrace_to_boundary_m": {
+      "value": 1.53,
+      "source": {
+        "pdf_page": 8
+      },
+      "status": "explicit"
+    },
+    "floor_plan_external_dimension_labels": [
+      {
+        "raw": "370",
+        "unit": "cm",
+        "value_mm": 3700,
+        "source": {
+          "pdf_page": 26,
+          "sheet": "A-AA-0-01",
+          "location": "Rzut parteru, skala 1:50"
+        },
+        "status": "explicit",
+        "note": "Wymiar pasa zewnętrznego u góry rzutu, przy salonie."
+      },
+      {
+        "raw": "470",
+        "unit": "cm",
+        "value_mm": 4700,
+        "source": {
+          "pdf_page": 26,
+          "sheet": "A-AA-0-01",
+          "location": "Rzut parteru, skala 1:50"
+        },
+        "status": "explicit",
+        "note": "Wymiar pasa zewnętrznego u góry rzutu, przy kuchni."
+      },
+      {
+        "raw": "400",
+        "unit": "cm",
+        "value_mm": 4000,
+        "source": {
+          "pdf_page": 26,
+          "sheet": "A-AA-0-01",
+          "location": "Rzut parteru, skala 1:50"
+        },
+        "status": "explicit",
+        "note": "Wymiar poziomy po prawej stronie, z własnymi liniami odniesienia."
+      },
+      {
+        "raw": "460",
+        "unit": "cm",
+        "value_mm": 4600,
+        "source": {
+          "pdf_page": 26,
+          "sheet": "A-AA-0-01",
+          "location": "Rzut parteru, skala 1:50"
+        },
+        "status": "explicit",
+        "note": "Wymiar poziomy po prawej stronie, z własnymi liniami odniesienia."
+      },
+      {
+        "raw": "931",
+        "unit": "cm",
+        "value_mm": 9310,
+        "source": {
+          "pdf_page": 26,
+          "sheet": "A-AA-0-01",
+          "location": "Rzut parteru, skala 1:50"
+        },
+        "status": "explicit",
+        "note": "Łańcuch zewnętrzny po prawej stronie."
+      },
+      {
+        "raw": "8.31",
+        "unit": "m",
+        "value_mm": 8310,
+        "source": {
+          "pdf_page": 26,
+          "sheet": "A-AA-0-01",
+          "location": "Rzut parteru, skala 1:50"
+        },
+        "status": "explicit",
+        "note": "Odcinek pionowy przy garażu."
+      },
+      {
+        "raw": "1.61",
+        "unit": "m",
+        "value_mm": 1610,
+        "source": {
+          "pdf_page": 26,
+          "sheet": "A-AA-0-01",
+          "location": "Rzut parteru, skala 1:50"
+        },
+        "status": "explicit",
+        "note": "Odcinek pionowy przy dolnym uskoku garażu/gabinetu."
+      },
+      {
+        "raw": "2",
+        "unit": "m",
+        "value_mm": 2000,
+        "source": {
+          "pdf_page": 26,
+          "sheet": "A-AA-0-01",
+          "location": "Rzut parteru, skala 1:50"
+        },
+        "status": "explicit",
+        "note": "Uskok górny przy pomieszczeniu gospodarczym."
+      }
+    ],
+    "terrace_stairs": {
+      "raw": "6x14 / 35",
+      "riser_count": 6,
+      "riser_height_mm": 140,
+      "tread_depth_mm": 350,
+      "total_rise_mm": 840,
+      "total_rise_status": "computed_from_dimensions",
+      "horizontal_run_mm": null,
+      "source": {
+        "pdf_page": 26,
+        "sheet": "A-AA-0-01",
+        "location": "Rzut parteru, skala 1:50"
+      },
+      "note": "Nie założono automatycznie liczby poziomych stopnic ani całkowitego biegu."
+    }
+  },
+  "issues_and_missing_data": [
+    {
+      "id": "U01",
+      "topic": "Łańcuchy osi",
+      "priority": "check",
+      "source_pages": [
+        26
+      ],
+      "observation": "Górny łańcuch zawiera 405 i 330 cm, dolny 404 i 328 cm dla odpowiadających sobie odcinków.",
+      "handling": "Obie wersje zapisane. Nie skorygowano arbitralnie położenia ścian."
+    },
+    {
+      "id": "U02",
+      "topic": "Domknięcie długości",
+      "priority": "check",
+      "source_pages": [
+        26
+      ],
+      "observation": "Wymiar całkowity 2830 cm. Dolny łańcuch pośredni sumuje się do 2831 cm, łańcuch otworów i filarków do 2832 cm.",
+      "handling": "Sumy podano jako kontrolę arytmetyczną. Różnic 1–2 cm nie rozdzielono między odcinki."
+    },
+    {
+      "id": "U03",
+      "topic": "Różne poziomy fundamentów",
+      "priority": "check",
+      "source_pages": [
+        15,
+        27,
+        28
+      ],
+      "observation": "A-A: -1.00 m. B-B: -1.40 m. PZT: wejście 254.00 m n.p.m., posadowienie 252.60 m n.p.m.",
+      "handling": "Zachowano oddzielne poziomy; plik nie rozstrzyga pełnej geometrii wszystkich ław. Nie stwierdzono na tej podstawie błędu projektu."
+    },
+    {
+      "id": "U04",
+      "topic": "Wysokość górnej krawędzi",
+      "priority": "check",
+      "source_pages": [
+        21,
+        27,
+        28,
+        31
+      ],
+      "observation": "Rzędna +3.95 m i opis 3.95 m, ale na B-B także 394 cm oraz 2.6 + 1.34 m.",
+      "handling": "3950 mm i 3940 mm są oddzielnymi rekordami. Do końcowego modelu budowlanego potrzebne potwierdzenie."
+    },
+    {
+      "id": "U05",
+      "topic": "Nominał stolarki a otwór",
+      "priority": "distinction",
+      "source_pages": [
+        26,
+        27
+      ],
+      "observation": "Drzwi 90 cm są rysowane w otworach około 100 cm; DZ 140 cm w 150 cm; brama 500 cm w 510 cm; D5 100 cm w przerwie około 120 cm. Rzut podaje wysokość drzwi 200 cm, wybrany otwór w A-A ma 205 cm.",
+      "handling": "Osobne pola dla wymiarów przy symbolu i dla geometrii otworu. Nie są to wymiary do zamówienia stolarki."
+    },
+    {
+      "id": "U06",
+      "topic": "Grubość membrany",
+      "priority": "check",
+      "source_pages": [
+        27,
+        28
+      ],
+      "observation": "W tej samej pozycji zestawienia: kolumna 15 mm oraz opis membrany EPDM SuperSeal 2.3mm.",
+      "handling": "Ostateczna grubość pozostawiona jako null; zachowano oba zapisy."
+    },
+    {
+      "id": "U07",
+      "topic": "Spadki dachu",
+      "priority": "distinction",
+      "source_pages": [
+        27,
+        28,
+        31
+      ],
+      "observation": "Występują osobno spadki 5° oraz 0.5%. Nie są tą samą wielkością.",
+      "handling": "Zapisano z jednostkami; nie zamieniono 5° na 5%. Brak wszystkich rzędnych narożników i wpustów."
+    },
+    {
+      "id": "U08",
+      "topic": "Wysokości dolnej krawędzi przeszkleń",
+      "priority": "missing",
+      "source_pages": [
+        26,
+        29,
+        30
+      ],
+      "observation": "hp=90 cm podano dla O1/O2, hp=120 cm dla O8. Przy O3–O7 nie ma osobnego liczbowego hp.",
+      "handling": "Dla O3–O7 sill_mm=null. Wygląd elewacji nie został zamieniony na potwierdzoną rzędną 0."
+    },
+    {
+      "id": "U09",
+      "topic": "Wykończenie a geometria pomieszczeń",
+      "priority": "missing",
+      "source_pages": [
+        26,
+        27,
+        28
+      ],
+      "observation": "Opis podaje tynk 15 mm, ale brak pełnych grubości okładzin, posadzki i sufitu g-k oraz jednoznacznej specyfikacji wszystkich powierzchni wykończonych.",
+      "handling": "Nie pomniejszano automatycznie pokoi o tynki. Wymiary po wykończeniu trzeba potwierdzić przed doborem zabudowy."
+    },
+    {
+      "id": "U10",
+      "topic": "Obrys elewacji a powierzchnia zabudowy",
+      "priority": "check",
+      "source_pages": [
+        21,
+        26
+      ],
+      "observation": "Zrekonstruowany obrys ścian zewnętrznych ma około 271.28 m²; opis podaje powierzchnię zabudowy 277.25 m². To nie muszą być te same zakresy elementów.",
+      "handling": "Nie zastąpiono wartości urzędowej polem obrysu. Należy wyjaśnić zakres bilansu, m.in. elementy wysunięte i zadaszenia, oraz potwierdzić rekonstrukcję."
+    },
+    {
+      "id": "U11",
+      "topic": "Dokładność zapisów",
+      "priority": "distinction",
+      "source_pages": [
+        26
+      ],
+      "observation": "Etykiety w cm są zaokrąglone. Przykład: 288 cm dla pokoju dziecięcego, podczas gdy odstęp między wektorami wynosi około 2875 mm.",
+      "handling": "Nie utożsamiono dokładności współrzędnych 0.1 mm z dokładnością projektu ani budowy."
+    },
+    {
+      "id": "U12",
+      "topic": "Stan rzeczywisty i brakujące detale",
+      "priority": "missing",
+      "source_pages": [
+        24,
+        26,
+        27,
+        28,
+        31
+      ],
+      "observation": "To dokumentacja projektowa, nie inwentaryzacja. Brak w tym pliku kompletu detali konstrukcyjnych, wymiarów wszystkich ław/nadproży, tabel stolarki i końcowego wykończenia. Strona 24 nakazuje ustalić wymiary na budowie.",
+      "handling": "Dane służą do odtworzenia projektu i planowania wnętrza; nie do zamawiania elementów na wymiar bez pomiaru."
+    }
+  ],
+  "modelling_guidance": {
+    "floor_2d": "Użyj geometrii wall_cut_profiles, a rooms traktuj jako pola funkcjonalne, nie ściany.",
+    "wall_3d": "Rzut ścian przedstawia przekrój poziomy z przerwami na otwory. Samo wyciągnięcie profili nie tworzy ścian pod oknami ani nadproży.",
+    "heights": "2600 mm to wysokość w świetle do sufitu podwieszanego. 2900 mm jest wyliczonym poziomem spodu stropu, nie nowym pomiarem.",
+    "openings": "Do geometrii muru używaj core_opening_bbox_mm; do oznaczenia stolarki nominal_width_mm i nominal_height_mm.",
+    "finishes": "Twórz osobne warstwy materiałów; nie pomniejszaj pokoi arbitralnie. Grubości niewymiarowane pozostają null.",
+    "confirmation": "Przed wykonawstwem i meblami na wymiar pomiar na budowie oraz wyjaśnienie pozycji U01–U12."
+  }
+}

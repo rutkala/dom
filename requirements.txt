@@ -1,0 +1,4 @@
+cadquery==2.8.0
+shapely==2.1.2
+trimesh==4.11.1
+numpy>=1.26

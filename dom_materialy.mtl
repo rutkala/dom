@@ -1,0 +1,84 @@
+# Neutralne, robocze materialy; nie oznaczaja finalnego wykonczenia.
+newmtl sciany
+Kd 0.84 0.83 0.8
+d 1.0
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 20
+
+newmtl izolacja
+Kd 0.93 0.92 0.88
+d 1.0
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 20
+
+newmtl uzupelnienia
+Kd 0.84 0.83 0.8
+d 1.0
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 20
+
+newmtl podlogi
+Kd 0.66 0.66 0.64
+d 1.0
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 20
+
+newmtl progi
+Kd 0.66 0.66 0.64
+d 1.0
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 20
+
+newmtl stolarka
+Kd 0.27 0.31 0.33
+d 1.0
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 20
+
+newmtl szklo
+Kd 0.58 0.74 0.79
+d 0.35
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 20
+
+newmtl drzwi
+Kd 0.59 0.57 0.53
+d 1.0
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 20
+
+newmtl strop
+Kd 0.72 0.73 0.74
+d 1.0
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 20
+
+newmtl dach
+Kd 0.38 0.41 0.43
+d 1.0
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 20
+
+newmtl attyka
+Kd 0.91 0.9 0.86
+d 1.0
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 20
+
+newmtl sufity
+Kd 0.94 0.94 0.92
+d 1.0
+Ka 0.1 0.1 0.1
+Ks 0.1 0.1 0.1
+Ns 20
