@@ -48,7 +48,7 @@ COLORS = {
     'brama_linia': [0.07, 0.08, 0.09, 1.0],
     'szklo_matowe': [0.78, 0.82, 0.80, 0.72],
     'metal_czarny': [0.03, 0.03, 0.03, 1.0],
-    'elewacja_biala': [0.92, 0.92, 0.90, 1.0],
+    'elewacja_biala': [0.99, 0.975, 0.93, 1.0],
     'elewacja_szara': [0.38, 0.39, 0.40, 1.0],
     'elewacja_drewno': [0.63, 0.43, 0.29, 1.0],
     'elewacja_drewno_fuga': [0.25, 0.17, 0.11, 1.0],
@@ -60,7 +60,7 @@ COLORS = {
     'daszek_beton': [0.70, 0.71, 0.70, 1.0],
     'strop': [0.72, 0.73, 0.74, 1.0],
     'dach': [0.38, 0.41, 0.43, 1.0],
-    'attyka': [0.91, 0.90, 0.86, 1.0],
+    'attyka': [0.99, 0.975, 0.93, 1.0],
     'sufity': [0.94, 0.94, 0.92, 1.0],
 }
 
@@ -188,6 +188,30 @@ def _facade_coord(facade, side, axis_value):
     cross=facade.intersection(LineString([(-big,axis_value),(big,axis_value)]))
     if cross.is_empty: return None
     return cross.bounds[0] if side=='south' else cross.bounds[2]
+
+def opening_elevation_masks(openings, facade):
+    """Project current exterior openings to elevation side coordinates (s,z).
+
+    The elevation drawings are used only for material zoning. Openings are always
+    taken from the current measured/model geometry, so removed or relocated
+    project windows cannot reappear in the finish layer.
+    """
+    masks={'east':[], 'west':[], 'south':[], 'north':[]}
+    for op in openings:
+        g=op['geometry']; minx,miny,maxx,maxy=g.bounds
+        cx,cy=g.centroid.x,g.centroid.y
+        if (maxx-minx) >= (maxy-miny):
+            east=_facade_coord(facade,'east',cx); west=_facade_coord(facade,'west',cx)
+            if east is None or west is None: continue
+            side='east' if abs(cy-east) <= abs(cy-west) else 'west'
+            s0,s1=minx,maxx
+        else:
+            south=_facade_coord(facade,'south',cy); north=_facade_coord(facade,'north',cy)
+            if south is None or north is None: continue
+            side='south' if abs(cx-south) <= abs(cx-north) else 'north'
+            s0,s1=miny,maxy
+        masks[side].append(box(float(s0),float(op['bottom']),float(s1),float(op['top'])))
+    return {k:(unary_union(v) if v else Polygon()) for k,v in masks.items()}
 
 def add_vertical_patch(name, material, side, patch_sz, facade, outward_mm, source, source_id='', extras=None):
     from trimesh.creation import triangulate_polygon
@@ -565,23 +589,48 @@ def main():
                 float(col['z_bottom_mm']),float(canopy['z_bottom_mm']),source='daszek.jpg - zewnetrzny slup zelbetowy',
                 assumed=False,note='Slup pod zewnetrznym naroznikiem daszku odwzorowany ze zdjecia z budowy.',source_id='DASZEK_SLUP')
 
-    # 9. Elewacja z rysunkow projektowych: bialy/szary tynk oraz poziome drewno.
+    # 9. Elewacja: rysunki projektowe definiuja TYLKO strefy materialowe.
+    # Otwory bierzemy wylacznie z aktualnej geometrii (okna po pomiarze + drzwi/brama),
+    # aby stare okna z elewacji PDF nie wracaly jako dziury w wykonczeniu.
     project_top=float(ELEVATIONS.get('project_top_mm',3940.0)); actual_top=float(PARAM.get('parapet_top_mm',project_top))
-    for order,patch in enumerate(ELEVATIONS.get('patches',[])):
-        def lift(coords):
-            return [(float(a),actual_top if float(z)>=project_top-12 else float(z)) for a,z in coords]
-        poly_sz=Polygon(lift(patch['polygon_sz_mm']['exterior']),[lift(h) for h in patch['polygon_sz_mm'].get('holes',[])])
+    def lift(coords):
+        return [(float(a),actual_top if float(z)>=project_top-12 else float(z)) for a,z in coords]
+    current_openings=opening_elevation_masks(openings,facade)
+    side_shapes={k:[] for k in ('east','west','south','north')}
+    lifted_patches=[]
+    for patch in ELEVATIONS.get('patches',[]):
+        # Intentionally ignore holes stored in the old elevation artwork.
+        # They represent the historic/project joinery, not the current measured model.
+        poly_sz=Polygon(lift(patch['polygon_sz_mm']['exterior']))
         if not poly_sz.is_valid: poly_sz=poly_sz.buffer(0)
+        lifted_patches.append((patch,poly_sz))
+        side_shapes[patch['side']].append(poly_sz)
+
+    # One continuous warm ecru base per facade side. This avoids the visual effect
+    # of many separate wall layers and keeps the parapet finish continuous.
+    for side,shapes in side_shapes.items():
+        if not shapes: continue
+        silhouette=unary_union(shapes).difference(current_openings[side])
+        src='DWK_2021-001-PZT_PAB.pdf s.26-27 - bazowa elewacja ecru'
+        add_vertical_patch('ELEW_BAZA_'+side,'elewacja_biala',side,silhouette,facade,0.35,src,'ELEW_BASE_'+side,{'facade_side':side})
+
+    # Add only accent zones (gray and wood) over the ecru base, also cut by the
+    # current openings. Tiny sub-millimetre offsets are only to avoid z-fighting.
+    for patch,poly_sz in lifted_patches:
+        if patch['material']=='elewacja_biala':
+            continue
+        poly_sz=poly_sz.difference(current_openings[patch['side']])
+        if poly_sz.is_empty: continue
         src=f"DWK_2021-001-PZT_PAB.pdf s.{patch['source']['pdf_page']} - elewacja {patch['side']}"
         extras={'facade_side':patch['side'],'source_page':patch['source']['pdf_page'],'source_drawing_index':patch['source']['drawing_index_0based']}
-        outward=8.0+order*0.15
+        outward=0.60
         add_vertical_patch('ELEW_'+patch['id'],patch['material'],patch['side'],poly_sz,facade,outward,src,patch['id'],extras)
         if patch.get('wood_horizontal_slats'):
             minz,maxz=poly_sz.bounds[1],poly_sz.bounds[3]; zline=math.ceil((minz+40)/200.0)*200.0; n=0
             while zline<maxz-25:
-                band=poly_sz.intersection(box(-1e6,zline-4,1e6,zline+4))
+                band=poly_sz.intersection(box(-1e6,zline-3,1e6,zline+3))
                 if not band.is_empty:
-                    n+=1; add_vertical_patch('ELEW_'+patch['id']+f'_fuga_{n:02}','elewacja_drewno_fuga',patch['side'],band,facade,outward+1.5,src,patch['id'],extras)
+                    n+=1; add_vertical_patch('ELEW_'+patch['id']+f'_fuga_{n:02}','elewacja_drewno_fuga',patch['side'],band,facade,0.85,src,patch['id'],extras)
                 zline+=200.0
 
     # 10. PZT / podworko / teren. Obrysy sa wektorowe, wysokosc terenu jest uproszczona plaszczyzna.
