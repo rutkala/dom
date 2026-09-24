@@ -15,4 +15,5 @@ s=s.replace('__ROOM_LABELS__',json.dumps(rooms,ensure_ascii=False))
 for marker,f in [('__GLB_INTERIOR__','dom_wnetrze.glb'),('__GLB_EXTERIOR__','dom_bryla.glb')]:
     s=s.replace(marker,base64.b64encode((ROOT/f).read_bytes()).decode())
 (ROOT/'podglad_3d.html').write_text(s,encoding='utf-8')
-print('Zaktualizowano podglad_3d.html')
+(ROOT/'index.html').write_text(s,encoding='utf-8')
+print('Zaktualizowano podglad_3d.html i index.html')

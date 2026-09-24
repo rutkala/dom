@@ -36,9 +36,17 @@ Plik: `Projekt budowlany PZT_PAB_2024.02.01.pdf`.
 
 Nie łączono geometrii z odrębnym projektem wnętrza ani z przykładami repozytorium archtool.
 
+## Aktualizacja stolarki na podstawie pomiaru
+
+Stolarka okienna zostala zaktualizowana na podstawie okna.pdf - oferty 2024/510 v. 8 po pomiarze z 2024-12-13. Szczegoly i mapowanie znajduja sie w OKNA_ZAMOWIONE.md.
+
+Okno kuchenne ma wymiar 2565 x 1490 mm i lewa krawedz 700 mm od sciany od strony garazu. Salon: HST 6555 x 2630 mm. Sypialnia: HST 3070 x 2630 mm. Trzy okna pokojowe: 1770 x 1590 mm. Para lazienkowa: 865 x 2580 mm. Dwa okna garazowe: 1470 x 575 mm.
+
+Oferta podaje gabaryty produktow, typy i parametry, ale nie wspolrzedne montazowe ani wysokosci parapetow.
+
 ## Co zawiera model
 
-27 profili z rzutu: 26 fragmentów ścian i 1 słup. Ściany zostały wyciągnięte do wyliczonego poziomu 2900 mm, a nie tylko do sufitu 2600 mm. Odtworzono mur pod znanymi parapetami i nad otworami. Otwory przechodzą również przez odtworzoną izolację zewnętrzną. Zachowano 11 oznaczonych elementów okiennych, 13 symboli drzwi/bramy i nieoznaczone przejście PR01. Nie dodano ściany na funkcjonalnej granicy kuchni i salonu.
+27 profili z rzutu: 26 fragmentów ścian i 1 słup. Ściany zostały wyciągnięte do wyliczonego poziomu 2900 mm, a nie tylko do sufitu 2600 mm. Odtworzono mur pod znanymi parapetami i nad otworami. Otwory przechodzą również przez odtworzoną izolację zewnętrzną. Stolarka okienna odpowiada 10 zamówionym zestawom z okna.pdf; zestawy HST sa w modelu reprezentowane przez po dwa techniczne segmenty. Zachowano 13 symboli drzwi/bramy i nieoznaczone przejście PR01. Nie dodano ściany na funkcjonalnej granicy kuchni i salonu.
 
 Podłogi są osobnymi powierzchniami dla 15 pomieszczeń; osobne powierzchnie uzupełniają przejścia. Sufity to dodatkowe płaszczyzny na +2,60 m, domyślnie wyłączone w podglądzie i pominięte w obu GLB, aby nie zasłaniały wnętrza. Są w STEP i danych sceny.
 
@@ -46,7 +54,7 @@ Kolory są neutralnymi materiałami roboczymi, nie projektem finalnego wykończe
 
 ## Założenia i ograniczenia — przeczytaj przed użyciem wymiarów
 
-1. **Niepełne wysokości okien.** Dla W01–W04 / O1–O2 użyto hp = 900 mm, dla W11 / O8: hp = 1200 mm. Dla W05–W10 / O3–O7 przyjęto do podglądu dolną krawędź na 0 mm. To ZAŁOŻENIE: w danych źródłowych hp pozostaje `null`. Wysokości i szerokości nominalne zachowano.
+1. **Wymiary stolarki a położenie montażowe.** Gabaryty okien pochodzą z okna.pdf (oferta po pomiarze). Dokument nie podaje wysokości parapetów ani współrzędnych montażowych. Model zachowuje dotychczasowe położenie otworów, a dla kuchni dodatkowo ustalenie 700 mm od ściany przy garażu. Nie należy utożsamiać gabarytu produktu z wymiarem otworu wykonawczego bez pomiaru montażowego.
 2. **Nominał drzwi nie jest otworem w murze.** Szerokości otworów pochodzą z rzutu; skrzydła/brama mają osobne wymiary nominalne. Dla DR02–DR13 roboczo przyjęto 2050 mm wysokości otworu, przenosząc wartość wybranego otworu z A-A — nie ma potwierdzenia osobno dla każdego z nich. Dla bramy DR01 przyjęto jako wysokość otworu nominalne 2250 mm. Przejście PR01 ma roboczo 2600 mm, bez wymyślonego skrzydła drzwiowego.
 3. **Stolarka jest symboliczna.** Rama 60 × 90 mm, szyba 10 mm, skrzydło 40 mm i ich osadzenie to ustawienia podglądu, nie przekroje podane w projekcie. Nie odwzorowano produktów, podziałów, okuć ani szczegółów HST.
 4. **Dach jest uproszczony.** Dokładne obrysy XY pochodzą z wektorów strony 31, ale górną powierzchnię wypełnienia ustawiono roboczo płasko na +3,71 m. W źródle jest to rzędna lokalna, a NIE poziom całego dachu. Nie odtworzono spadków 5° i 0,5%, wpustów i pełnej zmienności warstw. Góra attyki +3,95 m przyjęta z projektu; nie rozstrzygnięto różnicy względem wymiaru 394 cm na B-B. Nie rozdzielono warstw attyki.
