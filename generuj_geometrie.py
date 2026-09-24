@@ -13,13 +13,14 @@ import io
 import json
 import re
 import sys
+import math
 import unicodedata
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import trimesh
-from shapely.geometry import Polygon, MultiPolygon, GeometryCollection, box
+from shapely.geometry import Polygon, MultiPolygon, GeometryCollection, LineString, box
 from shapely.ops import unary_union
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
@@ -30,6 +31,8 @@ PARAM = json.loads((ROOT / 'parametry_modelu.json').read_text(encoding='utf-8'))
 ROOF = json.loads((ROOT / 'obrys_dachu_z_pdf.json').read_text(encoding='utf-8'))
 WINDOWS = json.loads((ROOT / 'okna_projektowe.json').read_text(encoding='utf-8'))
 EXTERIOR_JOINERY = json.loads((ROOT / 'stolarka_zewnetrzna.json').read_text(encoding='utf-8'))
+SITE = json.loads((ROOT / 'pzt_zagospodarowanie.json').read_text(encoding='utf-8'))
+ELEVATIONS = json.loads((ROOT / 'elewacje_materialy.json').read_text(encoding='utf-8'))
 
 COLORS = {
     'sciany': [0.84, 0.83, 0.80, 1.0],
@@ -45,9 +48,19 @@ COLORS = {
     'brama_linia': [0.07, 0.08, 0.09, 1.0],
     'szklo_matowe': [0.78, 0.82, 0.80, 0.72],
     'metal_czarny': [0.03, 0.03, 0.03, 1.0],
+    'elewacja_biala': [0.99, 0.975, 0.93, 1.0],
+    'elewacja_szara': [0.38, 0.39, 0.40, 1.0],
+    'elewacja_drewno': [0.63, 0.43, 0.29, 1.0],
+    'elewacja_drewno_fuga': [0.25, 0.17, 0.11, 1.0],
+    'teren_trawa': [0.43, 0.55, 0.34, 1.0],
+    'kostka': [0.58, 0.59, 0.59, 1.0],
+    'ziemia': [0.34, 0.25, 0.18, 1.0],
+    'taras': [0.62, 0.49, 0.39, 1.0],
+    'schody': [0.67, 0.67, 0.65, 1.0],
+    'daszek_beton': [0.70, 0.71, 0.70, 1.0],
     'strop': [0.72, 0.73, 0.74, 1.0],
     'dach': [0.38, 0.41, 0.43, 1.0],
-    'attyka': [0.91, 0.90, 0.86, 1.0],
+    'attyka': [0.99, 0.975, 0.93, 1.0],
     'sufity': [0.94, 0.94, 0.92, 1.0],
 }
 
@@ -60,6 +73,11 @@ GROUP_NAMES = {
     'strop': '06_STROP',
     'dach': '07_DACH_UPROSZCZONY',
     'sufity': '08_SUFITY_POWIERZCHNIE_ODNIESIENIA',
+    'elewacja': '09_ELEWACJA_WYKONCZENIE',
+    'daszek': '10_DASZEK_WEJSCIOWY',
+    'teren': '11_TEREN',
+    'nawierzchnie': '12_NAWIERZCHNIE_I_TARAS',
+    'schody': '13_SCHODY_ZEWNETRZNE',
 }
 
 parts: list[dict[str, Any]] = []
@@ -130,6 +148,89 @@ def add(name: str, category: str, material: str, geometry, z0: float, z1: float 
             record.update(extras)
         parts.append(record)
         meshes[nm] = m
+
+def add_mesh_record(name: str, category: str, material: str, mesh: trimesh.Trimesh,
+                    source: str, assumed: bool=False, note: str='', source_id: str='', extras: dict | None=None,
+                    reference_area_m2: float | None=None):
+    nm=ascii_name(name)
+    if nm in used_names: raise ValueError(f'Powtorzona nazwa {nm}')
+    used_names.add(nm); m=mesh.copy()
+    record={'name':nm,'category':category,'material':material,'color':COLORS[material],
+            'source':source,'source_id':source_id,'assumed':assumed,'note':note,
+            'z_bottom_mm':round(float(m.bounds[0][2])*1000,3),'z_top_mm':round(float(m.bounds[1][2])*1000,3),
+            'plan_area_m2':reference_area_m2,'geometry':'solid' if m.is_watertight else 'face',
+            'valid_brep':True,'watertight_mesh':bool(m.is_watertight),
+            'bbox_mm':[[round(float(v)*1000,3) for v in row] for row in m.bounds],
+            'volume_m3':round(float(m.volume),9) if m.is_watertight else None,
+            'vertices':len(m.vertices),'triangles':len(m.faces),'default_visible':category not in ['strop','dach','sufity']}
+    if extras: record.update(extras)
+    parts.append(record); meshes[nm]=m
+
+def geometry_from_serial(items):
+    geoms=[Polygon(item['exterior_mm'],item.get('holes_mm',[])) for item in items]
+    return unary_union(geoms) if geoms else Polygon()
+
+def add_surface(name, category, material, geometry, z_func, source, assumed=False, note='', source_id='', extras=None):
+    from trimesh.creation import triangulate_polygon
+    for number,poly in enumerate(polygons(geometry),1):
+        v2d,faces=triangulate_polygon(poly,engine='earcut')
+        z=np.array([float(z_func(float(x),float(y))) for x,y in v2d])
+        mesh=trimesh.Trimesh(vertices=np.column_stack([v2d,z])/1000.0,faces=faces,process=True)
+        nm=name+(f'_{number:02}' if len(polygons(geometry))>1 else '')
+        add_mesh_record(nm,category,material,mesh,source,assumed,note,source_id,extras,round(poly.area/1e6,6))
+
+def _facade_coord(facade, side, axis_value):
+    big=1e6
+    if side in ('east','west'):
+        cross=facade.intersection(LineString([(axis_value,-big),(axis_value,big)]))
+        if cross.is_empty: return None
+        return cross.bounds[1] if side=='east' else cross.bounds[3]
+    cross=facade.intersection(LineString([(-big,axis_value),(big,axis_value)]))
+    if cross.is_empty: return None
+    return cross.bounds[0] if side=='south' else cross.bounds[2]
+
+def opening_elevation_masks(openings, facade):
+    """Project current exterior openings to elevation side coordinates (s,z).
+
+    The elevation drawings are used only for material zoning. Openings are always
+    taken from the current measured/model geometry, so removed or relocated
+    project windows cannot reappear in the finish layer.
+    """
+    masks={'east':[], 'west':[], 'south':[], 'north':[]}
+    for op in openings:
+        g=op['geometry']; minx,miny,maxx,maxy=g.bounds
+        cx,cy=g.centroid.x,g.centroid.y
+        if (maxx-minx) >= (maxy-miny):
+            east=_facade_coord(facade,'east',cx); west=_facade_coord(facade,'west',cx)
+            if east is None or west is None: continue
+            side='east' if abs(cy-east) <= abs(cy-west) else 'west'
+            s0,s1=minx,maxx
+        else:
+            south=_facade_coord(facade,'south',cy); north=_facade_coord(facade,'north',cy)
+            if south is None or north is None: continue
+            side='south' if abs(cx-south) <= abs(cx-north) else 'north'
+            s0,s1=miny,maxy
+        masks[side].append(box(float(s0),float(op['bottom']),float(s1),float(op['top'])))
+    return {k:(unary_union(v) if v else Polygon()) for k,v in masks.items()}
+
+def add_vertical_patch(name, material, side, patch_sz, facade, outward_mm, source, source_id='', extras=None):
+    from trimesh.creation import triangulate_polygon
+    vals=sorted(set((x if side in ('east','west') else y) for x,y in facade.exterior.coords))
+    lo,_,hi,_=patch_sz.bounds; breaks=[lo]+[v for v in vals if lo+1e-6<v<hi-1e-6]+[hi]; piece=0
+    for a,b in zip(breaks,breaks[1:]):
+        for q in polygons(patch_sz.intersection(box(a,-1e6,b,1e6))):
+            if q.area<1: continue
+            wall=_facade_coord(facade,side,(a+b)/2)
+            if wall is None: continue
+            v2d,faces=triangulate_polygon(q,engine='earcut'); verts=[]
+            for sval,zval in v2d:
+                if side=='east': verts.append([sval,wall-outward_mm,zval])
+                elif side=='west': verts.append([sval,wall+outward_mm,zval])
+                elif side=='south': verts.append([wall-outward_mm,sval,zval])
+                else: verts.append([wall+outward_mm,sval,zval])
+            piece+=1
+            mesh=trimesh.Trimesh(vertices=np.asarray(verts)/1000.0,faces=faces,process=True)
+            add_mesh_record(f'{name}_{piece:02}','elewacja',material,mesh,source,False,'',source_id,extras,round(q.area/1e6,6))
 
 def bbox(b):
     return box(*[float(x) for x in b])
@@ -215,12 +316,13 @@ def main():
     facade = Polygon(DATA['facade_reference_outline']['polygon_mm'])
     H = float(PARAM['wall_top_mm'])  # 3100 mm do spodu stropu
     CEILING = float(PARAM['ceiling_level_mm'])  # 2850 mm
+    GARAGE_OFFSET = float(PARAM.get('garage_floor_offset_mm', 0))
     openings = []
 
-    # Zbierzmy wszystkie sciany bazy z rzutu + uzupelnienia starych przerw
-    old_w04 = box(16760, 2660, 17760, 2960) # usuniete okno w lazience/pralni
-    old_w11 = box(10223.6, 9360, 12223.6, 9660) # stara pozycja okna w kuchni
-    all_walls_2d = unary_union([Polygon(p['polygon_mm']) for p in DATA['wall_cut_profiles']] + [old_w04, old_w11])
+    # Profile scian z projektu zawieraja pierwotne szczeliny okienne.
+    # Najpierw je wypelniamy, a dopiero potem wycinamy aktualna stolarke po pomiarze.
+    old_window_gaps = [box(*w['core_opening_bbox_mm']) for w in DATA['windows']]
+    all_walls_2d = unary_union([Polygon(p['polygon_mm']) for p in DATA['wall_cut_profiles']] + old_window_gaps)
 
     # Otwory we wszystkich scianach na poziomie rzutu (okna + drzwi + przejscia)
     all_window_openings_2d = unary_union([box(*w['core_opening_bbox_mm']) for w in WINDOWS])
@@ -244,15 +346,16 @@ def main():
 
     # 2. Okna wg okna_projektowe.json
     for rec in WINDOWS:
-        z0 = float(rec['sill_mm'])
-        z1 = float(rec['top_mm'])
+        level_offset = GARAGE_OFFSET if int(rec.get('room_number', -1)) == 13 else 0.0
+        z0 = float(rec['sill_mm']) + level_offset
+        z1 = float(rec['top_mm']) + level_offset
         p = bbox(rec['core_opening_bbox_mm'])
         meta = dict(
             source=f"Okno {rec['id']} ({rec['nominal_width_mm']/10:.0f}×{(z1-z0)/10:.0f} cm)",
             assumed=False,
             source_id=rec['id'],
             note=rec.get('note', ''),
-            extras={'sill_used_mm': z0, 'opening_top_used_mm': z1}
+            extras={'sill_used_mm': z0, 'opening_top_used_mm': z1, 'level_offset_mm': level_offset}
         )
         if z0 > 0:
             add(rec['id'] + '_mur_pod_oknem', 'uzupelnienia', 'uzupelnienia', p, 0, z0, **meta)
@@ -266,21 +369,23 @@ def main():
     for rec in DATA['doors']:
         a, b, c, d = map(float, rec['core_opening_bbox_mm'])
         spec = EXTERIOR_JOINERY.get(rec['id'])
+        base_z = GARAGE_OFFSET if rec['id'] == 'DR01' else 0.0
         height = float(spec['opening_height_mm'] if spec else PARAM['door_opening_height_overrides_mm'].get(rec['id'], PARAM['door_opening_height_mm']))
+        opening_top = base_z + height
         source_name = spec['source_file'] if spec else 'Projekt budowlany / zalozenia robocze'
         add(
             rec['id'] + '_mur_nad_drzwiami',
             'uzupelnienia',
             'uzupelnienia',
             box(a, b, c, d),
-            height,
+            opening_top,
             H,
-            source=f'{source_name}: wysokosc otworu {height/1000:.2f} m',
+            source=f'{source_name}: otwor od +{base_z/1000:.2f} do +{opening_top/1000:.2f} m',
             assumed=spec is None,
             source_id=rec['id'],
             note=(spec.get('note','') if spec else ''),
             extras={'nominal_height_mm': (spec.get('product_height_mm') if spec else rec['nominal_height_mm']),
-                    'opening_height_used_mm': height,
+                    'opening_height_used_mm': height, 'opening_bottom_used_mm': base_z, 'opening_top_used_mm': opening_top,
                     'offer_number': (spec.get('offer_number') if spec else None)}
         )
 
@@ -310,10 +415,10 @@ def main():
                     'uw_w_m2k': spec['uw_w_m2k']
                 }
             )
-            add(rec['id'] + '_brama_panel', 'stolarka', 'brama', box(x0, y0, x1, y1), 0, height, **common)
+            add(rec['id'] + '_brama_panel', 'stolarka', 'brama', box(x0, y0, x1, y1), base_z, opening_top, **common)
             sections = int(spec.get('section_count_model', 5))
             for j in range(1, sections):
-                z = height * j / sections
+                z = base_z + height * j / sections
                 add(rec['id'] + f'_brama_linia_{j}', 'stolarka', 'brama_linia',
                     box(x0 + 20, y0 - 3, x1 - 20, y1 + 3), z - 5, z + 5, **common)
 
@@ -350,21 +455,21 @@ def main():
             )
             # Skrzydlo drzwiowe.
             add(rec['id'] + '_skrzydlo_ALTUS', 'stolarka', 'drzwi_antracyt',
-                box(lx0, y0, lx1, y1), 0, height, **common)
+                box(lx0, y0, lx1, y1), base_z, opening_top, **common)
 
             # Doswietle po lewej w widoku zewnetrznym: rama + matowe szklo.
             add(rec['id'] + '_doswietle_rama_dol', 'stolarka', 'drzwi_antracyt',
-                box(sx0, y0, sx1, y1), 0, frame, **common)
+                box(sx0, y0, sx1, y1), base_z, base_z+frame, **common)
             add(rec['id'] + '_doswietle_rama_gora', 'stolarka', 'drzwi_antracyt',
-                box(sx0, y0, sx1, y1), height-frame, height, **common)
+                box(sx0, y0, sx1, y1), opening_top-frame, opening_top, **common)
             add(rec['id'] + '_doswietle_rama_lewa', 'stolarka', 'drzwi_antracyt',
-                box(sx0, y0, sx0+frame, y1), frame, height-frame, **common)
+                box(sx0, y0, sx0+frame, y1), base_z+frame, opening_top-frame, **common)
             add(rec['id'] + '_doswietle_rama_prawa', 'stolarka', 'drzwi_antracyt',
-                box(sx1-frame, y0, sx1, y1), frame, height-frame, **common)
+                box(sx1-frame, y0, sx1, y1), base_z+frame, opening_top-frame, **common)
             glass_depth = 12.0
             gy0, gy1 = (b+d-glass_depth)/2, (b+d+glass_depth)/2
             add(rec['id'] + '_doswietle_szklo_matowe', 'stolarka', 'szklo_matowe',
-                box(sx0+frame, gy0, sx1-frame, gy1), frame, height-frame, **common)
+                box(sx0+frame, gy0, sx1-frame, gy1), base_z+frame, opening_top-frame, **common)
 
             # Trzy poziome frezy z widoku zewnetrznego - jako subtelne ciemne linie.
             exterior_y0 = y0 - 5
@@ -378,7 +483,7 @@ def main():
             add(rec['id'] + '_pochwyt_Amsterdam_1800', 'stolarka', 'metal_czarny',
                 box(hx-14, y0-28, hx+14, y0-8), 150, 1950, **common)
             add(rec['id'] + '_prog', 'stolarka', 'metal_czarny',
-                box(x0, y0, x1, y1), 0, 35, **common)
+                box(x0, y0, x1, y1), base_z, base_z+35, **common)
 
         else:
             width = rec['nominal_width_mm']
@@ -391,8 +496,8 @@ def main():
                 'stolarka',
                 'drzwi',
                 g,
-                0,
-                height,
+                base_z,
+                opening_top,
                 source='Skrzydlo drzwiowe na gotowo',
                 assumed=True,
                 source_id=rec['id'],
@@ -404,13 +509,13 @@ def main():
             'podlogi',
             'progi',
             box(a, b, c, d),
-            0,
+            base_z,
             None,
-            source='Poziom posadzki 0',
+            source=f'Poziom posadzki +{base_z/1000:.2f} m',
             source_id=rec['id']
         )
         if rec['id'] in ['DR01', 'DR02']:
-            openings.append({'id': rec['id'], 'geometry': boundary_opening(rec, facade), 'bottom': 0, 'top': height, 'assumed': spec is None})
+            openings.append({'id': rec['id'], 'geometry': boundary_opening(rec, facade), 'bottom': base_z, 'top': opening_top, 'assumed': spec is None})
 
     # 4. Przejscia otwarte
     for rec in DATA['unlabelled_passages']:
@@ -456,7 +561,9 @@ def main():
             source_id=room['id'],
             extras={'room_number': room['number'], 'room_name': room['name'], 'reported_area_m2': room['reported_area_m2']}
         )
-        add(nm + '_posadzka', 'podlogi', 'podlogi', p, 0, None, **meta)
+        floor_z = GARAGE_OFFSET if int(room['number']) == 13 else 0.0
+        meta['extras']['floor_level_mm'] = floor_z
+        add(nm + '_posadzka', 'podlogi', 'podlogi', p, floor_z, None, **meta)
         add(nm + f'_sufit_z_{int(CEILING)}', 'sufity', 'sufity', p, CEILING, None, **meta)
 
     # 7. Dach, strop i attyka
@@ -467,6 +574,89 @@ def main():
     add('DACH_wypelnienie_BEZ_SPADKOW', 'dach', 'dach', roof_inner, H + PARAM['slab_thickness_mm'], PARAM['simplified_roof_surface_mm'], source='Polac dachu ze spadkiem', assumed=True)
     add('DACH_attyka', 'dach', 'attyka', roof_outer.difference(roof_inner), H + PARAM['slab_thickness_mm'], PARAM['parapet_top_mm'], source='Attyka nad plyta stropowa', assumed=True)
 
+    # 8. Daszek nad wejsciem glownym wg zdjecia z budowy i slupa P01.
+    canopy=PARAM.get('entrance_canopy',{})
+    if canopy:
+        add('DASZEK_wejscie_beton','daszek','daszek_beton',
+            box(float(canopy['x_min_mm']),float(canopy['y_min_mm']),float(canopy['x_max_mm']),float(canopy['y_max_mm'])),
+            float(canopy['z_bottom_mm']),float(canopy['z_top_mm']),source='daszek.jpg + rzut parteru (slup P01)',
+            assumed=False,note=canopy.get('note',''),source_id='DASZEK_WEJSCIE')
+        col=canopy.get('column')
+        if col:
+            half=float(col['size_mm'])/2
+            add('DASZEK_slup_beton','daszek','daszek_beton',
+                box(float(col['x_mm'])-half,float(col['y_mm'])-half,float(col['x_mm'])+half,float(col['y_mm'])+half),
+                float(col['z_bottom_mm']),float(canopy['z_bottom_mm']),source='daszek.jpg - zewnetrzny slup zelbetowy',
+                assumed=False,note='Slup pod zewnetrznym naroznikiem daszku odwzorowany ze zdjecia z budowy.',source_id='DASZEK_SLUP')
+
+    # 9. Elewacja: rysunki projektowe definiuja TYLKO strefy materialowe.
+    # Otwory bierzemy wylacznie z aktualnej geometrii (okna po pomiarze + drzwi/brama),
+    # aby stare okna z elewacji PDF nie wracaly jako dziury w wykonczeniu.
+    project_top=float(ELEVATIONS.get('project_top_mm',3940.0)); actual_top=float(PARAM.get('parapet_top_mm',project_top))
+    def lift(coords):
+        return [(float(a),actual_top if float(z)>=project_top-12 else float(z)) for a,z in coords]
+    current_openings=opening_elevation_masks(openings,facade)
+    side_shapes={k:[] for k in ('east','west','south','north')}
+    lifted_patches=[]
+    for patch in ELEVATIONS.get('patches',[]):
+        # Intentionally ignore holes stored in the old elevation artwork.
+        # They represent the historic/project joinery, not the current measured model.
+        poly_sz=Polygon(lift(patch['polygon_sz_mm']['exterior']))
+        if not poly_sz.is_valid: poly_sz=poly_sz.buffer(0)
+        lifted_patches.append((patch,poly_sz))
+        side_shapes[patch['side']].append(poly_sz)
+
+    # One continuous warm ecru base per facade side. This avoids the visual effect
+    # of many separate wall layers and keeps the parapet finish continuous.
+    for side,shapes in side_shapes.items():
+        if not shapes: continue
+        silhouette=unary_union(shapes).difference(current_openings[side])
+        src='DWK_2021-001-PZT_PAB.pdf s.26-27 - bazowa elewacja ecru'
+        add_vertical_patch('ELEW_BAZA_'+side,'elewacja_biala',side,silhouette,facade,0.35,src,'ELEW_BASE_'+side,{'facade_side':side})
+
+    # Add only accent zones (gray and wood) over the ecru base, also cut by the
+    # current openings. Tiny sub-millimetre offsets are only to avoid z-fighting.
+    for patch,poly_sz in lifted_patches:
+        if patch['material']=='elewacja_biala':
+            continue
+        poly_sz=poly_sz.difference(current_openings[patch['side']])
+        if poly_sz.is_empty: continue
+        src=f"DWK_2021-001-PZT_PAB.pdf s.{patch['source']['pdf_page']} - elewacja {patch['side']}"
+        extras={'facade_side':patch['side'],'source_page':patch['source']['pdf_page'],'source_drawing_index':patch['source']['drawing_index_0based']}
+        outward=0.60
+        add_vertical_patch('ELEW_'+patch['id'],patch['material'],patch['side'],poly_sz,facade,outward,src,patch['id'],extras)
+        if patch.get('wood_horizontal_slats'):
+            minz,maxz=poly_sz.bounds[1],poly_sz.bounds[3]; zline=math.ceil((minz+40)/200.0)*200.0; n=0
+            while zline<maxz-25:
+                band=poly_sz.intersection(box(-1e6,zline-3,1e6,zline+3))
+                if not band.is_empty:
+                    n+=1; add_vertical_patch('ELEW_'+patch['id']+f'_fuga_{n:02}','elewacja_drewno_fuga',patch['side'],band,facade,0.85,src,patch['id'],extras)
+                zline+=200.0
+
+    # 10. PZT / podworko / teren. Obrysy sa wektorowe, wysokosc terenu jest uproszczona plaszczyzna.
+    tc=SITE['terrain_model']; ref_x=float(tc['reference_x_mm']); ref_z=float(tc['reference_z_mm']); sx=float(tc['slope_x_mm_per_mm']); sy=float(tc.get('slope_y_mm_per_mm',0.0))
+    terrain_min=float(tc.get('min_z_mm',-1e9)); terrain_max=float(tc.get('max_z_mm',1e9))
+    def terrain_z(x,y):
+        raw=ref_z+sx*(x-ref_x)+sy*y
+        return max(terrain_min,min(terrain_max,raw))
+    lawn=geometry_from_serial(SITE['areas']['lawn']); paving=geometry_from_serial(SITE['areas']['paving']); terrace=geometry_from_serial(SITE['areas']['terrace'])
+    add_surface('TEREN_trawnik_PZT','teren','teren_trawa',lawn,terrain_z,'DWK_2021-001-PZT_PAB.pdf s.15 - nawierzchnia biologicznie czynna',True,tc.get('basis',''),'PZT_LAWN')
+    poff=float(tc.get('paving_offset_from_natural_mm',-100.0))
+    add_surface('PODWORKO_kostka_PZT','nawierzchnie','kostka',paving,lambda x,y:terrain_z(x,y)+poff,'DWK_2021-001-PZT_PAB.pdf s.15 - utwardzenie z kostki betonowej',True,'Obrys z wektorow PZT; pion wg uogolnionego spadku terenu.','PZT_PAVING')
+    planter=0
+    for pp in polygons(paving):
+        for ring in pp.interiors:
+            planter+=1
+            add_surface(f'DONICA_PZT_{planter:02}','nawierzchnie','ziemia',Polygon(ring),lambda x,y:terrain_z(x,y)+poff+35.0,'DWK_2021-001-PZT_PAB.pdf s.15 - donice / przerwy w utwardzeniu',True,'','PZT_PLANTER')
+    ttop=float(tc.get('terrace_top_z_mm',-20.0)); tth=float(tc.get('terrace_slab_thickness_mm',180.0))
+    add('TARAS_PZT','nawierzchnie','taras',terrace,ttop-tth,ttop,'DWK_2021-001-PZT_PAB.pdf s.15 - projektowany taras',True,'Obrys tarasu z PZT; poziom gorny roboczo 20 mm ponizej posadzki.','PZT_TERRACE')
+    st=SITE.get('stairs',{}).get('north_terrace')
+    if st:
+        count=int(st['count']); rise=float(st['rise_mm']); run=float(st['run_mm']); width=float(st['width_mm']); cy=float(st['center_y_mm']); start=float(st['start_x_mm']); base=ttop-count*rise-180.0
+        for i in range(1,count+1):
+            top=ttop-i*rise; x0=start+(i-1)*run; x1=start+i*run
+            add(f'SCHODY_tarasu_{i:02}','schody','schody',box(x0,cy-width/2,x1,cy+width/2),base,top,'DWK_2021-001-PZT_PAB.pdf s.26-27 - schody przy tarasie',True,st.get('note',''),'STAIRS_NORTH')
+
     print(f"Wygenerowano {len(parts)} elementow.")
 
     # GLB
@@ -476,7 +666,7 @@ def main():
         for rec in parts:
             if rec['category'] == 'sufity':
                 continue
-            if not include_roof and rec['category'] in ['dach', 'strop']:
+            if not include_roof and rec['category'] in ['dach','strop','elewacja','daszek','teren','nawierzchnie','schody']:
                 continue
             mesh = meshes[rec['name']].copy()
             mesh.unmerge_vertices()
@@ -486,7 +676,7 @@ def main():
                 baseColorFactor=color.astype(np.uint8),
                 metallicFactor=0.0,
                 roughnessFactor=0.82,
-                alphaMode='BLEND' if rec['material'] == 'szklo' else 'OPAQUE',
+                alphaMode='BLEND' if float(rec['color'][3]) < 0.999 else 'OPAQUE',
                 doubleSided=True
             )
             mesh.visual = trimesh.visual.TextureVisuals(material=material)
@@ -511,7 +701,11 @@ def main():
         obj += ['f ' + ' '.join(str(int(x) + offset + 1) for x in f) for f in m.faces]
         offset += len(m.vertices)
     (ROOT / 'dom_model.obj').write_text('\n'.join(obj) + '\n', encoding='utf-8')
-    print("Zapisano: dom_model.obj")
+    mtl=['# Materialy modelu domu i otoczenia.']
+    for mat,c in COLORS.items():
+        mtl.extend([f'newmtl {mat}',f'Kd {c[0]} {c[1]} {c[2]}',f'd {c[3]}','Ka 0.08 0.08 0.08','Ks 0.06 0.06 0.06','Ns 16',''])
+    (ROOT / 'dom_materialy.mtl').write_text('\n'.join(mtl).rstrip()+'\n',encoding='utf-8')
+    print("Zapisano: dom_model.obj + dom_materialy.mtl")
 
     # scena_modelu.json
     scene_records = []

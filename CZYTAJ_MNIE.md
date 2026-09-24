@@ -53,13 +53,19 @@ Drzwi.pdf i brama.pdf są źródłem aktualnych danych dla dwóch elementów zew
 
 Podgląd HTML oraz pliki GLB/OBJ pokazują te wymiary i podstawowe podziały. Geometria profili i okuć pozostaje schematyczna.
 
+## Elewacja, teren i otoczenie
+
+Model zewnętrzny zawiera teraz strefy materiałowe elewacji z rysunków projektu, żelbetowy daszek nad wejściem z `daszek.jpg`, teren i utwardzenia z PZT oraz schody zewnętrzne przy tarasie. Szczegóły źródeł i jawne uproszczenia są opisane w `ELEWACJA_TEREN.md`.
+
+Uwzględniono również ustalenie z budowy o różnicy jednej warstwy pustaka: garaż ma 12 warstw do attyki, a pozostała część domu 13. Roboczy offset poziomu garażu wynosi 238,462 mm (3100 / 13) i jest zapisany w `parametry_modelu.json`.
+
 ## Co zawiera model
 
 27 profili z rzutu: 26 fragmentów ścian i 1 słup. Ściany zostały wyciągnięte do wyliczonego poziomu 2900 mm, a nie tylko do sufitu 2600 mm. Odtworzono mur pod znanymi parapetami i nad otworami. Otwory przechodzą również przez odtworzoną izolację zewnętrzną. Stolarka okienna odpowiada 10 zamówionym zestawom z okna.pdf; zestawy HST sa w modelu reprezentowane przez po dwa techniczne segmenty. Zachowano 13 symboli drzwi/bramy i nieoznaczone przejście PR01. Nie dodano ściany na funkcjonalnej granicy kuchni i salonu.
 
 Podłogi są osobnymi powierzchniami dla 15 pomieszczeń; osobne powierzchnie uzupełniają przejścia. Sufity to dodatkowe płaszczyzny na +2,60 m, domyślnie wyłączone w podglądzie i pominięte w obu GLB, aby nie zasłaniały wnętrza. Są w STEP i danych sceny.
 
-Kolory są neutralnymi materiałami roboczymi, nie projektem finalnego wykończenia.
+Materiały wnętrza pozostają robocze. Elewacja zewnętrzna korzysta natomiast z podziałów białych, szarych i drewnianych pokazanych na arkuszach elewacji projektu.
 
 ## Założenia i ograniczenia — przeczytaj przed użyciem wymiarów
 
@@ -69,7 +75,7 @@ Kolory są neutralnymi materiałami roboczymi, nie projektem finalnego wykończe
 4. **Dach jest uproszczony.** Dokładne obrysy XY pochodzą z wektorów strony 31, ale górną powierzchnię wypełnienia ustawiono roboczo płasko na +3,71 m. W źródle jest to rzędna lokalna, a NIE poziom całego dachu. Nie odtworzono spadków 5° i 0,5%, wpustów i pełnej zmienności warstw. Góra attyki +3,95 m przyjęta z projektu; nie rozstrzygnięto różnicy względem wymiaru 394 cm na B-B. Nie rozdzielono warstw attyki.
 5. **Strop i słup.** 2900 mm to 2600 + 300, a 3080 mm to 2600 + 300 + 180. Zasięg poziomy płyty przyjęto po obrysie rdzenia. Wysokość wolnostojącego słupa roboczo przeniesiono do spodu stropu. Nie odtworzono jego zadaszenia.
 6. **Wykończenia.** Nie pomniejszano pokoi o tynki i okładziny, których kompletnego układu nie określono. Podłogi i sufity są płaszczyznami, a nie dowolnie pogrubionymi warstwami. Przed doborem mebli na wymiar potrzebny jest pomiar po wykończeniu.
-7. **Pominięte elementy.** Brak fundamentów, tarasu, schodów zewnętrznych, terenu, zadaszenia przy słupie, instalacji, mebli i szczegółów konstrukcyjnych. Różnych poziomów posadowienia z projektu nie zastąpiono jedną zmyśloną wartością.
+7. **Pominięte elementy.** Nadal brak fundamentów, instalacji, mebli i szczegółów konstrukcyjnych. Taras, schody, teren oraz daszek są już ujęte w modelu zewnętrznym, z uproszczeniami opisanymi w `ELEWACJA_TEREN.md`. Różnych poziomów posadowienia z projektu nie zastąpiono jedną zmyśloną wartością.
 8. **Rozbieżności dokumentacji zachowano.** Dotyczy to między innymi łańcuchów wymiarowych, długości i wysokości budynku. Pełna lista jest w źródłowym JSON i `kontrola_modelu.json`.
 
 ## Edycja i powtarzalność
