@@ -44,6 +44,15 @@ Okno kuchenne ma wymiar 2565 x 1490 mm i lewa krawedz 700 mm od sciany od strony
 
 Oferta podaje gabaryty produktow, typy i parametry, ale nie wspolrzedne montazowe ani wysokosci parapetow.
 
+## Drzwi wejściowe i brama po zamówieniu
+
+Drzwi.pdf i brama.pdf są źródłem aktualnych danych dla dwóch elementów zewnętrznych. Szczegółowe zestawienie znajduje się w DRZWI_BRAMA_ZAMOWIONE.md, a dane maszynowe w stolarka_zewnetrzna.json.
+
+- drzwi wejściowe GERDA ALTUS RC2: 1470 × 2100 mm, skrzydło 970 mm + doświetle 500 mm, RAL 7016;
+- brama garażowa KRISHOME K2 R: 5000 × 2500 mm, antracyt gładki 204, panel Slick bez tłoczeń.
+
+Podgląd HTML oraz pliki GLB/OBJ pokazują te wymiary i podstawowe podziały. Geometria profili i okuć pozostaje schematyczna.
+
 ## Co zawiera model
 
 27 profili z rzutu: 26 fragmentów ścian i 1 słup. Ściany zostały wyciągnięte do wyliczonego poziomu 2900 mm, a nie tylko do sufitu 2600 mm. Odtworzono mur pod znanymi parapetami i nad otworami. Otwory przechodzą również przez odtworzoną izolację zewnętrzną. Stolarka okienna odpowiada 10 zamówionym zestawom z okna.pdf; zestawy HST sa w modelu reprezentowane przez po dwa techniczne segmenty. Zachowano 13 symboli drzwi/bramy i nieoznaczone przejście PR01. Nie dodano ściany na funkcjonalnej granicy kuchni i salonu.
