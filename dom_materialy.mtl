@@ -187,3 +187,66 @@ d 1.0
 Ka 0.08 0.08 0.08
 Ks 0.06 0.06 0.06
 Ns 16
+
+newmtl interior_block
+Kd 0.28 0.57 0.72
+d 0.38
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl interior_black
+Kd 0.055 0.058 0.06
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl interior_oak
+Kd 0.58 0.39 0.21
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl interior_concrete
+Kd 0.66 0.64 0.6
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl interior_cream
+Kd 0.84 0.8 0.74
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl interior_mustard
+Kd 0.86 0.64 0.08
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl interior_metal
+Kd 0.025 0.025 0.025
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl interior_glass
+Kd 0.62 0.72 0.75
+d 0.35
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl interior_flame
+Kd 0.95 0.42 0.08
+d 0.9
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16

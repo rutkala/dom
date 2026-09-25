@@ -1,0 +1,1016 @@
+{
+  "schema_version": 1,
+  "status": "v6 full-PDF audit: XY from p49; technical elevations/sections control dimensions and wall details",
+  "source": {
+    "file": "Projekt wnętrza 20,10,2023.pdf",
+    "pages": {
+      "visualizations": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "kitchen": [
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "living": [
+        29,
+        30,
+        31
+      ],
+      "pantry": [
+        33,
+        34,
+        35,
+        36
+      ],
+      "entry": [
+        38,
+        39,
+        40,
+        41
+      ],
+      "furniture_plan": [
+        49
+      ],
+      "materials": [
+        50,
+        51,
+        52
+      ]
+    }
+  },
+  "rooms": {
+    "1": "Hol wejściowy / wiatrołap",
+    "10": "Salon",
+    "11": "Kuchnia + jadalnia",
+    "14": "Spiżarnia"
+  },
+  "materials": {
+    "oak_craft_gold": {
+      "label": "Dąb craft złoty",
+      "color": [
+        0.58,
+        0.39,
+        0.21,
+        1
+      ]
+    },
+    "black_matte": {
+      "label": "Czarny mat",
+      "color": [
+        0.075,
+        0.075,
+        0.075,
+        1
+      ]
+    },
+    "warm_white": {
+      "label": "Jasne płytki / Marmo White",
+      "color": [
+        0.9,
+        0.89,
+        0.85,
+        1
+      ]
+    },
+    "architectural_concrete": {
+      "label": "Beton architektoniczny / SAFARI",
+      "color": [
+        0.66,
+        0.64,
+        0.6,
+        1
+      ]
+    },
+    "cream_fabric": {
+      "label": "Jasna tkanina / Soro 21",
+      "color": [
+        0.82,
+        0.78,
+        0.7,
+        1
+      ]
+    },
+    "mustard_fabric": {
+      "label": "Akcent fotela / Soro 40",
+      "color": [
+        0.83,
+        0.62,
+        0.08,
+        1
+      ]
+    },
+    "black_metal": {
+      "label": "Czarny metal",
+      "color": [
+        0.03,
+        0.03,
+        0.03,
+        1
+      ]
+    }
+  },
+  "layers": {
+    "blocks": [
+      {
+        "id": "KUCH_RUN_WINDOW",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7610,
+            8760,
+            30
+          ],
+          [
+            11010,
+            9360,
+            900
+          ]
+        ],
+        "role": "ciąg północny 3,40 m, gł. 0,60 m",
+        "source_pages": [
+          21,
+          22
+        ]
+      },
+      {
+        "id": "KUCH_TALL_ZONE",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            11010,
+            8760,
+            30
+          ],
+          [
+            12560,
+            9360,
+            2600
+          ]
+        ],
+        "role": "lodówka + space tower 1,55 m na ścianie północnej",
+        "source_pages": [
+          21,
+          22
+        ]
+      },
+      {
+        "id": "KUCH_LEFT_RUN",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7010,
+            7120,
+            30
+          ],
+          [
+            7610,
+            9360,
+            900
+          ]
+        ],
+        "role": "niska zabudowa zachodnia 2,24 m od wieży piekarnika do ściany północnej",
+        "source_pages": [
+          21,
+          23
+        ]
+      },
+      {
+        "id": "KUCH_OVEN_TOWER",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7010,
+            5920,
+            30
+          ],
+          [
+            7610,
+            7120,
+            2600
+          ]
+        ],
+        "role": "wysoka zabudowa zachodnia 1,20 m przy południowym końcu ściany",
+        "source_pages": [
+          23
+        ]
+      },
+      {
+        "id": "KUCH_ISLAND",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            8910,
+            6860,
+            30
+          ],
+          [
+            11810,
+            7760,
+            900
+          ]
+        ],
+        "role": "wyspa 2900×900",
+        "source_pages": [
+          21,
+          25,
+          26
+        ]
+      },
+      {
+        "id": "KUCH_CHALKBOARD",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7010,
+            5920,
+            50
+          ],
+          [
+            8860,
+            5950,
+            2520
+          ]
+        ],
+        "role": "ściana tablicowa",
+        "source_pages": [
+          27
+        ]
+      },
+      {
+        "id": "KUCH_SLIDING_DOOR",
+        "room": 11,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            8910,
+            5930,
+            30
+          ],
+          [
+            9910,
+            5970,
+            2280
+          ]
+        ],
+        "role": "drewniane drzwi przesuwne",
+        "source_pages": [
+          27
+        ]
+      },
+      {
+        "id": "SAL_DINING_TABLE",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            14330,
+            6730,
+            720
+          ],
+          [
+            15230,
+            9490,
+            790
+          ]
+        ],
+        "role": "stół 0,90 × 2,76 m wg rzutu s.49",
+        "source_pages": [
+          49
+        ]
+      },
+      {
+        "id": "SAL_SOFA_LONG",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            16530,
+            6660,
+            220
+          ],
+          [
+            17430,
+            9440,
+            540
+          ]
+        ],
+        "role": "długi moduł narożnika, 0,90 × 2,78 m",
+        "source_pages": [
+          11,
+          12,
+          13,
+          14,
+          15,
+          49
+        ]
+      },
+      {
+        "id": "SAL_SOFA_CHAISE",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            16530,
+            6660,
+            220
+          ],
+          [
+            18350,
+            7680,
+            540
+          ]
+        ],
+        "role": "szezlong: całość narożnika 1,82 × 2,78 m, głębokość ramienia 1,02 m",
+        "source_pages": [
+          11,
+          12,
+          13,
+          14,
+          15,
+          49
+        ]
+      },
+      {
+        "id": "SAL_ARMCHAIR",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            17650,
+            9120,
+            350
+          ],
+          [
+            18900,
+            10220,
+            1220
+          ]
+        ],
+        "role": "fotel akcentowy — pozycja z rzutu s.49, obrót uproszczony w proxy",
+        "source_pages": [
+          11,
+          14,
+          15,
+          49
+        ]
+      },
+      {
+        "id": "SAL_RUG",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            16350,
+            7050,
+            18
+          ],
+          [
+            19350,
+            9050,
+            30
+          ]
+        ],
+        "role": "dywan Hector 2,00 × 3,00 m, ustawienie wg strefy wypoczynkowej",
+        "source_pages": [
+          49,
+          51
+        ]
+      },
+      {
+        "id": "SAL_COFFEE_90",
+        "room": 10,
+        "primitive": "cylinder",
+        "center_mm": [
+          18010,
+          8655,
+          425
+        ],
+        "radius_mm": 450,
+        "height_mm": 50,
+        "role": "stolik kawowy Ø90 proxy",
+        "source_pages": [
+          49,
+          51
+        ]
+      },
+      {
+        "id": "SAL_COFFEE_60",
+        "room": 10,
+        "primitive": "cylinder",
+        "center_mm": [
+          18170,
+          8040,
+          355
+        ],
+        "radius_mm": 300,
+        "height_mm": 50,
+        "role": "stolik kawowy Ø60 proxy",
+        "source_pages": [
+          49,
+          51
+        ]
+      },
+      {
+        "id": "SAL_TV_WALL",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            20020,
+            5650,
+            30
+          ],
+          [
+            20060,
+            10360,
+            2900
+          ]
+        ],
+        "role": "ściana TV 4,71 m wg s.29",
+        "source_pages": [
+          29,
+          30
+        ]
+      },
+      {
+        "id": "SAL_ART_WALL",
+        "room": 10,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            15960,
+            5920,
+            30
+          ],
+          [
+            20060,
+            5960,
+            2900
+          ]
+        ],
+        "role": "ściana obrazu 4,10 m: beton 2,75 m + lamele 1,35 m wg s.31",
+        "source_pages": [
+          31
+        ]
+      },
+      {
+        "id": "SPI_BASE",
+        "room": 14,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7010,
+            4210,
+            30
+          ],
+          [
+            10010,
+            4810,
+            900
+          ]
+        ],
+        "role": "ciąg dolny 3,00 × 0,60 m na ścianie południowej",
+        "source_pages": [
+          33,
+          34,
+          36
+        ]
+      },
+      {
+        "id": "SPI_TALL",
+        "room": 14,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7010,
+            4920,
+            30
+          ],
+          [
+            7610,
+            5620,
+            2900
+          ]
+        ],
+        "role": "wysoka szafa 0,70 m na północnym końcu ściany zachodniej",
+        "source_pages": [
+          35,
+          36
+        ]
+      },
+      {
+        "id": "SPI_SHELVES",
+        "room": 14,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            7010,
+            4210,
+            900
+          ],
+          [
+            7360,
+            4920,
+            2900
+          ]
+        ],
+        "role": "otwarte półki 0,71 m na ścianie zachodniej, gł. ok. 0,35 m",
+        "source_pages": [
+          34,
+          36
+        ]
+      },
+      {
+        "id": "HOL_WARDROBE",
+        "room": 1,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            10310,
+            4460,
+            30
+          ],
+          [
+            12810,
+            5620,
+            2900
+          ]
+        ],
+        "role": "szafa 2,50 × 1,16 m dokładnie w północnej wnęce",
+        "source_pages": [
+          38
+        ]
+      },
+      {
+        "id": "HOL_MIRROR",
+        "room": 1,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            14920,
+            3310,
+            0
+          ],
+          [
+            14960,
+            4460,
+            2900
+          ]
+        ],
+        "role": "lustro 2,90 × 1,15 m na ścianie wschodniej wg s.39",
+        "source_pages": [
+          39
+        ]
+      },
+      {
+        "id": "HOL_CONSOLE",
+        "room": 1,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            14760,
+            3485,
+            750
+          ],
+          [
+            14960,
+            4285,
+            900
+          ]
+        ],
+        "role": "konsola 0,80 × 0,20 m, wys. ok. 0,90 m pod lustrem",
+        "source_pages": [
+          39
+        ]
+      },
+      {
+        "id": "HOL_SLAT_WALL",
+        "room": 1,
+        "primitive": "box",
+        "bbox_mm": [
+          [
+            10320,
+            2960,
+            30
+          ],
+          [
+            10370,
+            4460,
+            2900
+          ]
+        ],
+        "role": "lamele 1,50 m na zachodniej ścianie, drzwi ukryte wg s.41",
+        "source_pages": [
+          40,
+          41
+        ]
+      },
+      {
+        "id": "HOL_POUF",
+        "room": 1,
+        "primitive": "box",
+        "role": "pufa 1,15 × 0,50 m wg rzutu s.49",
+        "source_pages": [
+          17,
+          18,
+          49
+        ],
+        "bbox_mm": [
+          [
+            11100,
+            3120,
+            30
+          ],
+          [
+            12250,
+            3620,
+            430
+          ]
+        ]
+      }
+    ],
+    "selected": [
+      {
+        "id": "SEL_KITCHEN_CABINETRY",
+        "room": 11,
+        "based_on": [
+          "KUCH_RUN_WINDOW",
+          "KUCH_TALL_ZONE",
+          "KUCH_LEFT_RUN",
+          "KUCH_OVEN_TOWER",
+          "KUCH_ISLAND"
+        ],
+        "product_type": "custom_cabinetry",
+        "materials": [
+          "black_matte",
+          "oak_craft_gold"
+        ],
+        "source_pages": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26
+        ]
+      },
+      {
+        "id": "SEL_KITCHEN_STOOLS",
+        "room": 11,
+        "product": "Hoker loft 60 KAM",
+        "quantity": 3,
+        "proxy": {
+          "primitive": "stool",
+          "centers_mm": [
+            [
+              10390,
+              6690
+            ],
+            [
+              10960,
+              6690
+            ],
+            [
+              11530,
+              6690
+            ]
+          ],
+          "seat_height_mm": 690
+        },
+        "source_pages": [
+          3,
+          7,
+          8,
+          50
+        ]
+      },
+      {
+        "id": "SEL_KITCHEN_SINK",
+        "room": 11,
+        "product": "Primagran Oslo 80 Pocket",
+        "proxy": {
+          "primitive": "box",
+          "bbox_mm": [
+            [
+              9160,
+              7060,
+              900
+            ],
+            [
+              9860,
+              7560,
+              930
+            ]
+          ]
+        },
+        "source_pages": [
+          21,
+          25,
+          26,
+          50
+        ]
+      },
+      {
+        "id": "SEL_DINING_CHAIRS",
+        "room": 10,
+        "product": "Alaska beżowe, nogi czarne",
+        "quantity": 8,
+        "proxy": {
+          "primitive": "chair_set",
+          "around": "SAL_DINING_TABLE"
+        },
+        "source_pages": [
+          12,
+          13,
+          49,
+          51
+        ]
+      },
+      {
+        "id": "SEL_SOFA",
+        "room": 10,
+        "product": "Liquid, tkanina Soro 21",
+        "proxy": {
+          "primitive": "sectional",
+          "based_on": [
+            "SAL_SOFA_LONG",
+            "SAL_SOFA_CHAISE"
+          ]
+        },
+        "material": "cream_fabric",
+        "source_pages": [
+          11,
+          12,
+          13,
+          14,
+          15,
+          51
+        ]
+      },
+      {
+        "id": "SEL_ARMCHAIR",
+        "room": 10,
+        "product": "Sensi, tkanina Soro 40",
+        "proxy": {
+          "primitive": "armchair",
+          "based_on": [
+            "SAL_ARMCHAIR"
+          ]
+        },
+        "material": "mustard_fabric",
+        "source_pages": [
+          11,
+          14,
+          15,
+          51
+        ]
+      },
+      {
+        "id": "SEL_COFFEE_TABLES",
+        "room": 10,
+        "product": "Okrągłe stoliki kawowe 60/90 cm",
+        "proxy": {
+          "based_on": [
+            "SAL_COFFEE_60",
+            "SAL_COFFEE_90"
+          ]
+        },
+        "material": "black_metal",
+        "source_pages": [
+          11,
+          14,
+          15,
+          49,
+          51
+        ]
+      },
+      {
+        "id": "SEL_RUG",
+        "room": 10,
+        "product": "Hector 200×300 cm",
+        "proxy": {
+          "based_on": [
+            "SAL_RUG"
+          ]
+        },
+        "source_pages": [
+          51
+        ]
+      },
+      {
+        "id": "SEL_FIREPLACE",
+        "room": 10,
+        "product": "Dimplex Sierra 72\"",
+        "proxy": {
+          "primitive": "fireplace",
+          "bbox_mm": [
+            [
+              19920,
+              7345,
+              250
+            ],
+            [
+              20010,
+              9175,
+              750
+            ]
+          ]
+        },
+        "source_pages": [
+          29,
+          30,
+          51
+        ]
+      },
+      {
+        "id": "SEL_TV_WALL",
+        "room": 10,
+        "product_type": "custom_media_wall",
+        "materials": [
+          "architectural_concrete",
+          "black_matte",
+          "oak_craft_gold"
+        ],
+        "proxy": {
+          "based_on": [
+            "SAL_TV_WALL"
+          ]
+        },
+        "source_pages": [
+          29,
+          30
+        ]
+      },
+      {
+        "id": "SEL_PANTRY_CABINETRY",
+        "room": 14,
+        "product_type": "custom_cabinetry",
+        "materials": [
+          "black_matte",
+          "oak_craft_gold"
+        ],
+        "proxy": {
+          "based_on": [
+            "SPI_BASE",
+            "SPI_TALL",
+            "SPI_SHELVES"
+          ]
+        },
+        "source_pages": [
+          33,
+          34,
+          35,
+          36,
+          50
+        ]
+      },
+      {
+        "id": "SEL_ENTRY_WARDROBE",
+        "room": 1,
+        "product_type": "custom_cabinetry",
+        "materials": [
+          "black_matte",
+          "oak_craft_gold"
+        ],
+        "proxy": {
+          "based_on": [
+            "HOL_WARDROBE"
+          ]
+        },
+        "source_pages": [
+          38,
+          40,
+          41
+        ]
+      },
+      {
+        "id": "SEL_ENTRY_MIRROR",
+        "room": 1,
+        "product_type": "backlit_mirror",
+        "proxy": {
+          "based_on": [
+            "HOL_MIRROR"
+          ]
+        },
+        "source_pages": [
+          39
+        ]
+      },
+      {
+        "id": "SEL_ENTRY_CONSOLE",
+        "room": 1,
+        "product_type": "custom_console",
+        "material": "oak_craft_gold",
+        "proxy": {
+          "based_on": [
+            "HOL_CONSOLE"
+          ]
+        },
+        "source_pages": [
+          39
+        ]
+      },
+      {
+        "id": "SEL_ENTRY_SLATS",
+        "room": 1,
+        "product_type": "wood_slats",
+        "material": "oak_craft_gold",
+        "proxy": {
+          "based_on": [
+            "HOL_SLAT_WALL"
+          ]
+        },
+        "source_pages": [
+          40,
+          41
+        ]
+      },
+      {
+        "id": "SEL_ENTRY_POUF",
+        "room": 1,
+        "product": "Pufa Puffy / podobna propozycja",
+        "proxy": {
+          "based_on": [
+            "HOL_POUF"
+          ]
+        },
+        "material": "cream_fabric",
+        "source_pages": [
+          17,
+          18,
+          51
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "Pozycje bazowe oparto na rzucie umeblowania s.49 oraz wcześniejszym dopasowaniu do geometrii pomieszczeń.",
+    "Rysunki techniczne są nadrzędne dla wymiarów zabudów; wizualizacje służą do wyglądu i podziałów.",
+    "Warstwa selected zawiera proxy wybranych produktów; nie są to modele producentów 1:1.",
+    "Okno kuchenne pozostaje zgodne z aktualnym modelem budynku, nie z historycznym rysunkiem wnętrza.",
+    "Salon: stół 0,90 × 2,78 m, narożnik 1,82 × 2,78 m z częścią 1,20 m oraz stoliki Ø0,90/Ø0,60 m skorygowano bezpośrednio z rzutu umeblowania s.49.",
+    "Korekta v3: spiżarnia przeniesiona na właściwe ściany; wiatrołap ma szafę w niszy 2,50×1,16 m, lamele 1,50 m na ścianie z drzwiami ukrytymi, a pufa jest poza niszą.",
+    "Korekta v3: w kuchni przeszklona winiarka ma być modelowana jako witryna, nie jako pełna drewniana szafka przy wejściu.",
+    "Korekta v4: spiżarnia ma główny ciąg na ścianie północnej oraz wysoką szafę na ścianie przeciwległej; półki nad głównym ciągiem są modelowane jako otwarte, nie jako pełny blok.",
+    "Korekta v4: wiatrołap — szafa wyłącznie w niszy 2,50×1,16 m; ściana lamelowa 1,50 m z drzwiami ukrytymi; lustro i konsola na ścianie przeciwnej.",
+    "Korekta v4: winiarka 0,60 m przy kuchni jest przeszkloną witryną z półkami, a nie pełną szafką.",
+    "Korekta v5: rzut s.49 jest nadrzędnym źródłem pozycji XY. Rysunki 21–41 definiują wysokości, podziały i wygląd, ale nie nadpisują położenia w rzucie.",
+    "Korekta v5: spiżarnia ma układ U: 3,00×0,60 m na ścianie południowej, 2,40×0,45 m na północnej oraz 0,60×1,41 m na zachodniej.",
+    "Korekta v5: wiatrołap — szafa w niszy 2,50×1,16 m; lamele na zachodniej ścianie 1,50 m; konsola 0,80×0,20 i lustro 1,15 m na ścianie wschodniej; pufa 1,15×0,50.",
+    "Korekta v5: w kuchni nie ma dodatkowej wolnostojącej szafki przy wejściu; witryna/winiarka jest detalem zintegrowanym w wysokiej zabudowie.",
+    "Korekta v5.1: samodzielna winiarka została usunięta z geometrii XY — detal s.24 pozostaje w danych, ale bez położenia dopóki rzut nie potwierdzi jego footprintu.",
+    "Korekta v6: zachodnia zabudowa kuchni była odwrócona — wieża piekarnika 1,20 m jest przy południowym końcu, a niski ciąg 2,24 m biegnie na północ.",
+    "Korekta v6: stół ma 0,90×2,76 m; narożnik 1,82×2,78 m z ramieniem 1,02 m; ich XY przerejestrowano z rzutu s.49 do geometrii budynku.",
+    "Korekta v6: spiżarnia nie jest układem U — ma 3,00 m ciągu na ścianie południowej oraz na zachodniej 0,71 m otwartych półek + 0,70 m wysokiej szafy.",
+    "Korekta v6: ściana TV ma 4,71 m wg s.29, a ściana obrazu 4,10 m wg s.31; wcześniejsze krótkie proxy były błędne.",
+    "Korekta v6: lustro w wiatrołapie ma pełną wysokość 2,90 m i szerokość 1,15 m wg s.39.",
+    "Korekta v6.1: hokery i zlew dosunięto do wymiarów wyspy z s.21/25/26; kominek Dimplex 1,83 m osadzono centralnie w polu 2,30 m ze s.29."
+  ],
+  "unplaced_details": [
+    {
+      "id": "KUCH_WINE_RACK",
+      "room": 11,
+      "description": "witryna/winiarka 0,60 m z rysunku s.24",
+      "reason": "rysunek detalu podaje wymiary i wygląd, ale rzut s.49 nie wskazuje jednoznacznego samodzielnego footprintu; element nie jest renderowany jako osobna szafka"
+    }
+  ],
+  "source_priority": [
+    "s.49: rzut umeblowania — nadrzędny dla pozycji XY mebli wolnostojących i stref zabudowy",
+    "s.21-27 / 29-31 / 33-36 / 38-41: rysunki techniczne — nadrzędne dla wymiarów, wysokości, podziałów i zabudów przyściennych",
+    "s.3-18: wizualizacje — kontrola orientacji, materiałów i wyglądu; nie służą do zgadywania pozycji",
+    "s.43-48: rysunki ogólne — instalacje/oświetlenie/sufity; nie nadpisują geometrii mebli z s.49",
+    "s.50-52: wykaz materiałów — nazwy produktów i wykończeń"
+  ]
+}
