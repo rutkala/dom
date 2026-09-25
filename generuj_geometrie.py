@@ -381,8 +381,8 @@ def add_interior_layers():
     # Custom cabinetry: same verified envelope, materialized instead of blue blocks.
     cabinet_materials={
         'KUCH_RUN_WINDOW':'interior_black','KUCH_TALL_ZONE':'interior_oak','KUCH_LEFT_RUN':'interior_black',
-        'KUCH_OVEN_TOWER':'interior_black','KUCH_ISLAND':'interior_black','KUCH_WINE_RACK':'interior_oak',
-        'SPI_BASE':'interior_black','SPI_TALL':'interior_oak','SPI_SHELVES':'interior_oak',
+        'KUCH_OVEN_TOWER':'interior_black','KUCH_ISLAND':'interior_black',
+        'SPI_BASE':'interior_black','SPI_TALL':'interior_oak',
         'HOL_WARDROBE':'interior_black','HOL_CONSOLE':'interior_oak'
     }
     for rec in INTERIOR['layers']['selected']:
@@ -391,7 +391,30 @@ def add_interior_layers():
         if sid in ('SEL_KITCHEN_CABINETRY','SEL_PANTRY_CABINETRY','SEL_ENTRY_WARDROBE','SEL_ENTRY_CONSOLE'):
             refs=rec.get('based_on',proxy.get('based_on',[]))
             for block_id in refs:
+                if block_id in ('KUCH_WINE_RACK','SPI_SHELVES'):
+                    continue
                 clone_block(sid,block_id,cabinet_materials.get(block_id,'interior_black'),product)
+
+    # Kitchen: wall finishes and the 0.60 m glazed wine display from drawings p.24/p.27.
+    clone_block('KITCHEN_CHALKBOARD','KUCH_CHALKBOARD','interior_black','farba tablicowa Jeger')
+    clone_block('KITCHEN_SLIDING_DOOR','KUCH_SLIDING_DOOR','interior_oak','drzwi przesuwne drewniane')
+
+    wine=block_map['KUCH_WINE_RACK']
+    (wa,wb)=wine['bbox_mm']; wx0,wy0,wz0=map(float,wa); wx1,wy1,wz1=map(float,wb)
+    frame=28.0
+    # frame / side profiles
+    for idx,x in enumerate((wx0,wx1-frame),1):
+        _interior_box(f'SEL_WINE_frame_v_{idx}','wnetrze_elementy','interior_metal',
+            [[x,wy0,wz0],[x+frame,wy1,wz1]],source,11,'selected','rama witryny',[24],'witryna / winiarka 0,60 m')
+    for idx,z in enumerate((wz0,wz1-frame),1):
+        _interior_box(f'SEL_WINE_frame_h_{idx}','wnetrze_elementy','interior_metal',
+            [[wx0,wy0,z],[wx1,wy1,z+frame]],source,11,'selected','rama witryny',[24],'witryna / winiarka 0,60 m')
+    # glass door face and internal shelves
+    _interior_box('SEL_WINE_glass','wnetrze_elementy','interior_glass',
+        [[wx0+frame,wy0-8,wz0+frame],[wx1-frame,wy0+8,wz1-frame]],source,11,'selected','przeszklone drzwiczki',[24],'witryna / winiarka 0,60 m')
+    for idx,z in enumerate((520,920,1320,1720,2120),1):
+        _interior_box(f'SEL_WINE_shelf_{idx}','wnetrze_elementy','interior_oak',
+            [[wx0+frame,wy0+30,z],[wx1-frame,wy1-30,z+20]],source,11,'selected','półka witryny',[24],'witryna / winiarka 0,60 m')
 
     # Kitchen worktops / sink make the selected layer visually different from plain blocks.
     _interior_box('SEL_KITCHEN_top_window','wnetrze_elementy','interior_oak',
@@ -463,23 +486,45 @@ def add_interior_layers():
     _interior_box('SEL_FIREPLACE_body','wnetrze_elementy','interior_black',[[19700,7400,480],[19815,8720,930]],source,10,'selected','kominek',[29,30,51],'Dimplex Sierra 72"')
     _interior_box('SEL_FIREPLACE_flame','wnetrze_elementy','interior_flame',[[19685,7520,600],[19700,8600,790]],source,10,'selected','płomień - proxy',[29,30,51],'Dimplex Sierra 72"')
 
-    # Pantry selected layer.
-    for block_id in ('SPI_BASE','SPI_TALL','SPI_SHELVES'):
+    # Pantry selected layer — base run, opposite tall cabinet and open shelves (p.33–36).
+    for block_id in ('SPI_BASE','SPI_TALL'):
         clone_block('PANTRY',block_id,cabinet_materials[block_id],'zabudowa na wymiar - dąb craft złoty / czarny mat')
+    pb=block_map['SPI_BASE']['bbox_mm']
+    _interior_box('SEL_PANTRY_countertop','wnetrze_elementy','interior_oak',
+        [[pb[0][0]-10,pb[0][1]-10,900],[pb[1][0]+10,pb[1][1]+10,950]],
+        source,14,'selected','blat spiżarni',[33,34,36],'dąb craft złoty')
+    ps=block_map['SPI_SHELVES']['bbox_mm']; (pa,pb2)=ps
+    sx0,sy0,sz0=map(float,pa); sx1,sy1,sz1=map(float,pb2)
+    # wood back, dark frame and horizontal shelves instead of a solid cuboid
+    _interior_box('SEL_PANTRY_back','wnetrze_elementy','interior_oak',
+        [[sx0,sy1-18,sz0],[sx1,sy1,sz1]],source,14,'selected','drewniany tył półek',[34,36],'dąb craft złoty')
+    for idx,x in enumerate((sx0,sx0+(sx1-sx0)/2,sx1-25),1):
+        _interior_box(f'SEL_PANTRY_v_{idx}','wnetrze_elementy','interior_black',
+            [[x,sy0,sz0],[x+25,sy1,sz1]],source,14,'selected','pion półek',[34,36],'zabudowa spiżarni')
+    for idx,z in enumerate(np.linspace(sz0,sz1-25,5),1):
+        _interior_box(f'SEL_PANTRY_shelf_{idx}','wnetrze_elementy','interior_black',
+            [[sx0,sy0,z],[sx1,sy1,z+25]],source,14,'selected','półka otwarta',[34,36],'zabudowa spiżarni')
 
     # Entry selected layer.
     clone_block('ENTRY_WARDROBE','HOL_WARDROBE','interior_black','zabudowa na wymiar')
     clone_block('ENTRY_CONSOLE','HOL_CONSOLE','interior_oak','konsola na wymiar')
-    _interior_box('SEL_ENTRY_MIRROR','wnetrze_elementy','interior_glass',[[14890,3080,320],[14940,4230,2320]],source,1,'selected','lustro podświetlane',[39],'lustro 290×115 - projekt')
-    _interior_cylinder('SEL_ENTRY_POUF','wnetrze_elementy','interior_cream',[11150,4800,230],280,400,source,1,'selected','pufa',[17,18,51],'Pufa Puffy / podobna propozycja')
+    mirror=block_map['HOL_MIRROR']; _interior_box('SEL_ENTRY_MIRROR','wnetrze_elementy','interior_glass',
+        mirror['bbox_mm'],source,1,'selected','lustro podświetlane 1,15 m',[39],'lustro podświetlane')
+    pouf=block_map['HOL_POUF']; _interior_cylinder('SEL_ENTRY_POUF','wnetrze_elementy','interior_cream',
+        pouf['center_mm'],pouf['radius_mm'],pouf['height_mm'],source,1,'selected','pufa',[17,18,51],'Pufa Puffy / podobna propozycja')
 
-    # Full 1.5 m slatted wall with concealed door (drawing p.41).
-    y0,y1=4120.0,5620.0; count=24; step=(y1-y0)/count
+    # Full 1.5 m slatted wall with concealed door (drawing p.41), at the corrected wall segment.
+    sl=block_map['HOL_SLAT_WALL']['bbox_mm']; y0,y1=float(sl[0][1]),float(sl[1][1]); count=24; step=(y1-y0)/count
     for i in range(count):
         sy=y0+i*step+step*0.18
         ey=y0+(i+1)*step-step*0.18
         _interior_box(f'SEL_ENTRY_SLAT_{i+1:02}','wnetrze_elementy','interior_oak',
-            [[10320,sy,30],[10370,ey,2520]],source,1,'selected','lamela / drzwi ukryte',[40,41],'dąb craft złoty')
+            [[sl[0][0],sy,30],[sl[1][0],ey,2820]],source,1,'selected','lamela / drzwi ukryte',[40,41],'dąb craft złoty')
+
+    # Black vertical coat hangers shown on the 4.65 m entrance wall (p.40).
+    for idx,y in enumerate((3420,3650,3880,4110),1):
+        _interior_box(f'SEL_ENTRY_HOOK_RAIL_{idx}','wnetrze_elementy','interior_metal',
+            [[14510,y,180],[14535,y+28,2750]],source,1,'selected','pionowy wieszak metalowy',[40],'wieszak metalowy')
 
 def main():
     print("Rozpoczynanie generowania geometrii z aktualnym zestawieniem okien...")
