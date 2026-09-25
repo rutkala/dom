@@ -271,3 +271,24 @@ d 1.0
 Ka 0.08 0.08 0.08
 Ks 0.06 0.06 0.06
 Ns 16
+
+newmtl budynki_otoczenia
+Kd 0.62 0.6 0.56
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl drzewa_korony
+Kd 0.22 0.43 0.16
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl drzewa_pnie
+Kd 0.28 0.18 0.1
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
