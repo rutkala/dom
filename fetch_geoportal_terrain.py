@@ -929,30 +929,52 @@ def fit_house_to_orthophoto(ortho_img, bbox, parcel_geom):
             out[ok]=arr[rr[ok],cc[ok]]
         return out
 
+    def evaluate(theta,t):
+        c,sn=math.cos(theta),math.sin(theta)
+        R=np.asarray([[c,-sn],[sn,c]],dtype=float)
+        qin=interior@R.T+t
+        qbd=boundary@R.T+t
+        hit=float(np.mean(sample_grid(target_soft,qin)))
+        edge=float(np.mean(sample_grid(grad,qbd)))
+        fitted_center=R@model_center+t
+        seed_dist=float(np.linalg.norm(fitted_center-pzt_center))
+        score=1.45*hit+0.35*edge-0.012*seed_dist
+        return score,R,hit,edge,seed_dist,fitted_center
+
+    # Etap 1: szybkie przeszukanie zgrubne.
     best=None
     base_theta=target_angle-model_angle
-    angle_offsets=np.arange(-12.0,12.0001,1.0)
-    shifts=np.arange(-4.0,4.0001,0.5)
     for flip in (0.0,math.pi):
-        for ddeg in angle_offsets:
+        for ddeg in np.arange(-12.0,12.0001,2.0):
             theta=base_theta+flip+math.radians(float(ddeg))
             c,sn=math.cos(theta),math.sin(theta)
-            R=np.asarray([[c,-sn],[sn,c]],dtype=float)
-            base_t=component_center-R@model_center
-            for de in shifts:
-                for dn in shifts:
+            R0=np.asarray([[c,-sn],[sn,c]],dtype=float)
+            base_t=component_center-R0@model_center
+            for de in np.arange(-4.0,4.0001,1.0):
+                for dn in np.arange(-4.0,4.0001,1.0):
                     t=base_t+np.asarray([float(de),float(dn)])
-                    qin=interior@R.T+t
-                    qbd=boundary@R.T+t
-                    hit=float(np.mean(sample_grid(target_soft,qin)))
-                    edge=float(np.mean(sample_grid(grad,qbd)))
-                    fitted_center=R@model_center+t
-                    seed_dist=float(np.linalg.norm(fitted_center-pzt_center))
-                    score=1.45*hit+0.35*edge-0.012*seed_dist
+                    score,R,hit,edge,seed_dist,fitted_center=evaluate(theta,t)
                     if best is None or score>best[0]:
-                        best=(score,theta,R,t,hit,edge,seed_dist)
+                        best=(score,theta,R,t,hit,edge,seed_dist,fitted_center)
 
-    score,theta,R,t,hit,edge,seed_dist=best
+    # Etap 2: doprecyzowanie wokół najlepszego wyniku.
+    coarse=best
+    fine_center=np.asarray(coarse[7],dtype=float)
+    fine_theta=float(coarse[1])
+    best=None
+    for ddeg in np.arange(-1.5,1.5001,0.25):
+        theta=fine_theta+math.radians(float(ddeg))
+        c,sn=math.cos(theta),math.sin(theta)
+        R0=np.asarray([[c,-sn],[sn,c]],dtype=float)
+        base_t=fine_center-R0@model_center
+        for de in np.arange(-1.0,1.0001,0.25):
+            for dn in np.arange(-1.0,1.0001,0.25):
+                t=base_t+np.asarray([float(de),float(dn)])
+                score,R,hit,edge,seed_dist,fitted_center=evaluate(theta,t)
+                if best is None or score>best[0]:
+                    best=(score,theta,R,t,hit,edge,seed_dist,fitted_center)
+
+    score,theta,R,t,hit,edge,seed_dist,_=best
     coords=[]
     for x,y in model_poly.exterior.coords:
         q=R@np.asarray([float(x),float(y)])+t
