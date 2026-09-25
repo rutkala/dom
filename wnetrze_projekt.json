@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "v3 room-by-room review against visualizations, technical drawings and furniture plan p.49",
+  "status": "v4 room-by-room correction after full PDF review and user placement feedback",
   "source": {
     "file": "Projekt wnętrza 20,10,2023.pdf",
     "pages": {
@@ -516,7 +516,7 @@
             900
           ]
         ],
-        "role": "główny ciąg 2,40 m na ścianie północnej",
+        "role": "główny ciąg 2,40 m przy ścianie północnej",
         "source_pages": [
           33,
           34,
@@ -534,12 +534,12 @@
             30
           ],
           [
-            7610,
-            5620,
+            7710,
+            4810,
             2800
           ]
         ],
-        "role": "wysoka zabudowa na ścianie zachodniej (naprzeciw poprzedniej pozycji)",
+        "role": "wysoka szafa 0,70 m na przeciwległej ścianie południowej",
         "source_pages": [
           35,
           36
@@ -561,7 +561,7 @@
             2385
           ]
         ],
-        "role": "górne półki nad ciągiem północnym",
+        "role": "otwarte półki nad głównym ciągiem północnym",
         "source_pages": [
           34,
           36
@@ -999,6 +999,9 @@
     "Okno kuchenne pozostaje zgodne z aktualnym modelem budynku, nie z historycznym rysunkiem wnętrza.",
     "Salon: stół 0,90 × 2,78 m, narożnik 1,82 × 2,78 m z częścią 1,20 m oraz stoliki Ø0,90/Ø0,60 m skorygowano bezpośrednio z rzutu umeblowania s.49.",
     "Korekta v3: spiżarnia przeniesiona na właściwe ściany; wiatrołap ma szafę w niszy 2,50×1,16 m, lamele 1,50 m na ścianie z drzwiami ukrytymi, a pufa jest poza niszą.",
-    "Korekta v3: w kuchni przeszklona winiarka ma być modelowana jako witryna, nie jako pełna drewniana szafka przy wejściu."
+    "Korekta v3: w kuchni przeszklona winiarka ma być modelowana jako witryna, nie jako pełna drewniana szafka przy wejściu.",
+    "Korekta v4: spiżarnia ma główny ciąg na ścianie północnej oraz wysoką szafę na ścianie przeciwległej; półki nad głównym ciągiem są modelowane jako otwarte, nie jako pełny blok.",
+    "Korekta v4: wiatrołap — szafa wyłącznie w niszy 2,50×1,16 m; ściana lamelowa 1,50 m z drzwiami ukrytymi; lustro i konsola na ścianie przeciwnej.",
+    "Korekta v4: winiarka 0,60 m przy kuchni jest przeszkloną witryną z półkami, a nie pełną szafką."
   ]
 }
