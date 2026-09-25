@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "v4 room-by-room correction after full PDF review and user placement feedback",
+  "status": "v5 XY placement rebuilt from top furniture plan p.49; elevations used only for heights/details",
   "source": {
     "file": "Projekt wnętrza 20,10,2023.pdf",
     "pages": {
@@ -137,17 +137,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            7080,
-            8750,
+            7610,
+            8760,
             30
           ],
           [
-            10980,
-            9290,
-            840
+            11010,
+            9360,
+            900
           ]
         ],
-        "role": "dolna zabudowa pod oknem",
+        "role": "ciąg północny 3,40 m, gł. 0,60 m",
         "source_pages": [
           21,
           22
@@ -159,17 +159,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            11020,
-            8730,
+            11010,
+            8760,
             30
           ],
           [
-            12880,
-            9300,
-            2560
+            12560,
+            9360,
+            2600
           ]
         ],
-        "role": "wysoka zabudowa lodówka + słupki",
+        "role": "lodówka + space tower 1,55 m na ścianie północnej",
         "source_pages": [
           21,
           22
@@ -181,17 +181,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            7080,
-            6180,
+            7010,
+            5920,
             30
           ],
           [
-            7680,
-            8700,
+            7610,
+            8160,
             900
           ]
         ],
-        "role": "ciąg roboczy L",
+        "role": "niska zabudowa zachodnia 2,24 m, gł. 0,60 m",
         "source_pages": [
           21,
           23
@@ -203,17 +203,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            7080,
-            6180,
+            7010,
+            8160,
             30
           ],
           [
-            7660,
-            6860,
-            2550
+            7610,
+            9360,
+            2600
           ]
         ],
-        "role": "słupek piekarnik / mikrofala",
+        "role": "wysoka zabudowa zachodnia 1,20 m",
         "source_pages": [
           23
         ]
@@ -247,17 +247,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            12350,
-            6050,
-            30
+            12060,
+            8760,
+            100
           ],
           [
-            12880,
-            6650,
+            12560,
+            9360,
             2500
           ]
         ],
-        "role": "przeszklona witryna / winiarka 0,60 m - nie pełna szafka",
+        "role": "winiarka/witryna zintegrowana w strefie wysokiej; bez dodatkowego wolnostojącego footprintu",
         "source_pages": [
           24
         ]
@@ -268,13 +268,13 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            7080,
-            5935,
+            7010,
+            5920,
             50
           ],
           [
-            8880,
-            5965,
+            8860,
+            5950,
             2520
           ]
         ],
@@ -289,12 +289,12 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            9350,
+            8910,
             5930,
             30
           ],
           [
-            10350,
+            9910,
             5970,
             2280
           ]
@@ -506,17 +506,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            7610,
-            5020,
+            7010,
+            4210,
             30
           ],
           [
             10010,
-            5620,
+            4810,
             900
           ]
         ],
-        "role": "główny ciąg 2,40 m przy ścianie północnej",
+        "role": "ciąg południowy 3,00 m × 0,60 m",
         "source_pages": [
           33,
           34,
@@ -534,12 +534,12 @@
             30
           ],
           [
-            7710,
-            4810,
+            7610,
+            5620,
             2800
           ]
         ],
-        "role": "wysoka szafa 0,70 m na przeciwległej ścianie południowej",
+        "role": "zabudowa zachodnia 0,60 m × 1,41 m (półki + wysoki moduł)",
         "source_pages": [
           35,
           36
@@ -552,8 +552,8 @@
         "bbox_mm": [
           [
             7610,
-            5270,
-            1200
+            5170,
+            30
           ],
           [
             10010,
@@ -561,7 +561,7 @@
             2385
           ]
         ],
-        "role": "otwarte półki nad głównym ciągiem północnym",
+        "role": "ciąg/półki północne 2,40 m × 0,45 m",
         "source_pages": [
           34,
           36
@@ -580,10 +580,10 @@
           [
             12810,
             5620,
-            2820
+            2900
           ]
         ],
-        "role": "szafa 2,50 m w istniejącej wnęce 2,50 × 1,16 m",
+        "role": "szafa 2,50 m w niszy 2,50 × 1,16 m",
         "source_pages": [
           38
         ]
@@ -594,17 +594,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            14910,
+            14920,
             2960,
             320
           ],
           [
-            14950,
+            14960,
             4110,
             2320
           ]
         ],
-        "role": "lustro podświetlane 1,15 m na ścianie wschodniej",
+        "role": "lustro 1,15 m na wschodniej ścianie",
         "source_pages": [
           39
         ]
@@ -616,16 +616,16 @@
         "bbox_mm": [
           [
             14760,
-            3260,
+            2960,
             750
           ],
           [
             14960,
-            4060,
+            3760,
             900
           ]
         ],
-        "role": "konsola 0,80 × 0,20 m pod lustrem",
+        "role": "konsola 0,80 × 0,20 m na wschodniej ścianie",
         "source_pages": [
           39
         ]
@@ -643,10 +643,10 @@
           [
             10370,
             4460,
-            2820
+            2900
           ]
         ],
-        "role": "lamele 1,50 m / drzwi ukryte na ścianie zachodniej",
+        "role": "lamele 1,50 m na zachodniej ścianie z drzwiami ukrytymi do gabinetu",
         "source_pages": [
           40,
           41
@@ -655,19 +655,24 @@
       {
         "id": "HOL_POUF",
         "room": 1,
-        "primitive": "cylinder",
-        "center_mm": [
-          11850,
-          3700,
-          230
-        ],
-        "radius_mm": 300,
-        "height_mm": 400,
-        "role": "pufa w dolnej części wiatrołapu, poza wnęką szafy",
+        "primitive": "box",
+        "role": "pufa 1,15 × 0,50 m wg rzutu s.49",
         "source_pages": [
           17,
           18,
           49
+        ],
+        "bbox_mm": [
+          [
+            11100,
+            3120,
+            30
+          ],
+          [
+            12250,
+            3620,
+            430
+          ]
         ]
       }
     ],
@@ -680,8 +685,7 @@
           "KUCH_TALL_ZONE",
           "KUCH_LEFT_RUN",
           "KUCH_OVEN_TOWER",
-          "KUCH_ISLAND",
-          "KUCH_WINE_RACK"
+          "KUCH_ISLAND"
         ],
         "product_type": "custom_cabinetry",
         "materials": [
@@ -1002,6 +1006,10 @@
     "Korekta v3: w kuchni przeszklona winiarka ma być modelowana jako witryna, nie jako pełna drewniana szafka przy wejściu.",
     "Korekta v4: spiżarnia ma główny ciąg na ścianie północnej oraz wysoką szafę na ścianie przeciwległej; półki nad głównym ciągiem są modelowane jako otwarte, nie jako pełny blok.",
     "Korekta v4: wiatrołap — szafa wyłącznie w niszy 2,50×1,16 m; ściana lamelowa 1,50 m z drzwiami ukrytymi; lustro i konsola na ścianie przeciwnej.",
-    "Korekta v4: winiarka 0,60 m przy kuchni jest przeszkloną witryną z półkami, a nie pełną szafką."
+    "Korekta v4: winiarka 0,60 m przy kuchni jest przeszkloną witryną z półkami, a nie pełną szafką.",
+    "Korekta v5: rzut s.49 jest nadrzędnym źródłem pozycji XY. Rysunki 21–41 definiują wysokości, podziały i wygląd, ale nie nadpisują położenia w rzucie.",
+    "Korekta v5: spiżarnia ma układ U: 3,00×0,60 m na ścianie południowej, 2,40×0,45 m na północnej oraz 0,60×1,41 m na zachodniej.",
+    "Korekta v5: wiatrołap — szafa w niszy 2,50×1,16 m; lamele na zachodniej ścianie 1,50 m; konsola 0,80×0,20 i lustro 1,15 m na ścianie wschodniej; pufa 1,15×0,50.",
+    "Korekta v5: w kuchni nie ma dodatkowej wolnostojącej szafki przy wejściu; witryna/winiarka jest detalem zintegrowanym w wysokiej zabudowie."
   ]
 }
