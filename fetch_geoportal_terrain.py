@@ -74,17 +74,30 @@ def request_get(url: str, *, params=None, timeout=60, attempts=4):
     raise RuntimeError(f"Nie udało się pobrać {url}: {errors}")
 
 
-def model_to_epsg2177(x_mm: float, y_mm: float) -> tuple[float, float]:
-    m = CFG["model_to_epsg2177_affine"]
-    e = m[0][0] * x_mm + m[0][1] * y_mm + m[0][2]
-    n = m[1][0] * x_mm + m[1][1] * y_mm + m[1][2]
-    return float(e), float(n)
-
-
 M2177 = np.asarray(CFG["model_to_epsg2177_affine"], dtype=float)
 M2177_INV = np.linalg.inv(M2177)
 TO_2180 = Transformer.from_crs(2177, 2180, always_xy=True)
 TO_2177 = Transformer.from_crs(2180, 2177, always_xy=True)
+
+ORIENTATION_DEG = float(CFG.get("orientation_correction_deg", 0.0))
+ORIENTATION_RAD = math.radians(ORIENTATION_DEG)
+ROT = np.asarray([
+    [math.cos(ORIENTATION_RAD), -math.sin(ORIENTATION_RAD)],
+    [math.sin(ORIENTATION_RAD),  math.cos(ORIENTATION_RAD)],
+], dtype=float)
+ROT_INV = ROT.T
+PIVOT_MODEL = np.asarray(
+    CFG.get("orientation_correction_pivot_model_mm", CFG["fetch"]["center_model_mm"]),
+    dtype=float,
+)
+PIVOT_BASE = M2177 @ np.asarray([PIVOT_MODEL[0], PIVOT_MODEL[1], 1.0], dtype=float)
+
+
+def model_to_epsg2177(x_mm: float, y_mm: float) -> tuple[float, float]:
+    base = M2177 @ np.asarray([x_mm, y_mm, 1.0], dtype=float)
+    delta = ROT @ (base[:2] - PIVOT_BASE[:2])
+    corrected = PIVOT_BASE[:2] + delta
+    return float(corrected[0]), float(corrected[1])
 
 
 def model_to_epsg2180(x_mm: float, y_mm: float) -> tuple[float, float]:
@@ -94,7 +107,9 @@ def model_to_epsg2180(x_mm: float, y_mm: float) -> tuple[float, float]:
 
 def epsg2180_to_model(e: float, n: float) -> tuple[float, float]:
     e17, n17 = TO_2177.transform(e, n)
-    v = M2177_INV @ np.asarray([e17, n17, 1.0], dtype=float)
+    corrected = np.asarray([e17, n17], dtype=float)
+    base_xy = PIVOT_BASE[:2] + ROT_INV @ (corrected - PIVOT_BASE[:2])
+    v = M2177_INV @ np.asarray([base_xy[0], base_xy[1], 1.0], dtype=float)
     return float(v[0]), float(v[1])
 
 
