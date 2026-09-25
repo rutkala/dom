@@ -12,6 +12,8 @@ for r in source['rooms']:
 s=(ROOT/'podglad_szablon.html').read_text(encoding='utf-8')
 s=s.replace('__SCENE__',(ROOT/'scena_modelu.json').read_text(encoding='utf-8').replace('</','<\\/'))
 s=s.replace('__ROOM_LABELS__',json.dumps(rooms,ensure_ascii=False))
+ortho=(ROOT/'geoportal_ortho.jpg')
+s=s.replace('__ORTHO_JPG__',base64.b64encode(ortho.read_bytes()).decode() if ortho.exists() else '')
 for marker,f in [('__GLB_INTERIOR__','dom_wnetrze.glb'),('__GLB_EXTERIOR__','dom_bryla.glb')]:
     s=s.replace(marker,base64.b64encode((ROOT/f).read_bytes()).decode())
 (ROOT/'podglad_3d.html').write_text(s,encoding='utf-8')
