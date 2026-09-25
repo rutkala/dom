@@ -273,7 +273,14 @@ Ks 0.06 0.06 0.06
 Ns 16
 
 newmtl budynki_otoczenia
-Kd 0.62 0.6 0.56
+Kd 0.73 0.71 0.67
+d 1.0
+Ka 0.08 0.08 0.08
+Ks 0.06 0.06 0.06
+Ns 16
+
+newmtl budynki_dachy
+Kd 0.48 0.38 0.3
 d 1.0
 Ka 0.08 0.08 0.08
 Ks 0.06 0.06 0.06
