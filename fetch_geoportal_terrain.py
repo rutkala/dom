@@ -2,33 +2,38 @@
 """Pobiera rzeczywisty NMT i ortofotomapę z usług GUGiK / Geoportal.
 
 Źródła:
-- ULDK: kontrola działki ewidencyjnej,
-- WCS NMT GRID1 GeoTIFF: wysokości PL-EVRF2007-NH,
-- WMS ORTO: ortofotomapa.
+- ULDK: granica i kontrola działki ewidencyjnej,
+- WMS NMT "SkorowidzeUkladEVRF2007": linki do plików NMT PL-EVRF2007-NH,
+- WMS ORTO: bieżąca ortofotomapa.
 
 Wynik:
-- geoportal_teren.json: mesh NMT + kolorowe kafle ortofotomapy + granica działki,
-- geoportal_ortho.jpg: podgląd pobranej ortofotomapy.
+- geoportal_teren.json: mesh NMT + kafle ortofotomapy + granica działki,
+- geoportal_ortho.jpg: podgląd ortofotomapy.
 
 Model lokalny pozostaje w metrach / Z-up. Rzędna 0,00 modelu jest wiązana
-z rzędną wejścia z PZT.
+z rzędną wejścia z PZT w układzie PL-EVRF2007-NH.
 """
 from __future__ import annotations
 
+import html
 import io
 import json
 import math
 import re
 import tempfile
+import time
+import zipfile
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urljoin, urlparse
 
 import numpy as np
 import rasterio
 import requests
 from PIL import Image
 from pyproj import Transformer
+from rasterio.merge import merge as raster_merge
 from shapely import wkt
 from shapely.geometry import Point
 
@@ -37,13 +42,32 @@ CFG = json.loads((ROOT / "geoportal_georef.json").read_text(encoding="utf-8"))
 
 SESSION = requests.Session()
 SESSION.headers.update({
-    "User-Agent": "rutkala-dom-geoportal/1.0 (+https://github.com/rutkala/dom)",
+    "User-Agent": "Pobieracz-QGIS-Client/1.0 rutkala-dom-geoportal",
     "Accept": "*/*",
+    "Connection": "close",
 })
 
 
 def local_name(tag: str) -> str:
     return tag.split("}")[-1].lower()
+
+
+def request_get(url: str, *, params=None, timeout=60, attempts=4):
+    errors = []
+    for attempt in range(1, attempts + 1):
+        try:
+            r = SESSION.get(url, params=params, timeout=timeout)
+            if r.status_code >= 500 and attempt < attempts:
+                errors.append(f"HTTP {r.status_code}")
+                time.sleep(1.2 * attempt)
+                continue
+            return r
+        except requests.RequestException as exc:
+            errors.append(repr(exc))
+            if attempt >= attempts:
+                raise
+            time.sleep(1.2 * attempt)
+    raise RuntimeError(f"Nie udało się pobrać {url}: {errors}")
 
 
 def model_to_epsg2177(x_mm: float, y_mm: float) -> tuple[float, float]:
@@ -78,120 +102,292 @@ def get_parcel_geometry():
         "result": "geom_wkt,teryt,parcel,region,commune,county,voivodeship",
         "srid": "2180",
     }
-    r = SESSION.get(cfg["uldk_url"], params=params, timeout=45)
+    r = request_get(cfg["uldk_url"], params=params, timeout=45)
     r.raise_for_status()
     txt = r.text.strip()
-    wkt_text = None
     for line in txt.splitlines():
-        if "POLYGON" in line.upper():
-            positions = [line.upper().find("POLYGON"), line.upper().find("MULTIPOLYGON")]
-            idx = min(i for i in positions if i >= 0)
-            candidate = line[idx:].split("|")[0].strip()
-            try:
-                wkt.loads(candidate)
-                wkt_text = candidate
-                break
-            except Exception:
-                pass
-    if not wkt_text:
-        m = re.search(r"((?:MULTI)?POLYGON\s*\(.+\))", txt, flags=re.I | re.S)
-        if m:
-            candidate = m.group(1).strip().split("|")[0].strip()
-            try:
-                wkt.loads(candidate)
-                wkt_text = candidate
-            except Exception:
-                pass
-    if not wkt_text:
-        raise RuntimeError(f"ULDK nie zwrócił geometrii działki. Początek odpowiedzi: {txt[:500]!r}")
-    return wkt.loads(wkt_text), txt
+        upper = line.upper()
+        if "POLYGON" not in upper:
+            continue
+        starts = [i for i in (upper.find("POLYGON"), upper.find("MULTIPOLYGON")) if i >= 0]
+        if not starts:
+            continue
+        candidate = line[min(starts):].split("|")[0].strip()
+        try:
+            return wkt.loads(candidate), txt
+        except Exception:
+            pass
+    m = re.search(r"((?:MULTI)?POLYGON\s*\(.+\))", txt, flags=re.I | re.S)
+    if m:
+        candidate = m.group(1).strip().split("|")[0].strip()
+        try:
+            return wkt.loads(candidate), txt
+        except Exception:
+            pass
+    raise RuntimeError(f"ULDK nie zwrócił geometrii działki. Początek: {txt[:500]!r}")
 
 
-def discover_wcs_coverage(url: str) -> tuple[str, str]:
-    params = {"SERVICE": "WCS", "VERSION": "1.0.0", "REQUEST": "GetCapabilities"}
-    r = SESSION.get(url, params=params, timeout=60)
+def get_queryable_wms_layers(url: str) -> list[str]:
+    r = request_get(url, params={"SERVICE": "WMS", "REQUEST": "GetCapabilities"}, timeout=60)
     r.raise_for_status()
     root = ET.fromstring(r.content)
-    candidates = []
-    for brief in root.iter():
-        if local_name(brief.tag) != "coverageofferingbrief":
+    queryable = []
+    fallback = []
+    for layer in root.iter():
+        if local_name(layer.tag) != "layer":
             continue
-        name = ""
-        label = ""
-        for child in brief.iter():
-            ln = local_name(child.tag)
-            if ln == "name" and not name and child.text:
+        name = None
+        for child in list(layer):
+            if local_name(child.tag) == "name" and child.text:
                 name = child.text.strip()
-            elif ln == "label" and not label and child.text:
-                label = child.text.strip()
-        if name:
-            candidates.append((name, label))
-    if not candidates:
-        return "1", "fallback"
-    preferred = []
-    for name, label in candidates:
-        key = (name + " " + label).lower()
-        score = 0
-        if "evrf" in key:
-            score += 5
-        if "dtm" in key or "terrain" in key:
-            score += 4
-        if "nmt" in key:
-            score += 3
-        preferred.append((score, name, label))
-    preferred.sort(reverse=True)
-    _, name, label = preferred[0]
-    return name, label
-
-
-def fetch_nmt(bbox: tuple[float, float, float, float]):
-    cfg = CFG["services"]["nmt_wcs"]
-    coverage, label = discover_wcs_coverage(cfg["url"])
-    minx, miny, maxx, maxy = bbox
-    resolution = float(cfg.get("request_resolution_m", 1.0))
-    width = max(32, int(math.ceil((maxx - minx) / resolution)))
-    height = max(32, int(math.ceil((maxy - miny) / resolution)))
-    base_params = {
-        "SERVICE": "WCS",
-        "VERSION": "1.0.0",
-        "REQUEST": "GetCoverage",
-        "COVERAGE": coverage,
-        "CRS": "EPSG:2180",
-        "RESPONSE_CRS": "EPSG:2180",
-        "BBOX": ",".join(f"{v:.3f}" for v in bbox),
-        "WIDTH": str(width),
-        "HEIGHT": str(height),
-    }
-    attempts = []
-    content = None
-    used_format = None
-    for fmt in cfg.get("formats", ["GeoTIFF", "image/tiff", "TIFF"]):
-        params = dict(base_params)
-        params["FORMAT"] = fmt
-        r = SESSION.get(cfg["url"], params=params, timeout=120)
-        attempts.append((fmt, r.status_code, r.headers.get("content-type", ""), len(r.content)))
-        if not r.ok or len(r.content) < 512:
+                break
+        if not name:
             continue
-        if r.content[:4] not in (b"II*\x00", b"MM\x00*"):
-            head = r.content[:500].decode("utf-8", errors="ignore")
-            if "Exception" in head or "<ServiceException" in head:
+        fallback.append(name)
+        if str(layer.attrib.get("queryable", "0")) in ("1", "true", "True"):
+            queryable.append(name)
+    result = queryable or fallback
+    return list(dict.fromkeys(result))
+
+
+def parse_wms_objects(content: str) -> list[dict]:
+    text = html.unescape(content)
+    # Geoportal zwraca obiekty podobne do JSON: {"nazwa_pliku":"https://...", ...}
+    chunks = re.findall(r"\{[^{}\r\n]*\}", text)
+    objects = []
+    for chunk in chunks:
+        pairs = re.findall(r'"([^"]+)"\s*:\s*"([^"]*)"', chunk)
+        if pairs:
+            objects.append({k: v for k, v in pairs})
+            continue
+        attrs = {}
+        raw = chunk.strip("{}")
+        for item in raw.split(","):
+            if ":" not in item:
                 continue
-        try:
-            with rasterio.io.MemoryFile(r.content) as mem:
-                with mem.open() as ds:
-                    _ = ds.read(1, out_shape=(1, min(ds.height, 4), min(ds.width, 4)))
-            content = r.content
-            used_format = fmt
-            break
-        except Exception:
+            k, v = item.split(":", 1)
+            attrs[k.strip().strip('"')] = v.strip().strip('"')
+        if attrs:
+            objects.append(attrs)
+    # awaryjnie wyciągnij linki, jeżeli serwis zmieni format HTML
+    if not objects:
+        links = re.findall(r'https?://[^\s"\'<>]+', text)
+        objects = [{"nazwa_pliku": u.rstrip(").,;")} for u in links]
+    unique = []
+    seen = set()
+    for obj in objects:
+        key = json.dumps(obj, sort_keys=True, ensure_ascii=False)
+        if key not in seen:
+            seen.add(key)
+            unique.append(obj)
+    return unique
+
+
+def nmt_object_url(obj: dict) -> str:
+    for key in ("nazwa_pliku", "url", "link", "LinkDoPobrania", "link_do_pobrania"):
+        value = obj.get(key)
+        if value and str(value).startswith(("http://", "https://")):
+            return html.unescape(str(value))
+    for value in obj.values():
+        if isinstance(value, str) and value.startswith(("http://", "https://")):
+            return html.unescape(value)
+    return ""
+
+
+def nmt_object_score(obj: dict) -> tuple:
+    url = nmt_object_url(obj)
+    fmt = str(obj.get("format", "")).upper()
+    crs = str(obj.get("ukladWspolrzednych", obj.get("uklad_wspolrzednych_plaskich", ""))).upper()
+    vertical = str(obj.get("ukladWysokosci", obj.get("uklad_wspolrzednych_wysokosciowych", ""))).upper()
+    text_all = " ".join(str(v) for v in obj.values())
+    years = [int(x) for x in re.findall(r"20\d{2}", text_all) if 2010 <= int(x) <= 2099]
+    year = max(years) if years else 0
+    is_asc = "ASC" in fmt or ".ASC" in url.upper() or "ASCII" in fmt
+    is_1992 = "1992" in crs or "2180" in crs
+    is_evrf = "EVRF" in vertical or "2007" in vertical or not vertical
+    filled = str(obj.get("calyArkuszWyeplnionyTrescia", obj.get("caly_arkusz_wypelniony_trescia", ""))).lower()
+    full_sheet = 1 if filled in ("1", "true", "tak", "yes") else 0
+    return (1 if is_asc else 0, 1 if is_1992 else 0, 1 if is_evrf else 0, year, full_sheet)
+
+
+def query_nmt_objects_at_point(service_url: str, e: float, n: float) -> tuple[list[dict], dict]:
+    layers = get_queryable_wms_layers(service_url)
+    if not layers:
+        return [], {"layers": [], "response_chars": 0}
+    # Geoportal 1.3.0 dla EPSG:2180 stosuje kolejność osi zgodną z oficjalnym klientem:
+    # BBOX = northing,easting,northing,easting.
+    bbox_axis = f"{n-50:.3f},{e-50:.3f},{n+50:.3f},{e+50:.3f}"
+    params = {
+        "SERVICE": "WMS",
+        "request": "GetFeatureInfo",
+        "version": "1.3.0",
+        "styles": "",
+        "crs": "EPSG:2180",
+        "width": "101",
+        "height": "101",
+        "format": "image/png",
+        "transparent": "true",
+        "i": "50",
+        "j": "50",
+        "INFO_FORMAT": CFG["services"]["nmt_evrf_wms"].get("info_format", "text/html"),
+        "layers": ",".join(layers),
+        "query_layers": ",".join(layers),
+        "bbox": bbox_axis,
+    }
+    r = request_get(service_url, params=params, timeout=75)
+    r.raise_for_status()
+    objs = parse_wms_objects(r.text)
+    # Niektóre wdrożenia WMS tolerują/oczekują tradycyjnej kolejności XY.
+    if not objs:
+        params["bbox"] = f"{e-50:.3f},{n-50:.3f},{e+50:.3f},{n+50:.3f}"
+        r = request_get(service_url, params=params, timeout=75)
+        r.raise_for_status()
+        objs = parse_wms_objects(r.text)
+    return objs, {"layers": layers, "response_chars": len(r.text)}
+
+
+def select_nmt_object(objects: list[dict]) -> dict | None:
+    candidates = [o for o in objects if nmt_object_url(o)]
+    if not candidates:
+        return None
+    candidates.sort(key=nmt_object_score, reverse=True)
+    # Preferuj PL-1992 / EPSG:2180. Dane w innym układzie nie są mieszane z siatką modelu.
+    best_2180 = [o for o in candidates if nmt_object_score(o)[1] == 1]
+    return (best_2180 or candidates)[0]
+
+
+def nmt_download_links_for_bbox(bbox) -> tuple[list[tuple[str, dict]], dict]:
+    minx, miny, maxx, maxy = bbox
+    # punkty wewnątrz obszaru; wystarczą do zebrania sąsiadujących arkuszy 1 km
+    xs = [minx + 2, (minx + maxx) / 2, maxx - 2]
+    ys = [miny + 2, (miny + maxy) / 2, maxy - 2]
+    service_cfg = CFG["services"]["nmt_evrf_wms"]
+    services = [
+        ("1m", service_cfg["url"]),
+        ("5m", service_cfg.get("fallback_5m_url")),
+    ]
+    diagnostics = {"queries": [], "service": None}
+    for service_name, service_url in services:
+        if not service_url:
             continue
-    if content is None:
-        raise RuntimeError(f"Nie udało się pobrać NMT WCS. Próby: {attempts}")
-    with tempfile.NamedTemporaryFile(suffix=".tif", delete=False) as tmp:
-        tmp.write(content)
-        tmp_path = Path(tmp.name)
-    ds = rasterio.open(tmp_path)
-    return ds, tmp_path, coverage, label, used_format, attempts
+        found = {}
+        for e in xs:
+            for n in ys:
+                try:
+                    objs, diag = query_nmt_objects_at_point(service_url, e, n)
+                    selected = select_nmt_object(objs)
+                    diagnostics["queries"].append({
+                        "service": service_name,
+                        "point": [round(e, 3), round(n, 3)],
+                        "objects": len(objs),
+                        "layers": diag.get("layers", []),
+                        "selected": selected,
+                    })
+                    if selected:
+                        url = nmt_object_url(selected)
+                        found[url] = selected
+                except Exception as exc:
+                    diagnostics["queries"].append({
+                        "service": service_name,
+                        "point": [round(e, 3), round(n, 3)],
+                        "error": repr(exc),
+                    })
+        if found:
+            diagnostics["service"] = service_url
+            diagnostics["resolution_family"] = service_name
+            return list(found.items()), diagnostics
+    raise RuntimeError("Nie znaleziono plików NMT PL-EVRF2007-NH dla zadanego obszaru.")
+
+
+def save_downloaded_raster_files(url: str, temp_dir: Path) -> list[Path]:
+    r = request_get(url, timeout=180, attempts=4)
+    r.raise_for_status()
+    content = r.content
+    if len(content) < 500:
+        raise RuntimeError(f"Za mały plik NMT z {url}: {len(content)} B")
+    paths = []
+    if content[:2] == b"PK" or url.lower().endswith(".zip"):
+        with zipfile.ZipFile(io.BytesIO(content)) as zf:
+            for name in zf.namelist():
+                lower = name.lower()
+                if not lower.endswith((".asc", ".tif", ".tiff")):
+                    continue
+                target = temp_dir / Path(name).name
+                target.write_bytes(zf.read(name))
+                paths.append(target)
+    else:
+        suffix = Path(urlparse(url).path).suffix.lower()
+        if suffix not in (".asc", ".tif", ".tiff"):
+            if content[:4] in (b"II*\x00", b"MM\x00*"):
+                suffix = ".tif"
+            elif content[:32].lstrip().lower().startswith(b"ncols"):
+                suffix = ".asc"
+            else:
+                suffix = ".dat"
+        target = temp_dir / f"nmt_{abs(hash(url))}{suffix}"
+        target.write_bytes(content)
+        paths.append(target)
+    if not paths:
+        raise RuntimeError(f"Archiwum NMT nie zawiera ASC/TIFF: {url}")
+    return paths
+
+
+def fetch_nmt_evrf(bbox):
+    selected, diagnostics = nmt_download_links_for_bbox(bbox)
+    temp_dir_obj = tempfile.TemporaryDirectory(prefix="nmt_evrf_")
+    temp_dir = Path(temp_dir_obj.name)
+    raster_paths = []
+    metadata = []
+    for url, obj in selected:
+        try:
+            files = save_downloaded_raster_files(url, temp_dir)
+            raster_paths.extend(files)
+            metadata.append({"url": url, "object": obj, "files": [p.name for p in files]})
+        except Exception as exc:
+            metadata.append({"url": url, "object": obj, "error": repr(exc)})
+    if not raster_paths:
+        temp_dir_obj.cleanup()
+        raise RuntimeError(f"Nie udało się pobrać żadnego arkusza NMT: {metadata}")
+
+    datasets = []
+    try:
+        for path in raster_paths:
+            ds = rasterio.open(path)
+            # Arc/Info ASCII zwykle nie ma wpisanego CRS, ale skorowidz został przefiltrowany do PL-1992.
+            datasets.append(ds)
+        pixel_sizes = [max(abs(float(ds.transform.a)), abs(float(ds.transform.e))) for ds in datasets]
+        source_res = min(pixel_sizes)
+        nodata = -9999.0
+        mosaic, transform = raster_merge(
+            datasets,
+            bounds=bbox,
+            res=source_res,
+            nodata=nodata,
+            dtype="float32",
+        )
+        arr = mosaic[0]
+        if not np.isfinite(arr).any():
+            raise RuntimeError("Po scaleniu arkuszy NMT brak danych.")
+        return arr, transform, nodata, {
+            "service": diagnostics.get("service"),
+            "resolution_family": diagnostics.get("resolution_family"),
+            "source_resolution_m": round(float(source_res), 4),
+            "vertical_system": "PL-EVRF2007-NH",
+            "horizontal_system": "PL-1992 / EPSG:2180",
+            "downloads": metadata,
+            "diagnostics": diagnostics,
+        }, temp_dir_obj
+    except Exception:
+        for ds in datasets:
+            ds.close()
+        temp_dir_obj.cleanup()
+        raise
+    finally:
+        for ds in datasets:
+            try:
+                ds.close()
+            except Exception:
+                pass
 
 
 def fetch_orthophoto(bbox: tuple[float, float, float, float]):
@@ -199,37 +395,56 @@ def fetch_orthophoto(bbox: tuple[float, float, float, float]):
     minx, miny, maxx, maxy = bbox
     width = int(cfg.get("width_px", 1800))
     height = max(256, int(round(width * (maxy - miny) / (maxx - minx))))
-    attempts = []
-    endpoints = [cfg.get("high_resolution_url"), cfg.get("standard_resolution_url")]
-    endpoints = [u for u in endpoints if u]
-    for url in endpoints:
+    attempts_log = []
+
+    specs = [
+        {
+            "url": cfg.get("standard_resolution_url"),
+            "version": "1.3.0",
+            "layers": "Raster",
+            "format": "image/jpeg",
+            "crs_key": "CRS",
+        },
+        {
+            "url": cfg.get("high_resolution_url"),
+            "version": "1.1.1",
+            "layers": "3,2,1",
+            "format": "image/png",
+            "crs_key": "SRS",
+        },
+    ]
+    for spec in specs:
+        url = spec["url"]
+        if not url:
+            continue
         params = {
             "SERVICE": "WMS",
-            "VERSION": "1.3.0",
+            "VERSION": spec["version"],
             "REQUEST": "GetMap",
-            "LAYERS": cfg.get("layer", "Raster"),
-            "STYLES": "",
-            "CRS": "EPSG:2180",
+            "LAYERS": spec["layers"],
+            "STYLES": "" if spec["layers"] == "Raster" else ",,",
+            spec["crs_key"]: "EPSG:2180",
             "BBOX": ",".join(f"{v:.3f}" for v in bbox),
             "WIDTH": str(width),
             "HEIGHT": str(height),
-            "FORMAT": "image/jpeg",
+            "FORMAT": spec["format"],
             "TRANSPARENT": "FALSE",
             "EXCEPTIONS": "XML",
         }
-        r = SESSION.get(url, params=params, timeout=120)
-        attempts.append((url, r.status_code, r.headers.get("content-type", ""), len(r.content)))
-        if not r.ok or len(r.content) < 1024:
-            continue
         try:
+            r = request_get(url, params=params, timeout=120, attempts=4)
+            attempts_log.append((url, r.status_code, r.headers.get("content-type", ""), len(r.content)))
+            if not r.ok or len(r.content) < 1024:
+                continue
             img = Image.open(io.BytesIO(r.content)).convert("RGB")
             arr = np.asarray(img)
             if float(arr.std()) < 2.0:
                 continue
-            return img, url, attempts
-        except Exception:
+            return img, url, attempts_log
+        except Exception as exc:
+            attempts_log.append((url, "exception", repr(exc), 0))
             continue
-    raise RuntimeError(f"Nie udało się pobrać ortofotomapy WMS. Próby: {attempts}")
+    raise RuntimeError(f"Nie udało się pobrać ortofotomapy WMS. Próby: {attempts_log}")
 
 
 def raster_value(arr, transform, nodata, e: float, n: float):
@@ -239,7 +454,7 @@ def raster_value(arr, transform, nodata, e: float, n: float):
     v = float(arr[row, col])
     if not math.isfinite(v):
         return None
-    if nodata is not None and abs(v - float(nodata)) < 1e-6:
+    if nodata is not None and abs(v - float(nodata)) < 1e-5:
         return None
     if v < 100 or v > 1000:
         return None
@@ -266,14 +481,13 @@ def build_terrain_part(arr, transform, nodata, zero_m: float):
     for ir, row in enumerate(rows):
         for ic, col in enumerate(cols):
             h = float(arr[row, col])
-            valid = math.isfinite(h) and (nodata is None or abs(h - float(nodata)) > 1e-6) and 100 < h < 1000
+            valid = math.isfinite(h) and (nodata is None or abs(h - float(nodata)) > 1e-5) and 100 < h < 1000
             if not valid:
                 continue
             e, n = rasterio.transform.xy(transform, row, col, offset="center")
             x_mm, y_mm = epsg2180_to_model(float(e), float(n))
-            z = h - zero_m
             index[(ir, ic)] = len(vertices)
-            vertices.append([x_mm / 1000.0, y_mm / 1000.0, z])
+            vertices.append([x_mm / 1000.0, y_mm / 1000.0, h - zero_m])
             heights.append(h)
 
     faces = []
@@ -285,7 +499,6 @@ def build_terrain_part(arr, transform, nodata, zero_m: float):
             a, b, c, d = [index[k] for k in keys]
             faces.append([a, b, c])
             faces.append([a, c, d])
-
     if not faces:
         raise RuntimeError("NMT nie dał poprawnej siatki w zadanym obszarze.")
 
@@ -294,10 +507,10 @@ def build_terrain_part(arr, transform, nodata, zero_m: float):
         "category": "teren_rzeczywisty",
         "material": "teren_rzeczywisty",
         "color": [0.40, 0.47, 0.34, 1.0],
-        "source": "Geoportal / GUGiK NMT GRID1 WCS, PL-EVRF2007-NH",
+        "source": "Geoportal / GUGiK NMT PL-EVRF2007-NH",
         "source_id": "GEO_NMT",
         "assumed": False,
-        "note": f"Rzeczywisty NMT; Z=0 modelu odpowiada {zero_m:.2f} m n.p.m.",
+        "note": f"Rzeczywisty NMT; Z=0 modelu odpowiada {zero_m:.2f} m n.p.m. (PL-EVRF2007-NH).",
         "positions_m": vertices,
         "faces": faces,
         "reference_area_m2": None,
@@ -341,13 +554,11 @@ def build_ortho_tiles(img: Image.Image, bbox, arr, transform, nodata, zero_m: fl
         for ix in range(nx):
             e0 = minx + ix * tile
             e1 = min(maxx, e0 + tile)
-            ec = (e0 + e1) / 2
-            nc = (n0 + n1) / 2
+            ec, nc = (e0 + e1) / 2, (n0 + n1) / 2
             color = sample_image_rgb(img_arr, bbox, ec, nc)
-            corners_global = [(e0, n0), (e1, n0), (e1, n1), (e0, n1)]
             verts = []
             ok = True
-            for e, n in corners_global:
+            for e, n in ((e0, n0), (e1, n0), (e1, n1), (e0, n1)):
                 h = raster_value(arr, transform, nodata, e, n)
                 if h is None:
                     ok = False
@@ -393,15 +604,7 @@ def build_parcel_parts(parcel_geom, arr, transform, nodata, zero_m: float):
             if L < 1e-4:
                 continue
             perp = np.asarray([-d[1], d[0]], dtype=float) / L * (width / 2)
-            z0 = h0 - zero_m + 0.08
-            z1 = h1 - zero_m + 0.08
-            verts = [
-                [*(p0 - perp), z0],
-                [*(p0 + perp), z0],
-                [*(p1 + perp), z1],
-                [*(p1 - perp), z1],
-            ]
-            seg_no += 1
+            z0, z1 = h0 - zero_m + 0.08, h1 - zero_m + 0.08
             parts.append({
                 "name": f"GEO_PARCEL_{seg_no:03d}",
                 "category": "granica_dzialki",
@@ -411,10 +614,14 @@ def build_parcel_parts(parcel_geom, arr, transform, nodata, zero_m: float):
                 "source_id": "GEO_PARCEL",
                 "assumed": False,
                 "note": "Granica działki ewidencyjnej z ULDK.",
-                "positions_m": verts,
+                "positions_m": [
+                    [*(p0 - perp), z0], [*(p0 + perp), z0],
+                    [*(p1 + perp), z1], [*(p1 - perp), z1],
+                ],
                 "faces": [[0, 1, 2], [0, 2, 3]],
                 "reference_area_m2": round(L * width, 4),
             })
+            seg_no += 1
     return parts
 
 
@@ -430,21 +637,20 @@ def main():
     print(f"Geoportal bbox EPSG:2180: {bbox}")
 
     parcel_geom = None
-    parcel_raw = ""
     parcel_error = None
     try:
-        parcel_geom, parcel_raw = get_parcel_geometry()
+        parcel_geom, _ = get_parcel_geometry()
         print(f"ULDK parcel: {parcel_geom.geom_type}, area={parcel_geom.area:.1f} m²")
     except Exception as exc:
         parcel_error = str(exc)
         print(f"UWAGA: ULDK validation failed: {parcel_error}")
 
-    ds, tmp_path, coverage, coverage_label, fmt, nmt_attempts = fetch_nmt(bbox)
+    arr, transform, nodata, nmt_meta, tmp_holder = fetch_nmt_evrf(bbox)
     try:
-        arr = ds.read(1)
-        transform = ds.transform
-        nodata = ds.nodata
-        print(f"NMT: {ds.width}x{ds.height}, CRS={ds.crs}, nodata={nodata}, coverage={coverage!r}")
+        print(
+            f"NMT EVRF: {arr.shape[1]}x{arr.shape[0]}, "
+            f"res={nmt_meta['source_resolution_m']} m, downloads={len(nmt_meta['downloads'])}"
+        )
         terrain = build_terrain_part(arr, transform, nodata, zero_m)
 
         ortho_img, ortho_url, ortho_attempts = fetch_orthophoto(bbox)
@@ -453,28 +659,25 @@ def main():
 
         parcel_parts = []
         validation = {}
+        center_height = raster_value(arr, transform, nodata, cx, cy)
+        validation["nmt_at_model_center_m"] = round(center_height, 3) if center_height is not None else None
+        validation["nmt_center_relative_to_model_zero_m"] = (
+            round(center_height - zero_m, 3) if center_height is not None else None
+        )
         if parcel_geom is not None:
             parcel_parts = build_parcel_parts(parcel_geom, arr, transform, nodata, zero_m)
             house_center = Point(cx, cy)
-            validation = {
+            validation.update({
                 "parcel_contains_fetch_center": bool(parcel_geom.contains(house_center) or parcel_geom.touches(house_center)),
                 "distance_fetch_center_to_parcel_m": round(float(parcel_geom.distance(house_center)), 3),
                 "parcel_area_m2": round(float(parcel_geom.area), 3),
-            }
+            })
 
         result = {
             "status": "fetched",
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
             "source": {
-                "nmt": {
-                    "service": CFG["services"]["nmt_wcs"]["url"],
-                    "coverage": coverage,
-                    "coverage_label": coverage_label,
-                    "format": fmt,
-                    "crs": str(ds.crs),
-                    "vertical_system": CFG["vertical"]["system"],
-                    "attempts": nmt_attempts,
-                },
+                "nmt": nmt_meta,
                 "ortho": {
                     "service": ortho_url,
                     "crs": "EPSG:2180",
@@ -488,6 +691,7 @@ def main():
             },
             "alignment": {
                 "model_zero_elevation_m": zero_m,
+                "model_vertical_system": CFG["vertical"]["system"],
                 "model_horizontal_source_crs": "EPSG:2177",
                 "download_crs": "EPSG:2180",
                 "bbox_epsg2180": [round(v, 3) for v in bbox],
@@ -514,11 +718,7 @@ def main():
         print(json.dumps(result["stats"], ensure_ascii=False, indent=2))
         print(json.dumps(result["validation"], ensure_ascii=False, indent=2))
     finally:
-        ds.close()
-        try:
-            tmp_path.unlink()
-        except Exception:
-            pass
+        tmp_holder.cleanup()
 
 
 if __name__ == "__main__":
