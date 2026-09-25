@@ -74,7 +74,36 @@ def request_get(url: str, *, params=None, timeout=60, attempts=4):
     raise RuntimeError(f"Nie udało się pobrać {url}: {errors}")
 
 
-M2177 = np.asarray(CFG["model_to_epsg2177_affine"], dtype=float)
+def derive_model_to_epsg2177_from_survey_grid():
+    """Wyprowadza model -> PL-2000/6 wyłącznie z geodezyjnej siatki PZT.
+
+    Nie ma tu ręcznego obrotu ani przesunięcia:
+    - strona PDF -> model pochodzi z geometrii projektu,
+    - strona PDF -> EPSG:2177 pochodzi z siatki 50 m mapy 1:500.
+    """
+    page_to_model = np.asarray([
+        CFG["page_to_model_affine"]["x_mm"],
+        CFG["page_to_model_affine"]["y_mm"],
+        [0.0, 0.0, 1.0],
+    ], dtype=float)
+    model_to_page = np.linalg.inv(page_to_model)
+    grid = CFG["survey_grid"]
+    px0, py0 = map(float, grid["control_cross_page_pt"])
+    e0 = float(grid["control_cross_epsg2177"]["easting_Y_m"])
+    n0 = float(grid["control_cross_epsg2177"]["northing_X_m"])
+    m_per_pt = float(grid["grid_spacing_ground_m"]) / float(grid["grid_spacing_page_pt"])
+    page_to_epsg2177 = np.asarray([
+        [m_per_pt, 0.0, e0 - m_per_pt * px0],
+        [0.0, -m_per_pt, n0 + m_per_pt * py0],
+        [0.0, 0.0, 1.0],
+    ], dtype=float)
+    return page_to_epsg2177 @ model_to_page
+
+
+M2177_DERIVED = derive_model_to_epsg2177_from_survey_grid()
+M2177_CONFIG = np.asarray(CFG["model_to_epsg2177_affine"], dtype=float)
+M2177_MATRIX_DIFF = float(np.max(np.abs(M2177_DERIVED - M2177_CONFIG)))
+M2177 = M2177_DERIVED
 M2177_INV = np.linalg.inv(M2177)
 TO_2180 = Transformer.from_crs(2177, 2180, always_xy=True)
 TO_2177 = Transformer.from_crs(2180, 2177, always_xy=True)
@@ -104,25 +133,9 @@ def geo_local_to_epsg2180(x_mm: float, y_mm: float) -> tuple[float,float]:
     out = GEO_CENTER_2180 + delta
     return float(out[0]), float(out[1])
 
-ORIENTATION_DEG = float(CFG.get("orientation_correction_deg", 0.0))
-ORIENTATION_RAD = math.radians(ORIENTATION_DEG)
-ROT = np.asarray([
-    [math.cos(ORIENTATION_RAD), -math.sin(ORIENTATION_RAD)],
-    [math.sin(ORIENTATION_RAD),  math.cos(ORIENTATION_RAD)],
-], dtype=float)
-ROT_INV = ROT.T
-PIVOT_MODEL = np.asarray(
-    CFG.get("orientation_correction_pivot_model_mm", CFG["fetch"]["center_model_mm"]),
-    dtype=float,
-)
-PIVOT_BASE = M2177 @ np.asarray([PIVOT_MODEL[0], PIVOT_MODEL[1], 1.0], dtype=float)
-
-
 def model_to_epsg2177(x_mm: float, y_mm: float) -> tuple[float, float]:
-    base = M2177 @ np.asarray([x_mm, y_mm, 1.0], dtype=float)
-    delta = ROT @ (base[:2] - PIVOT_BASE[:2])
-    corrected = PIVOT_BASE[:2] + delta
-    return float(corrected[0]), float(corrected[1])
+    v = M2177 @ np.asarray([float(x_mm), float(y_mm), 1.0], dtype=float)
+    return float(v[0]), float(v[1])
 
 
 def model_to_epsg2180(x_mm: float, y_mm: float) -> tuple[float, float]:
@@ -131,11 +144,55 @@ def model_to_epsg2180(x_mm: float, y_mm: float) -> tuple[float, float]:
 
 
 def epsg2180_to_model(e: float, n: float) -> tuple[float, float]:
-    e17, n17 = TO_2177.transform(e, n)
-    corrected = np.asarray([e17, n17], dtype=float)
-    base_xy = PIVOT_BASE[:2] + ROT_INV @ (corrected - PIVOT_BASE[:2])
-    v = M2177_INV @ np.asarray([base_xy[0], base_xy[1], 1.0], dtype=float)
+    e17, n17 = TO_2177.transform(float(e), float(n))
+    v = M2177_INV @ np.asarray([e17, n17, 1.0], dtype=float)
     return float(v[0]), float(v[1])
+
+
+def derive_house_model_to_geo_local_affine():
+    """Lokalny model domu -> lokalna scena Geoportalu.
+
+    Macierz jest wyprowadzona z geodezyjnego PZT i oficjalnej transformacji
+    EPSG:2177 -> EPSG:2180. Nie jest kalibrowana wizualnie do ortofotomapy.
+    """
+    cx, cy = map(float, CFG["fetch"]["center_model_mm"])
+    def exact(x,y):
+        e,n = model_to_epsg2180(x,y)
+        return np.asarray(epsg2180_to_geo_local(e,n), dtype=float)
+    pc = exact(cx,cy)
+    px = exact(cx+1000.0,cy)
+    py = exact(cx,cy+1000.0)
+    A = np.column_stack(((px-pc)/1000.0, (py-pc)/1000.0))
+    t = pc - A @ np.asarray([cx,cy],dtype=float)
+    M = np.asarray([
+        [A[0,0], A[0,1], t[0]],
+        [A[1,0], A[1,1], t[1]],
+        [0.0,0.0,1.0],
+    ])
+    max_err=0.0
+    for x,y in MODEL_DATA["facade_reference_outline"]["polygon_mm"]:
+        exact_xy=exact(float(x),float(y))
+        aff=(M @ np.asarray([float(x),float(y),1.0]))[:2]
+        max_err=max(max_err,float(np.linalg.norm(exact_xy-aff)))
+    return M, max_err
+
+
+def project_house_polygon_epsg2180():
+    pts=[model_to_epsg2180(float(x),float(y)) for x,y in MODEL_DATA["facade_reference_outline"]["polygon_mm"]]
+    return Polygon(pts)
+
+
+def house_vs_parcel_validation(parcel_geom):
+    hp=project_house_polygon_epsg2180()
+    if parcel_geom is None or parcel_geom.is_empty or hp.is_empty:
+        return {}
+    inter=hp.intersection(parcel_geom).area
+    return {
+        "project_house_area_m2": round(float(hp.area),3),
+        "project_house_inside_parcel_fraction": round(float(inter/max(hp.area,1e-9)),6),
+        "project_house_centroid_to_parcel_m": round(float(parcel_geom.distance(hp.centroid)),3),
+        "project_house_centroid_epsg2180": [round(float(hp.centroid.x),3),round(float(hp.centroid.y),3)],
+    }
 
 
 def get_parcel_geometry():
@@ -1300,6 +1357,7 @@ def main():
         cx, cy = float(seed_cx), float(seed_cy)
         geo_center_source = "legacy_PZT_affine_fallback"
     set_geo_frame(cx, cy)
+    house_geo_affine, house_geo_affine_err_mm = derive_house_model_to_geo_local_affine()
 
     radius = float(fetch_cfg.get("radius_m", 90.0))
     bbox = (cx - radius, cy - radius, cx + radius, cy + radius)
@@ -1334,7 +1392,11 @@ def main():
         ortho_parts = build_ortho_surface(terrain, bbox)
 
         parcel_parts = []
-        validation = {}
+        validation = {
+            "pzt_survey_grid_matrix_max_diff": round(M2177_MATRIX_DIFF, 12),
+            "house_geo_affine_max_linearization_error_mm": round(float(house_geo_affine_err_mm), 6),
+            **house_vs_parcel_validation(parcel_geom),
+        }
         center_height = raster_value(arr, transform, nodata, cx, cy)
         validation["nmt_at_model_center_m"] = round(center_height, 3) if center_height is not None else None
         validation["nmt_center_relative_to_model_zero_m"] = (
@@ -1401,10 +1463,14 @@ def main():
                 "geo_context_anchor_model_mm": [round(float(GEO_ANCHOR_MODEL_MM[0]),3), round(float(GEO_ANCHOR_MODEL_MM[1]),3)],
                 "geo_context_rule": "native EPSG:2180 east/north -> local x/y, no rotation; shared by NMT/ortho/parcel/EGiB",
                 "house_calibration": {
-                    "status": "pending",
-                    "legacy_model_to_epsg2177_affine": CFG["model_to_epsg2177_affine"],
-                    "legacy_orientation_correction_deg": CFG.get("orientation_correction_deg",0.0),
-                    "note": "House/model alignment is intentionally separated from the base Geoportal frame."
+                    "status": "survey_georeferenced",
+                    "method": "PZT map-to-design survey grid -> EPSG:2177 -> EPSG:2180",
+                    "manual_rotation_deg": 0.0,
+                    "manual_offset_m": [0.0,0.0],
+                    "model_to_epsg2177_affine_derived": np.round(M2177,12).tolist(),
+                    "model_to_geo_local_affine_mm": np.round(house_geo_affine,12).tolist(),
+                    "affine_linearization_error_mm": round(float(house_geo_affine_err_mm),6),
+                    "note": "Położenie domu wynika wyłącznie z geodezyjnej siatki PZT; brak ręcznego dopasowania do ortofotomapy."
                 },
                 "control": CFG["control"],
             },
