@@ -61,6 +61,7 @@ jobs:
           assert d["stats"]["context_buildings"] > 0, d["stats"]
           assert d["validation"]["parcel_contains_fetch_center"] is True, d["validation"]
           assert d["validation"]["distance_fetch_center_to_parcel_m"] == 0.0, d["validation"]
+          assert d["validation"].get("ortho_uv_roundtrip_max_error_mm", 999) < 0.01, d["validation"]
           print(json.dumps(d["stats"], ensure_ascii=False, indent=2))
           print(json.dumps(d.get("validation",{}), ensure_ascii=False, indent=2))
           PY
