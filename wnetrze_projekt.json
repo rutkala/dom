@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "v2 dimensions corrected against furniture plan p.49; geometry proxies, not manufacturer models",
+  "status": "v3 room-by-room review against visualizations, technical drawings and furniture plan p.49",
   "source": {
     "file": "Projekt wnętrza 20,10,2023.pdf",
     "pages": {
@@ -257,7 +257,7 @@
             2500
           ]
         ],
-        "role": "winiarka / witryna",
+        "role": "przeszklona witryna / winiarka 0,60 m - nie pełna szafka",
         "source_pages": [
           24
         ]
@@ -506,17 +506,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            7100,
-            5080,
+            7610,
+            5020,
             30
           ],
           [
-            9920,
-            5550,
-            790
+            10010,
+            5620,
+            900
           ]
         ],
-        "role": "dolna zabudowa spiżarni",
+        "role": "główny ciąg 2,40 m na ścianie północnej",
         "source_pages": [
           33,
           34,
@@ -529,17 +529,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            9340,
-            4280,
+            7010,
+            4210,
             30
           ],
           [
-            9940,
-            5050,
-            2550
+            7610,
+            5620,
+            2800
           ]
         ],
-        "role": "wysoka szafa spiżarni",
+        "role": "wysoka zabudowa na ścianie zachodniej (naprzeciw poprzedniej pozycji)",
         "source_pages": [
           35,
           36
@@ -551,17 +551,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            7120,
-            5180,
+            7610,
+            5270,
             1200
           ],
           [
-            9300,
-            5500,
+            10010,
+            5620,
             2385
           ]
         ],
-        "role": "górne półki",
+        "role": "górne półki nad ciągiem północnym",
         "source_pages": [
           34,
           36
@@ -573,17 +573,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            10480,
-            3020,
+            10310,
+            4460,
             30
           ],
           [
-            12980,
-            3580,
-            2550
+            12810,
+            5620,
+            2820
           ]
         ],
-        "role": "szafa 2500",
+        "role": "szafa 2,50 m w istniejącej wnęce 2,50 × 1,16 m",
         "source_pages": [
           38
         ]
@@ -594,17 +594,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            14890,
-            3080,
+            14910,
+            2960,
             320
           ],
           [
-            14940,
-            4180,
+            14950,
+            4110,
             2320
           ]
         ],
-        "role": "lustro podświetlane",
+        "role": "lustro podświetlane 1,15 m na ścianie wschodniej",
         "source_pages": [
           39
         ]
@@ -615,17 +615,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            14620,
-            3300,
-            800
+            14760,
+            3260,
+            750
           ],
           [
-            14930,
-            3950,
+            14960,
+            4060,
             900
           ]
         ],
-        "role": "konsola",
+        "role": "konsola 0,80 × 0,20 m pod lustrem",
         "source_pages": [
           39
         ]
@@ -637,16 +637,16 @@
         "bbox_mm": [
           [
             10320,
-            4530,
+            2960,
             30
           ],
           [
             10370,
-            5470,
-            2520
+            4460,
+            2820
           ]
         ],
-        "role": "lamele / ukryte drzwi",
+        "role": "lamele 1,50 m / drzwi ukryte na ścianie zachodniej",
         "source_pages": [
           40,
           41
@@ -657,13 +657,13 @@
         "room": 1,
         "primitive": "cylinder",
         "center_mm": [
-          11150,
-          4800,
+          11850,
+          3700,
           230
         ],
-        "radius_mm": 280,
+        "radius_mm": 300,
         "height_mm": 400,
-        "role": "pufa",
+        "role": "pufa w dolnej części wiatrołapu, poza wnęką szafy",
         "source_pages": [
           17,
           18,
@@ -997,6 +997,8 @@
     "Rysunki techniczne są nadrzędne dla wymiarów zabudów; wizualizacje służą do wyglądu i podziałów.",
     "Warstwa selected zawiera proxy wybranych produktów; nie są to modele producentów 1:1.",
     "Okno kuchenne pozostaje zgodne z aktualnym modelem budynku, nie z historycznym rysunkiem wnętrza.",
-    "Salon: stół 0,90 × 2,78 m, narożnik 1,82 × 2,78 m z częścią 1,20 m oraz stoliki Ø0,90/Ø0,60 m skorygowano bezpośrednio z rzutu umeblowania s.49."
+    "Salon: stół 0,90 × 2,78 m, narożnik 1,82 × 2,78 m z częścią 1,20 m oraz stoliki Ø0,90/Ø0,60 m skorygowano bezpośrednio z rzutu umeblowania s.49.",
+    "Korekta v3: spiżarnia przeniesiona na właściwe ściany; wiatrołap ma szafę w niszy 2,50×1,16 m, lamele 1,50 m na ścianie z drzwiami ukrytymi, a pufa jest poza niszą.",
+    "Korekta v3: w kuchni przeszklona winiarka ma być modelowana jako witryna, nie jako pełna drewniana szafka przy wejściu."
   ]
 }
