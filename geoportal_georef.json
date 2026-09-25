@@ -64,7 +64,12 @@
     "radius_m": 90,
     "mesh_step_m": 2,
     "ortho_tile_m": 6,
-    "parcel_line_width_m": 0.12
+    "parcel_line_width_m": 0.12,
+    "tree_min_height_m": 3.5,
+    "tree_min_spacing_m": 5,
+    "tree_max_count": 180,
+    "tree_crown_radius_factor": 0.22,
+    "context_building_max_count": 250
   },
   "services": {
     "nmt_wcs": {
@@ -98,6 +103,18 @@
       "preferred_coverage": "Orthoimagery_StandardResolution",
       "format": "GEOTIFF",
       "note": "Podstawowe źródło obrazu ortofotomapy do modelu; WMS pozostaje fallbackiem."
+    },
+    "nmpt_evrf_wms": {
+      "url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/NMPT/WMS/SkorowidzeWUkladzieEVRF2007",
+      "info_format": "text/html",
+      "note": "GetFeatureInfo udostępnia link do źródłowego NMPT PL-EVRF2007-NH; NMPT-NMT służy do estymacji wysokości drzew i budynków."
+    },
+    "egib_wfs": {
+      "url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/EGIB/WFS/UslugaZbiorcza",
+      "typename": "ms:budynki",
+      "geometry_field": "geom",
+      "srs": "EPSG:2180",
+      "note": "Zbiorcza usługa WFS EGiB; obrysy budynków używane do kontekstu 3D."
     }
   }
 }
