@@ -1020,7 +1020,7 @@ def main():
     def export_glb(filename: str, include_roof: bool):
         scene = trimesh.Scene(base_frame='DOM')
         for rec in parts:
-            if rec['category'] == 'sufity':
+            if rec['category'] in ['sufity','dom_geo']:
                 continue
             if not include_roof and rec['category'] in ['dach','strop','elewacja','daszek','teren','nawierzchnie','schody','teren_rzeczywisty','ortofoto','granica_dzialki','budynki_otoczenia','drzewa']:
                 continue
@@ -1049,7 +1049,7 @@ def main():
     obj = ['# Model roboczy domu z aktualnymi oknami. Units: meters. Z-up.', 'mtllib dom_materialy.mtl']
     offset = 0
     for rec in parts:
-        if rec['category'] == 'sufity':
+        if rec['category'] in ['sufity','dom_geo']:
             continue
         m = meshes[rec['name']]
         obj += [f"o {rec['name']}", f"g {GROUP_NAMES[rec['category']]}", f"usemtl {rec['material']}"]
