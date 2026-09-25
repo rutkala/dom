@@ -590,7 +590,7 @@ def polygon_grid_values(poly, arr, transform, nodata=None):
     return vals[valid]
 
 
-def build_context_buildings(buildings, nmt_arr, nmpt_arr, transform, nmt_nodata, zero_m, center_en):
+def build_context_buildings(buildings, nmt_arr, nmpt_arr, transform, nmt_nodata, zero_m, center_en, ortho_img, ortho_bbox):
     house = house_footprint_epsg2180().buffer(1.0)
     candidates = []
     for rec in buildings:
@@ -605,66 +605,51 @@ def build_context_buildings(buildings, nmt_arr, nmpt_arr, transform, nmt_nodata,
     candidates.sort(key=lambda x: x[0])
     candidates = candidates[:int(CFG["fetch"].get("context_building_max_count", 250))]
 
-    meshes = []
-    heights = []
-    accepted_geoms = []
-    for _, rec in candidates:
-        geom = rec["geometry"]
-        pieces = [geom] if isinstance(geom, Polygon) else list(geom.geoms)
-        nmt_vals = polygon_grid_values(geom, nmt_arr, transform, nmt_nodata)
-        if len(nmt_vals) == 0:
-            continue
-        base_abs = float(np.nanpercentile(nmt_vals, 10))
-        h = None
+    parts=[]; heights=[]; accepted_geoms=[]
+    for bi,(_,rec) in enumerate(candidates,1):
+        geom=rec["geometry"]
+        pieces=[geom] if isinstance(geom,Polygon) else list(geom.geoms)
+        nmt_vals=polygon_grid_values(geom,nmt_arr,transform,nmt_nodata)
+        if len(nmt_vals)==0: continue
+        base_abs=float(np.nanpercentile(nmt_vals,10))
+        total_h=None
         if nmpt_arr is not None:
-            nmpt_vals = polygon_grid_values(geom, nmpt_arr, transform, None)
+            nmpt_vals=polygon_grid_values(geom,nmpt_arr,transform,None)
             if len(nmpt_vals):
-                # Surface model inside footprint is normally roof height.
-                diffs = nmpt_vals[:min(len(nmpt_vals), len(nmt_vals))] - np.nanmedian(nmt_vals)
-                good = diffs[np.isfinite(diffs) & (diffs > 2.2) & (diffs < 45)]
-                if len(good):
-                    h = float(np.nanmedian(good))
-        if h is None or not math.isfinite(h):
-            h = 6.0
-        h = float(np.clip(h, 2.8, 30.0))
-
+                roof_abs=float(np.nanpercentile(nmpt_vals,75))
+                candidate_h=roof_abs-base_abs
+                if 2.5 < candidate_h < 35:
+                    total_h=candidate_h
+        if total_h is None or not math.isfinite(total_h):
+            total_h=6.0
+        total_h=float(np.clip(total_h,3.0,30.0))
+        eave_h=float(np.clip(total_h*0.64,2.8,max(total_h-1.0,2.8)))
+        body_meshes=[]
         for p in pieces:
-            ext = [epsg2180_to_model(float(e), float(n)) for e, n in p.exterior.coords]
-            holes = [[epsg2180_to_model(float(e), float(n)) for e, n in ring.coords] for ring in p.interiors]
-            lp = Polygon([(x/1000.0, y/1000.0) for x,y in ext],
-                         [[(x/1000.0, y/1000.0) for x,y in ring] for ring in holes])
-            if not lp.is_valid or lp.area < 2:
-                continue
+            ext=[epsg2180_to_model(float(e),float(n)) for e,n in p.exterior.coords]
+            holes=[[epsg2180_to_model(float(e),float(n)) for e,n in ring.coords] for ring in p.interiors]
+            lp=Polygon([(x/1000.0,y/1000.0) for x,y in ext],
+                       [[(x/1000.0,y/1000.0) for x,y in ring] for ring in holes])
+            if not lp.is_valid or lp.area<2: continue
             try:
-                mesh = trimesh.creation.extrude_polygon(lp, height=h, engine="earcut")
+                m=trimesh.creation.extrude_polygon(lp,height=eave_h,engine="earcut")
             except Exception:
                 continue
-            mesh.apply_translation([0,0,base_abs-zero_m])
-            meshes.append(mesh)
-            accepted_geoms.append(geom)
-            heights.append(h)
+            m.apply_translation([0,0,base_abs-zero_m])
+            body_meshes.append(m)
+        if body_meshes:
+            bm=trimesh.util.concatenate(body_meshes)
+            parts.append({"name":f"GEO_BUDYNEK_SCIANY_{bi:03d}","category":"budynki_otoczenia","material":"budynki_otoczenia",
+                "color":[0.73,0.71,0.67,1.0],"source":"Geoportal / EGiB","source_id":"GEO_BUILDINGS","assumed":False,
+                "note":"Ściany budynku sąsiedniego: obrys EGiB; wysokość okapu z NMPT-NMT lub fallback.",
+                "positions_m":np.round(bm.vertices,6).tolist(),"faces":bm.faces.tolist(),"reference_area_m2":round(float(geom.area),2)})
+            roof=make_gable_roof_part(geom,base_abs-zero_m,total_h,ortho_img,ortho_bbox,bi)
+            if roof: parts.append(roof)
+            accepted_geoms.append(geom); heights.append(total_h)
 
-    if not meshes:
-        return [], accepted_geoms, {"count":0}
-    combined = trimesh.util.concatenate(meshes)
-    part = {
-        "name":"GEO_BUDYNKI_OTOCZENIA",
-        "category":"budynki_otoczenia",
-        "material":"budynki_otoczenia",
-        "color":[0.62,0.60,0.56,1.0],
-        "source":"Geoportal / EGiB WFS + NMPT/NMT",
-        "source_id":"GEO_BUILDINGS",
-        "assumed":False,
-        "note":"Budynki sąsiadujące: obrysy EGiB, wysokości z różnicy NMPT-NMT; bryły LoD1 z płaskim dachem.",
-        "positions_m":np.round(combined.vertices,6).tolist(),
-        "faces":combined.faces.tolist(),
-        "reference_area_m2":round(sum(g.area for g in accepted_geoms),2),
-    }
-    return [part], accepted_geoms, {
-        "count":len(meshes),
+    return parts,accepted_geoms,{"count":len(accepted_geoms),
         "median_height_m":round(float(np.median(heights)),2) if heights else None,
-        "max_height_m":round(float(max(heights)),2) if heights else None,
-    }
+        "max_height_m":round(float(max(heights)),2) if heights else None}
 
 
 def make_tree_mesh(x, y, ground_z, h, crown_radius):
@@ -1011,6 +996,122 @@ def build_terrain_part(arr, transform, nodata, zero_m: float):
     }
 
 
+
+def build_ortho_surface(terrain):
+    """Jedna powierzchnia ortofoto zgodna 1:1 z meshem NMT; tekstura jest nakładana w HTML."""
+    verts = [[float(x), float(y), float(z) + 0.025] for x,y,z in terrain["positions_m"]]
+    return [{
+        "name":"GEO_ORTHO_TEXTURED",
+        "category":"ortofoto",
+        "material":"ortofoto",
+        "color":[1.0,1.0,1.0,1.0],
+        "source":"Geoportal / GUGiK ortofotomapa",
+        "source_id":"GEO_ORTHO",
+        "assumed":False,
+        "note":"Rzeczywista ortofotomapa jest teksturowana na powierzchni NMT w podglądzie HTML.",
+        "texture":"geoportal_ortho",
+        "positions_m":verts,
+        "faces":terrain["faces"],
+        "reference_area_m2":terrain.get("reference_area_m2"),
+    }]
+
+
+def make_gable_roof_part(poly, base_abs, total_h, ortho_img, ortho_bbox, idx):
+    rect = poly.minimum_rotated_rectangle
+    coords = list(rect.exterior.coords)[:-1]
+    if len(coords) != 4:
+        return None
+    q = [np.asarray(p, dtype=float) for p in coords]
+    l01=float(np.linalg.norm(q[1]-q[0])); l12=float(np.linalg.norm(q[2]-q[1]))
+    if l01 < l12:
+        q=[q[1],q[2],q[3],q[0]]
+    r0=(q[0]+q[3])/2; r1=(q[1]+q[2])/2
+    eave_h=float(np.clip(total_h*0.64,2.8,max(total_h-1.0,2.8)))
+    ridge_h=float(max(total_h,eave_h+1.0))
+    pts_2180=[q[0],q[1],q[2],q[3],r0,r1]
+    pts=[]
+    for e,n in pts_2180:
+        x_mm,y_mm=epsg2180_to_model(float(e),float(n))
+        pts.append([x_mm/1000.0,y_mm/1000.0,0.0])
+    for i in range(4): pts[i][2]=base_abs + eave_h
+    pts[4][2]=base_abs + ridge_h; pts[5][2]=base_abs + ridge_h
+    faces=[[0,1,5],[0,5,4],[3,4,5],[3,5,2],[0,4,3],[1,2,5]]
+    c=poly.centroid
+    col=sample_image_rgb(np.asarray(ortho_img),ortho_bbox,float(c.x),float(c.y))
+    col=[round(min(max(v*0.95,0),1),4) for v in col[:3]]+[1.0]
+    return {
+        "name":f"GEO_BUDYNEK_DACH_{idx:03d}",
+        "category":"budynki_otoczenia",
+        "material":"budynki_dachy",
+        "color":col,
+        "source":"Geoportal / EGiB + ortofotomapa",
+        "source_id":"GEO_BUILDINGS",
+        "assumed":True,
+        "note":"Uproszczony dach dwuspadowy; obrys z EGiB, kolor z ortofotomapy, wysokość z NMPT-NMT lub fallback.",
+        "positions_m":pts,
+        "faces":faces,
+        "reference_area_m2":round(float(poly.area),2),
+    }
+
+
+def build_context_trees_from_ortho(img, bbox, nmt_arr, transform, nmt_nodata, building_geoms, zero_m):
+    """Fallback, gdy NMPT nie jest dostępny: pozycje z ciemnozielonych skupisk ortofoto, wysokości orientacyjne."""
+    minx,miny,maxx,maxy=bbox
+    arr=np.asarray(img.resize((240,240),Image.BILINEAR)).astype(float)/255.0
+    h,w=arr.shape[:2]
+    score_grid=np.full((h,w),-999.0,dtype=float)
+    for r in range(h):
+        for c in range(w):
+            rr,gg,bb=arr[r,c]
+            bright=(rr+gg+bb)/3
+            green=gg-0.5*(rr+bb)
+            if gg>rr*1.03 and gg>bb*0.95 and green>0.035 and bright<0.62:
+                score_grid[r,c]=green+(0.62-bright)*0.35
+    candidates=[]
+    for r in range(2,h-2):
+        for c in range(2,w-2):
+            sc=score_grid[r,c]
+            if sc<0: continue
+            if sc+1e-9 < np.max(score_grid[r-2:r+3,c-2:c+3]): continue
+            e=minx+(c+0.5)/w*(maxx-minx)
+            n=maxy-(r+0.5)/h*(maxy-miny)
+            p=Point(e,n)
+            if any(g.contains(p) for g in building_geoms):
+                continue
+            candidates.append((float(sc),e,n))
+    candidates.sort(reverse=True)
+    spacing=float(CFG["fetch"].get("tree_min_spacing_m",5.0))
+    max_count=int(CFG["fetch"].get("tree_max_count",180))
+    selected=[]
+    for sc,e,n in candidates:
+        if any((e-e2)**2+(n-n2)**2<spacing**2 for _,e2,n2 in selected): continue
+        selected.append((sc,e,n))
+        if len(selected)>=max_count: break
+
+    trunks=[];crowns=[];heights=[]
+    for sc,e,n in selected:
+        ground=raster_value(nmt_arr,transform,nmt_nodata,e,n)
+        if ground is None: continue
+        height=float(np.clip(6.0+sc*18.0,5.0,14.0))
+        x_mm,y_mm=epsg2180_to_model(e,n)
+        radius=float(np.clip(height*0.24,1.2,3.8))
+        trunk,crown=make_tree_mesh(x_mm/1000.0,y_mm/1000.0,ground-zero_m,height,radius)
+        trunks.append(trunk);crowns.append(crown);heights.append(height)
+    parts=[]
+    if trunks:
+        tm=trimesh.util.concatenate(trunks); cm=trimesh.util.concatenate(crowns)
+        parts.append({"name":"GEO_DRZEWA_PNIE","category":"drzewa","material":"drzewa_pnie","color":[0.28,0.18,0.10,1.0],
+            "source":"Geoportal / ortofotomapa + NMT","source_id":"GEO_TREES","assumed":True,
+            "note":"Fallback: pozycje drzew estymowane z ciemnozielonych skupisk ortofotomapy; wysokości orientacyjne.",
+            "positions_m":np.round(tm.vertices,6).tolist(),"faces":tm.faces.tolist(),"reference_area_m2":None})
+        parts.append({"name":"GEO_DRZEWA_KORONY","category":"drzewa","material":"drzewa_korony","color":[0.20,0.40,0.14,1.0],
+            "source":"Geoportal / ortofotomapa + NMT","source_id":"GEO_TREES","assumed":True,
+            "note":"Fallback: uproszczone korony z ortofotomapy, nie inwentaryzacja dendrologiczna.",
+            "positions_m":np.round(cm.vertices,6).tolist(),"faces":cm.faces.tolist(),"reference_area_m2":None})
+    return parts,{"count":len(heights),"median_height_m":round(float(np.median(heights)),2) if heights else None,
+                  "max_height_m":round(float(max(heights)),2) if heights else None,"source":"ortho_fallback"}
+
+
 def sample_image_rgb(img_arr: np.ndarray, bbox, e: float, n: float):
     minx, miny, maxx, maxy = bbox
     h, w = img_arr.shape[:2]
@@ -1155,8 +1256,8 @@ def main():
             print(f"UWAGA: NMPT niedostępny, pomijam drzewa/wysokości kontekstu: {exc}")
 
         ortho_img, ortho_url, ortho_attempts = fetch_orthophoto(bbox)
-        ortho_img.save(ROOT / "geoportal_ortho.jpg", format="JPEG", quality=90, optimize=True)
-        ortho_parts = build_ortho_tiles(ortho_img, bbox, arr, transform, nodata, zero_m)
+        ortho_img.save(ROOT / "geoportal_ortho.jpg", format="JPEG", quality=92, optimize=True)
+        ortho_parts = build_ortho_surface(terrain)
 
         parcel_parts = []
         validation = {}
@@ -1181,16 +1282,21 @@ def main():
         try:
             building_records, building_meta = fetch_egib_buildings(bbox)
             building_parts, building_geoms, building_stats = build_context_buildings(
-                building_records, arr, nmpt_aligned, transform, nodata, zero_m, (cx,cy)
+                building_records, arr, nmpt_aligned, transform, nodata, zero_m, (cx,cy), ortho_img, bbox
             )
             building_meta["rendered"] = building_stats.get("count",0)
         except Exception as exc:
             building_meta = {"service":CFG["services"]["egib_wfs"]["url"],"error":repr(exc)}
             print(f"UWAGA: EGiB budynki niedostępne: {exc}")
 
-        tree_parts, tree_stats = build_context_trees(
-            arr, nmpt_aligned, transform, nodata, building_geoms, zero_m
-        )
+        if nmpt_aligned is not None:
+            tree_parts, tree_stats = build_context_trees(
+                arr, nmpt_aligned, transform, nodata, building_geoms, zero_m
+            )
+        else:
+            tree_parts, tree_stats = build_context_trees_from_ortho(
+                ortho_img, bbox, arr, transform, nodata, building_geoms, zero_m
+            )
 
         result = {
             "status": "fetched",
