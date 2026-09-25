@@ -79,6 +79,31 @@ M2177_INV = np.linalg.inv(M2177)
 TO_2180 = Transformer.from_crs(2177, 2180, always_xy=True)
 TO_2177 = Transformer.from_crs(2180, 2177, always_xy=True)
 
+# Native Geoportal scene frame.
+# All public geodata layers (NMT, ortho, EGiB, parcel, trees) are first aligned
+# to each other in EPSG:2180. The house model is calibrated to this frame later,
+# as a separate step.
+GEO_CENTER_2180 = None
+GEO_ANCHOR_MODEL_MM = np.asarray(CFG["fetch"]["center_model_mm"], dtype=float)
+
+def set_geo_frame(e: float, n: float):
+    global GEO_CENTER_2180
+    GEO_CENTER_2180 = np.asarray([float(e), float(n)], dtype=float)
+
+def epsg2180_to_geo_local(e: float, n: float) -> tuple[float,float]:
+    if GEO_CENTER_2180 is None:
+        raise RuntimeError("Geo frame not initialized.")
+    delta = np.asarray([float(e), float(n)], dtype=float) - GEO_CENTER_2180
+    out = GEO_ANCHOR_MODEL_MM + delta * 1000.0
+    return float(out[0]), float(out[1])
+
+def geo_local_to_epsg2180(x_mm: float, y_mm: float) -> tuple[float,float]:
+    if GEO_CENTER_2180 is None:
+        raise RuntimeError("Geo frame not initialized.")
+    delta = (np.asarray([float(x_mm), float(y_mm)], dtype=float) - GEO_ANCHOR_MODEL_MM) / 1000.0
+    out = GEO_CENTER_2180 + delta
+    return float(out[0]), float(out[1])
+
 ORIENTATION_DEG = float(CFG.get("orientation_correction_deg", 0.0))
 ORIENTATION_RAD = math.radians(ORIENTATION_DEG)
 ROT = np.asarray([
@@ -592,8 +617,12 @@ def fetch_egib_buildings(bbox):
 
 
 def house_footprint_epsg2180():
-    pts = [model_to_epsg2180(float(x), float(y)) for x, y in MODEL_DATA["facade_reference_outline"]["polygon_mm"]]
-    return Polygon(pts)
+    # Until the house itself is calibrated to the map, do not use the old PZT affine
+    # as a hard geospatial constraint. Use only a small exclusion around the geo frame
+    # center so context buildings do not obscure the model during calibration.
+    if GEO_CENTER_2180 is None:
+        return Polygon()
+    return Point(float(GEO_CENTER_2180[0]), float(GEO_CENTER_2180[1])).buffer(10.0)
 
 
 def polygon_grid_values(poly, arr, transform, nodata=None):
@@ -641,8 +670,8 @@ def build_context_buildings(buildings, nmt_arr, nmpt_arr, transform, nmt_nodata,
         eave_h=float(np.clip(total_h*0.64,2.8,max(total_h-1.0,2.8)))
         body_meshes=[]
         for p in pieces:
-            ext=[epsg2180_to_model(float(e),float(n)) for e,n in p.exterior.coords]
-            holes=[[epsg2180_to_model(float(e),float(n)) for e,n in ring.coords] for ring in p.interiors]
+            ext=[epsg2180_to_geo_local(float(e),float(n)) for e,n in p.exterior.coords]
+            holes=[[epsg2180_to_geo_local(float(e),float(n)) for e,n in ring.coords] for ring in p.interiors]
             lp=Polygon([(x/1000.0,y/1000.0) for x,y in ext],
                        [[(x/1000.0,y/1000.0) for x,y in ring] for ring in holes])
             if not lp.is_valid or lp.area<2: continue
@@ -728,7 +757,7 @@ def build_context_trees(nmt_arr, nmpt_arr, transform, nmt_nodata, building_geoms
     for h,e,n,r,c in selected:
         h=float(np.clip(h,threshold,24.0))
         ground=float(nmt_arr[r,c])-zero_m
-        x_mm,y_mm=epsg2180_to_model(e,n)
+        x_mm,y_mm=epsg2180_to_geo_local(e,n)
         radius=float(np.clip(h*factor,1.1,4.2))
         trunk,crown=make_tree_mesh(x_mm/1000.0,y_mm/1000.0,ground,h,radius)
         trunks.append(trunk); crowns.append(crown); heights.append(h)
@@ -971,7 +1000,7 @@ def build_terrain_part(arr, transform, nodata, zero_m: float):
             if not valid:
                 continue
             e, n = rasterio.transform.xy(transform, row, col, offset="center")
-            x_mm, y_mm = epsg2180_to_model(float(e), float(n))
+            x_mm, y_mm = epsg2180_to_geo_local(float(e), float(n))
             index[(ir, ic)] = len(vertices)
             vertices.append([x_mm / 1000.0, y_mm / 1000.0, h - zero_m])
             heights.append(h)
@@ -1023,12 +1052,12 @@ def build_ortho_surface(terrain, bbox):
     uv = []
     max_roundtrip_err = 0.0
     for x,y,_ in terrain["positions_m"]:
-        e,n = model_to_epsg2180(float(x)*1000.0, float(y)*1000.0)
+        e,n = geo_local_to_epsg2180(float(x)*1000.0, float(y)*1000.0)
         u = (e-minx)/max(maxx-minx,1e-9)
         v = (n-miny)/max(maxy-miny,1e-9)
         uv.append([float(u),float(v)])
         # kontrola odwracalności transformacji
-        rx,ry = epsg2180_to_model(e,n)
+        rx,ry = epsg2180_to_geo_local(e,n)
         max_roundtrip_err = max(max_roundtrip_err, math.hypot(rx-float(x)*1000.0, ry-float(y)*1000.0))
     return [{
         "name":"GEO_ORTHO_TEXTURED",
@@ -1063,7 +1092,7 @@ def make_gable_roof_part(poly, base_abs, total_h, ortho_img, ortho_bbox, idx):
     pts_2180=[q[0],q[1],q[2],q[3],r0,r1]
     pts=[]
     for e,n in pts_2180:
-        x_mm,y_mm=epsg2180_to_model(float(e),float(n))
+        x_mm,y_mm=epsg2180_to_geo_local(float(e),float(n))
         pts.append([x_mm/1000.0,y_mm/1000.0,0.0])
     for i in range(4): pts[i][2]=base_abs + eave_h
     pts[4][2]=base_abs + ridge_h; pts[5][2]=base_abs + ridge_h
@@ -1125,7 +1154,7 @@ def build_context_trees_from_ortho(img, bbox, nmt_arr, transform, nmt_nodata, bu
         ground=raster_value(nmt_arr,transform,nmt_nodata,e,n)
         if ground is None: continue
         height=float(np.clip(6.0+sc*18.0,5.0,14.0))
-        x_mm,y_mm=epsg2180_to_model(e,n)
+        x_mm,y_mm=epsg2180_to_geo_local(e,n)
         radius=float(np.clip(height*0.24,1.2,3.8))
         trunk,crown=make_tree_mesh(x_mm/1000.0,y_mm/1000.0,ground-zero_m,height,radius)
         trunks.append(trunk);crowns.append(crown);heights.append(height)
@@ -1182,7 +1211,7 @@ def build_ortho_tiles(img: Image.Image, bbox, arr, transform, nodata, zero_m: fl
                 if h is None:
                     ok = False
                     break
-                x_mm, y_mm = epsg2180_to_model(e, n)
+                x_mm, y_mm = epsg2180_to_geo_local(e, n)
                 verts.append([x_mm / 1000.0, y_mm / 1000.0, (h - zero_m) + 0.025])
             if not ok:
                 continue
@@ -1214,8 +1243,8 @@ def build_parcel_parts(parcel_geom, arr, transform, nodata, zero_m: float):
             h1 = raster_value(arr, transform, nodata, e1, n1)
             if h0 is None or h1 is None:
                 continue
-            x0, y0 = epsg2180_to_model(e0, n0)
-            x1, y1 = epsg2180_to_model(e1, n1)
+            x0, y0 = epsg2180_to_geo_local(e0, n0)
+            x1, y1 = epsg2180_to_geo_local(e1, n1)
             p0 = np.asarray([x0 / 1000.0, y0 / 1000.0], dtype=float)
             p1 = np.asarray([x1 / 1000.0, y1 / 1000.0], dtype=float)
             d = p1 - p0
@@ -1247,13 +1276,9 @@ def build_parcel_parts(parcel_geom, arr, transform, nodata, zero_m: float):
 def main():
     fetch_cfg = CFG["fetch"]
     cx_mm, cy_mm = map(float, fetch_cfg["center_model_mm"])
-    cx, cy = model_to_epsg2180(cx_mm, cy_mm)
-    radius = float(fetch_cfg.get("radius_m", 90.0))
-    bbox = (cx - radius, cy - radius, cx + radius, cy + radius)
+    # Old PZT affine is used only as a fallback seed for locating the parcel.
+    seed_cx, seed_cy = model_to_epsg2180(cx_mm, cy_mm)
     zero_m = float(CFG["vertical"]["model_zero_elevation_m"])
-
-    print(f"Model center EPSG:2180: {cx:.3f}, {cy:.3f}")
-    print(f"Geoportal bbox EPSG:2180: {bbox}")
 
     parcel_geom = None
     parcel_error = None
@@ -1263,6 +1288,23 @@ def main():
     except Exception as exc:
         parcel_error = str(exc)
         print(f"UWAGA: ULDK validation failed: {parcel_error}")
+
+    # Base Geoportal layers are centered in the native cadastral frame, not by the
+    # house-model transform. This guarantees NMT, orthophoto, parcel and EGiB share
+    # exactly one horizontal reference frame.
+    if parcel_geom is not None and not parcel_geom.is_empty:
+        pc = parcel_geom.centroid
+        cx, cy = float(pc.x), float(pc.y)
+        geo_center_source = "parcel_centroid_ULDK"
+    else:
+        cx, cy = float(seed_cx), float(seed_cy)
+        geo_center_source = "legacy_PZT_affine_fallback"
+    set_geo_frame(cx, cy)
+
+    radius = float(fetch_cfg.get("radius_m", 90.0))
+    bbox = (cx - radius, cy - radius, cx + radius, cy + radius)
+    print(f"Geo frame center EPSG:2180: {cx:.3f}, {cy:.3f} ({geo_center_source})")
+    print(f"Geoportal bbox EPSG:2180: {bbox}")
 
     arr, transform, nodata, nmt_meta, tmp_holder = fetch_nmt_evrf(bbox)
     nmpt_holder = None
@@ -1300,11 +1342,12 @@ def main():
         )
         if parcel_geom is not None:
             parcel_parts = build_parcel_parts(parcel_geom, arr, transform, nodata, zero_m)
-            house_center = Point(cx, cy)
+            geo_center_point = Point(cx, cy)
             validation.update({
-                "parcel_contains_fetch_center": bool(parcel_geom.contains(house_center) or parcel_geom.touches(house_center)),
-                "distance_fetch_center_to_parcel_m": round(float(parcel_geom.distance(house_center)), 3),
+                "parcel_contains_fetch_center": bool(parcel_geom.contains(geo_center_point) or parcel_geom.touches(geo_center_point)),
+                "distance_fetch_center_to_parcel_m": round(float(parcel_geom.distance(geo_center_point)), 3),
                 "parcel_area_m2": round(float(parcel_geom.area), 3),
+                "geo_base_frame": "EPSG:2180 parcel-centered, no rotation",
             })
 
         building_records = []
@@ -1351,11 +1394,18 @@ def main():
             "alignment": {
                 "model_zero_elevation_m": zero_m,
                 "model_vertical_system": CFG["vertical"]["system"],
-                "model_horizontal_source_crs": "EPSG:2177",
                 "download_crs": "EPSG:2180",
                 "bbox_epsg2180": [round(v, 3) for v in bbox],
-                "center_epsg2180": [round(cx, 3), round(cy, 3)],
-                "model_to_epsg2177_affine": CFG["model_to_epsg2177_affine"],
+                "geo_context_center_epsg2180": [round(cx, 3), round(cy, 3)],
+                "geo_context_center_source": geo_center_source,
+                "geo_context_anchor_model_mm": [round(float(GEO_ANCHOR_MODEL_MM[0]),3), round(float(GEO_ANCHOR_MODEL_MM[1]),3)],
+                "geo_context_rule": "native EPSG:2180 east/north -> local x/y, no rotation; shared by NMT/ortho/parcel/EGiB",
+                "house_calibration": {
+                    "status": "pending",
+                    "legacy_model_to_epsg2177_affine": CFG["model_to_epsg2177_affine"],
+                    "legacy_orientation_correction_deg": CFG.get("orientation_correction_deg",0.0),
+                    "note": "House/model alignment is intentionally separated from the base Geoportal frame."
+                },
                 "control": CFG["control"],
             },
             "validation": {
