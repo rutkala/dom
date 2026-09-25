@@ -65,8 +65,26 @@ jobs:
           assert d["alignment"]["house_calibration"]["status"] == "reality_georeferenced", d["alignment"]["house_calibration"]
           assert d["validation"]["house_alignment_source"] in {"EGiB_building_footprint","orthophoto_roof_within_parcel"}, d["validation"]
           assert d["validation"].get("calibrated_house_inside_parcel_fraction",0) >= 0.95, d["validation"]
+          if d["validation"]["house_alignment_source"] == "orthophoto_roof_within_parcel":
+              fit=d["validation"].get("house_ortho_fit") or {}
+              assert fit.get("status") == "accepted", fit
+              assert 0.80 <= float(fit.get("roof_component_area_ratio",0)) <= 1.40, fit
+              assert float(fit.get("roof_mask_hit",0)) >= 0.80, fit
+              assert float(fit.get("roof_edge_score",0)) >= 0.15, fit
+              assert float(fit.get("pzt_seed_distance_m",999)) <= 10.0, fit
+          scene=json.loads(Path("scena_modelu.json").read_text(encoding="utf-8"))
+          geo_parts=[x for x in scene.get("parts",[]) if x.get("category")=="dom_geo"]
+          assert geo_parts, "Brak warstwy dom_geo w scenie"
+          html=Path("index.html").read_text(encoding="utf-8")
+          assert "Dom dopasowany do ortofotomapy" in html
+          assert "Dom wg geodezyjnego PZT" not in html
+          assert "if(mode==='geo')" in html
+          assert "$('#geoHouse').checked=true" in html
+          assert "$('#walls').checked=false" in html
+          assert "$('#contextTrees').checked=false" in html
           print(json.dumps(d["stats"], ensure_ascii=False, indent=2))
           print(json.dumps(d.get("validation",{}), ensure_ascii=False, indent=2))
+          print(f"Geo house parts: {len(geo_parts)}")
           PY
 
       - name: Commit regenerated terrain and model assets
