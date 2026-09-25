@@ -393,6 +393,21 @@ def add_interior_layers():
             for block_id in refs:
                 clone_block(sid,block_id,cabinet_materials.get(block_id,'interior_black'),product)
 
+    # Kitchen worktops / sink make the selected layer visually different from plain blocks.
+    _interior_box('SEL_KITCHEN_top_window','wnetrze_elementy','interior_oak',
+        [[7060,8730,840],[11000,9310,900]],source,11,'selected','blat pod oknem',[21,22],'dąb craft złoty')
+    _interior_box('SEL_KITCHEN_top_left','wnetrze_elementy','interior_oak',
+        [[7060,6160,900],[7700,8720,960]],source,11,'selected','blat ciągu L',[21,23],'dąb craft złoty')
+    _interior_box('SEL_KITCHEN_top_island','wnetrze_elementy','interior_oak',
+        [[8880,6830,900],[11840,7790,960]],source,11,'selected','blat wyspy 2900×900',[21,25,26],'dąb craft złoty')
+    sink_rec=next((x for x in INTERIOR['layers']['selected'] if x['id']=='SEL_KITCHEN_SINK'),None)
+    if sink_rec:
+        bb=sink_rec['proxy']['bbox_mm']
+        _interior_box('SEL_KITCHEN_sink','wnetrze_elementy','interior_black',
+            [[bb[0][0],bb[0][1],955],[bb[1][0],bb[1][1],985]],source,11,'selected','zlewozmywak',[21,25,26,50],sink_rec['product'])
+        _interior_cylinder('SEL_KITCHEN_faucet','wnetrze_elementy','interior_metal',
+            [9630,7040,1045],25,180,source,11,'selected','bateria kuchenna - proxy',[25,26,50],'bateria kuchenna')
+
     # Kitchen stools: recognizable seats + four slim legs.
     stool_rec=next((x for x in INTERIOR['layers']['selected'] if x['id']=='SEL_KITCHEN_STOOLS'),None)
     if stool_rec:
@@ -402,9 +417,12 @@ def add_interior_layers():
                 _interior_box(f"SEL_HOKER_{idx}_leg_{dx}_{dy}",'wnetrze_elementy','interior_metal',
                     [[cx+dx-12,cy+dy-12,40],[cx+dx+12,cy+dy+12,660]],source,11,'selected','noga hokera',[50],stool_rec['product'])
 
-    # Dining table gets oak top and eight selected-chair proxies.
+    # Dining table: exact 0.90 × 2.78 m top from plan p.49 + four black legs.
     clone_block('DINING','SAL_DINING_TABLE','interior_oak','stół - zamówienie indywidualne')
-    chair_y=[6820,7550,8280,9010]
+    for idx,(lx,ly) in enumerate(((13560,6740),(14300,6740),(13560,9140),(14300,9140)),1):
+        _interior_box(f'SEL_DINING_leg_{idx}','wnetrze_elementy','interior_metal',
+            [[lx-25,ly-25,30],[lx+25,ly+25,720]],source,10,'selected','noga stołu',[49],'stół - zamówienie indywidualne')
+    chair_y=[6830,7570,8310,9050]
     for side,cx in (('L',13080),('R',14780)):
         for idx,cy in enumerate(chair_y,1):
             _interior_box(f"SEL_CHAIR_{side}_{idx}_seat",'wnetrze_elementy','interior_cream',
@@ -416,13 +434,15 @@ def add_interior_layers():
                 _interior_box(f"SEL_CHAIR_{side}_{idx}_leg_{dx}_{dy}",'wnetrze_elementy','interior_metal',
                     [[cx+dx-15,cy+dy-15,30],[cx+dx+15,cy+dy+15,430]],source,10,'selected','noga krzesła',[51],'Alaska beżowe, nogi czarne')
 
-    # Sofa Liquid / Soro 21 proxy with backs and loose cushions.
+    # Sofa Liquid / Soro 21: dimensions corrected from p.49 (overall 1.82 × 2.78 m, chaise depth 1.20 m).
     clone_block('SOFA','SAL_SOFA_LONG','interior_cream','Liquid / tkanina Soro 21')
     clone_block('SOFA','SAL_SOFA_CHAISE','interior_cream','Liquid / tkanina Soro 21')
-    _interior_box('SEL_SOFA_back_long','wnetrze_elementy','interior_cream',[[15420,6650,400],[15620,9150,930]],source,10,'selected','oparcie narożnika',[11,14,15,51],'Liquid / tkanina Soro 21')
-    _interior_box('SEL_SOFA_back_chaise','wnetrze_elementy','interior_cream',[[15550,6580,400],[17900,6780,830]],source,10,'selected','oparcie szezlonga',[11,14,15,51],'Liquid / tkanina Soro 21')
-    for idx,(y0,y1) in enumerate(((7550,8050),(8120,8620)),1):
-        _interior_box(f'SEL_SOFA_cushion_{idx}','wnetrze_elementy','interior_cream',[[15620,y0,580],[15840,y1,860]],source,10,'selected','poduszka',[14,51],'Liquid / tkanina Soro 21')
+    _interior_box('SEL_SOFA_back_long','wnetrze_elementy','interior_cream',[[15420,6650,400],[15620,9430,930]],source,10,'selected','oparcie narożnika',[11,14,15,49,51],'Liquid / tkanina Soro 21')
+    _interior_box('SEL_SOFA_back_chaise','wnetrze_elementy','interior_cream',[[15550,6580,400],[17370,6780,830]],source,10,'selected','oparcie szezlonga',[11,14,15,49,51],'Liquid / tkanina Soro 21')
+    _interior_box('SEL_SOFA_arm_end','wnetrze_elementy','interior_cream',[[16270,9200,420],[16520,9430,780]],source,10,'selected','podłokietnik',[11,14,15,49,51],'Liquid / tkanina Soro 21')
+    for idx,(y0,y1) in enumerate(((6940,7670),(7770,8500),(8600,9330)),1):
+        _interior_box(f'SEL_SOFA_seat_{idx}','wnetrze_elementy','interior_cream',[[15620,y0,545],[16380,y1,610]],source,10,'selected','poduszka siedziska',[14,15,49,51],'Liquid / tkanina Soro 21')
+    _interior_box('SEL_SOFA_chaise_seat','wnetrze_elementy','interior_cream',[[16420,6850,545],[17280,7750,610]],source,10,'selected','poduszka szezlonga',[14,15,49,51],'Liquid / tkanina Soro 21')
 
     # Mustard accent armchair.
     _interior_box('SEL_ARMCHAIR_seat','wnetrze_elementy','interior_mustard',[[17850,8780,350],[18650,9500,550]],source,10,'selected','siedzisko fotela',[11,14,15,51],'Sensi / Soro 40')
