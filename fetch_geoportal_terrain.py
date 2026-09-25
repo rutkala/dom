@@ -1012,9 +1012,24 @@ def build_terrain_part(arr, transform, nodata, zero_m: float):
 
 
 
-def build_ortho_surface(terrain):
-    """Jedna powierzchnia ortofoto zgodna 1:1 z meshem NMT; tekstura jest nakładana w HTML."""
+def build_ortho_surface(terrain, bbox):
+    """Jedna powierzchnia ortofoto zgodna 1:1 z meshem NMT.
+
+    UV są liczone w układzie EPSG:2180, a nie z lokalnego bbox modelu.
+    Dzięki temu ortofoto pozostaje zgodne z EGiB/NMT także po obrocie georeferencji.
+    """
+    minx,miny,maxx,maxy = map(float,bbox)
     verts = [[float(x), float(y), float(z) + 0.025] for x,y,z in terrain["positions_m"]]
+    uv = []
+    max_roundtrip_err = 0.0
+    for x,y,_ in terrain["positions_m"]:
+        e,n = model_to_epsg2180(float(x)*1000.0, float(y)*1000.0)
+        u = (e-minx)/max(maxx-minx,1e-9)
+        v = (n-miny)/max(maxy-miny,1e-9)
+        uv.append([float(u),float(v)])
+        # kontrola odwracalności transformacji
+        rx,ry = epsg2180_to_model(e,n)
+        max_roundtrip_err = max(max_roundtrip_err, math.hypot(rx-float(x)*1000.0, ry-float(y)*1000.0))
     return [{
         "name":"GEO_ORTHO_TEXTURED",
         "category":"ortofoto",
@@ -1023,11 +1038,13 @@ def build_ortho_surface(terrain):
         "source":"Geoportal / GUGiK ortofotomapa",
         "source_id":"GEO_ORTHO",
         "assumed":False,
-        "note":"Rzeczywista ortofotomapa jest teksturowana na powierzchni NMT w podglądzie HTML.",
+        "note":"Rzeczywista ortofotomapa teksturowana na NMT; UV liczone bezpośrednio z EPSG:2180.",
         "texture":"geoportal_ortho",
+        "texture_uv":uv,
         "positions_m":verts,
         "faces":terrain["faces"],
         "reference_area_m2":terrain.get("reference_area_m2"),
+        "uv_roundtrip_max_error_mm":round(max_roundtrip_err,6),
     }]
 
 
@@ -1272,7 +1289,7 @@ def main():
 
         ortho_img, ortho_url, ortho_attempts = fetch_orthophoto(bbox)
         ortho_img.save(ROOT / "geoportal_ortho.jpg", format="JPEG", quality=92, optimize=True)
-        ortho_parts = build_ortho_surface(terrain)
+        ortho_parts = build_ortho_surface(terrain, bbox)
 
         parcel_parts = []
         validation = {}
@@ -1341,7 +1358,10 @@ def main():
                 "model_to_epsg2177_affine": CFG["model_to_epsg2177_affine"],
                 "control": CFG["control"],
             },
-            "validation": validation,
+            "validation": {
+                **validation,
+                "ortho_uv_roundtrip_max_error_mm": ortho_parts[0].get("uv_roundtrip_max_error_mm") if ortho_parts else None,
+            },
             "stats": {
                 "terrain_min_elevation_m": terrain["stats"]["min_elevation_m"],
                 "terrain_max_elevation_m": terrain["stats"]["max_elevation_m"],
