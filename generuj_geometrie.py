@@ -572,10 +572,10 @@ def add_interior_layers():
 
 
 def add_georeferenced_house_overlay():
-    """Tworzy kopię zewnętrznej bryły domu w pozycji geodezyjnej z PZT.
+    """Tworzy kopię zewnętrznej bryły domu w aktualnej pozycji georeferencyjnej.
 
-    Pozycja XY wynika z geodezyjnej siatki mapy do celów projektowych
-    (EPSG:2177 -> EPSG:2180) i nie zawiera ręcznej translacji/rotacji.
+    Transformacja pochodzi z geoportal_teren.json. Preferowany jest obrys EGiB,
+    a przy jego braku — dopasowanie do rzeczywistego dachu na ortofotomapie.
     """
     if not GEO_REAL or GEO_REAL.get('status') != 'fetched':
         return
@@ -602,9 +602,9 @@ def add_georeferenced_house_overlay():
             'dom_geo',
             rec['material'],
             m,
-            'PZT geodezyjny / siatka PL-2000 strefa 6 -> EPSG:2180',
+            'Geoportal / dopasowanie domu do danych rzeczywistych',
             False,
-            'Georeferencjonowana kopia elementu domu; bez ręcznej kalibracji do ortofotomapy.',
+            'Georeferencjonowana kopia elementu domu; transformacja wg bieżącej kalibracji EGiB/ortofotomapy.',
             rec.get('source_id',''),
             {
                 'geo_house':True,
