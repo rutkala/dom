@@ -36,9 +36,9 @@ from scipy import ndimage
 from pyproj import Transformer
 from rasterio.merge import merge as raster_merge
 from rasterio.warp import reproject, Resampling
-from rasterio.features import geometry_mask
+from rasterio.features import geometry_mask, shapes
 from shapely import wkt
-from shapely.geometry import Point, Polygon, MultiPolygon, mapping
+from shapely.geometry import Point, Polygon, MultiPolygon, mapping, shape
 import trimesh
 
 ROOT = Path(__file__).resolve().parent
@@ -824,13 +824,12 @@ def _geo_affine_to_house_polygon_epsg2180(M):
 
 
 def fit_house_to_orthophoto(ortho_img, bbox, parcel_geom):
-    """Dopasuj model do rzeczywistego dachu na ortofotomapie.
+    """Dopasowanie domu do rzeczywistego śladu dachu na ortofotomapie.
 
-    W przeciwieństwie do poprzedniej wersji nie optymalizujemy całej bryły
-    bezpośrednio po jasności obrazu (to potrafiło wybrać błędny kąt).
-    Najpierw niezależnie segmentujemy szary dach w sąsiedztwie punktu PZT,
-    wyznaczamy jego centroid i główną oś, a dopiero potem dopasowujemy obrys.
-    PZT zachowuje wyłącznie rolę seeda i rozstrzyga niejednoznaczność 180°.
+    Ta wersja NIE używa PZT do ograniczania okna wyszukiwania ani do wyboru
+    pozycji. Przeszukuje całą działkę i wybiera komponent, którego kształt
+    najlepiej odpowiada obrysowi modelu przy sztywnej transformacji 1:1.
+    PZT jest raportowany tylko diagnostycznie.
     """
     if parcel_geom is None or parcel_geom.is_empty:
         return None,{"status":"no_parcel"}
@@ -838,187 +837,152 @@ def fit_house_to_orthophoto(ortho_img, bbox, parcel_geom):
     img=np.asarray(ortho_img.convert("RGB")).astype(np.float32)/255.0
     h,w=img.shape[:2]
     minx,miny,maxx,maxy=map(float,bbox)
-    px_e=(maxx-minx)/max(float(w),1.0)
-    px_n=(maxy-miny)/max(float(h),1.0)
-    pixel_area=px_e*px_n
-
+    pixel_area=((maxx-minx)/max(float(w),1.0))*((maxy-miny)/max(float(h),1.0))
     transform_img=rasterio.transform.from_bounds(minx,miny,maxx,maxy,w,h)
-    parcel_mask=geometry_mask(
-        [mapping(parcel_geom)],out_shape=(h,w),transform=transform_img,
-        invert=True,all_touched=True
-    )
+    parcel_mask=geometry_mask([mapping(parcel_geom)],out_shape=(h,w),transform=transform_img,invert=True,all_touched=True)
 
     model_poly=model_house_polygon_local_m()
     model_area=float(model_poly.area)
+    model_center=np.asarray([model_poly.centroid.x,model_poly.centroid.y],dtype=float)
     pzt_poly=project_house_polygon_epsg2180()
     pzt_center=np.asarray([pzt_poly.centroid.x,pzt_poly.centroid.y],dtype=float)
-    model_center=np.asarray([model_poly.centroid.x,model_poly.centroid.y],dtype=float)
-
-    cols=np.arange(w,dtype=float)
-    rows=np.arange(h,dtype=float)
-    ee=minx+(cols+0.5)/w*(maxx-minx)
-    nn=maxy-(rows+0.5)/h*(maxy-miny)
-    E,N=np.meshgrid(ee,nn)
-    dist_seed=np.hypot(E-pzt_center[0],N-pzt_center[1])
-    local_window=dist_seed<=25.0
-    seed_disk=dist_seed<=3.0
 
     bright=img.mean(axis=2)
     spread=img.max(axis=2)-img.min(axis=2)
     green_excess=img[:,:,1]-0.5*(img[:,:,0]+img[:,:,2])
 
-    seed_ok=seed_disk & parcel_mask & (green_excess<0.08) & (spread<0.32)
-    if int(np.sum(seed_ok))<20:
-        seed_ok=seed_disk & parcel_mask
-    roof_color=np.median(img[seed_ok],axis=0)
-    color_dist=np.linalg.norm(img-roof_color.reshape(1,1,3),axis=2)
+    # kilka niezależnych masek materiałowych - jasne/szare/ciemne dachy i stan surowy
+    masks=[]
+    masks.append(parcel_mask & (green_excess<0.08) & (spread<0.24) & (bright>0.18) & (bright<0.88))
+    masks.append(parcel_mask & (green_excess<0.10) & (spread<0.38) & (bright>0.38) & (bright<0.92))
+    masks.append(parcel_mask & (green_excess<0.06) & (spread<0.32) & (bright>0.10) & (bright<0.50))
 
-    # Szukamy kilku progów koloru i wybieramy komponent najbardziej podobny
-    # polem/pozycją do rzeczywistego dachu, zamiast scalać cały neutralny teren.
+    # gradient obrazu - później używany tylko jako dodatkowe potwierdzenie krawędzi
+    gray=bright
+    gx=ndimage.sobel(gray,axis=1,mode="nearest")
+    gy=ndimage.sobel(gray,axis=0,mode="nearest")
+    grad=np.hypot(gx,gy)
+    gp=np.percentile(grad[parcel_mask],90) if np.any(parcel_mask) else 1.0
+    if gp<=1e-9: gp=1.0
+    grad=np.clip(grad/gp,0,1)
+
     candidates=[]
-    for thr in (0.12,0.15,0.18,0.21,0.24):
-        mask=(
-            parcel_mask & local_window
-            & (color_dist<thr)
-            & (spread<0.34)
-            & (green_excess<0.10)
-            & (bright>0.10) & (bright<0.86)
-        )
-        mask=ndimage.binary_closing(mask,iterations=4)
+    seen=[]
+
+    def geom_key(poly):
+        c=poly.centroid
+        return (round(float(c.x),1),round(float(c.y),1),round(float(poly.area),1))
+
+    for mi,raw in enumerate(masks):
+        mask=ndimage.binary_closing(raw,iterations=3)
         mask=ndimage.binary_opening(mask,iterations=1)
         mask=ndimage.binary_fill_holes(mask)
         labels,count=ndimage.label(mask)
         for lab in range(1,int(count)+1):
-            rr,cc=np.nonzero(labels==lab)
-            if len(rr)<30:
+            cm=(labels==lab)
+            pix=int(np.sum(cm))
+            if pix<25:
                 continue
-            area=float(len(rr))*pixel_area
-            if area<70.0 or area>520.0:
+            approx_area=float(pix)*pixel_area
+            if approx_area<model_area*0.45 or approx_area>model_area*2.2:
                 continue
-            e=float(np.mean(minx+(cc.astype(float)+0.5)/w*(maxx-minx)))
-            n=float(np.mean(maxy-(rr.astype(float)+0.5)/h*(maxy-miny)))
-            c=np.asarray([e,n],dtype=float)
-            d=float(np.linalg.norm(c-pzt_center))
-            if d>16.0:
+
+            polys=[]
+            for geom,val in shapes(cm.astype(np.uint8),mask=cm,transform=transform_img):
+                if int(val)!=1:
+                    continue
+                try:
+                    p=shape(geom)
+                    if p.geom_type=="MultiPolygon":
+                        p=max(p.geoms,key=lambda q:q.area)
+                    if p.is_valid and p.area>5:
+                        polys.append(p)
+                except Exception:
+                    pass
+            if not polys:
                 continue
-            area_ratio=area/max(model_area,1e-9)
-            # Dach ma niewielki okap, więc lekko preferujemy pole 1.0-1.3x obrysu ścian.
-            target_ratio=1.12
-            score=abs(math.log(max(area_ratio/target_ratio,1e-9)))+d/10.0
-            candidates.append((score,thr,lab,labels,rr,cc,area,c,d,area_ratio))
+            target=max(polys,key=lambda q:q.area).buffer(0)
+            if target.is_empty:
+                continue
+
+            key=geom_key(target)
+            if key in seen:
+                continue
+            seen.append(key)
+
+            inside=float(target.intersection(parcel_geom).area/max(float(target.area),1e-9))
+            if inside<0.80:
+                continue
+            area_ratio=float(target.area/max(model_area,1e-9))
+            if area_ratio<0.45 or area_ratio>2.2:
+                continue
+
+            local_best=None
+            for deg in np.arange(0.0,360.0,3.0):
+                p,R,t=_transform_local_house_to_target(model_poly,target,math.radians(float(deg)))
+                inter=float(p.intersection(target).area)
+                union=float(p.union(target).area)
+                iou=inter/union if union>0 else 0.0
+                hd=float(p.boundary.hausdorff_distance(target.boundary))
+                # najpierw geometria; PZT nie bierze udziału w tej funkcji celu
+                score=5.0*(1.0-iou)+0.35*hd+0.65*abs(math.log(max(area_ratio,1e-9)))
+                if local_best is None or score<local_best[0]:
+                    local_best=(score,float(deg),p,R,t,iou,hd)
+
+            center_deg=local_best[1]
+            for deg in np.arange(center_deg-3.0,center_deg+3.0001,0.15):
+                p,R,t=_transform_local_house_to_target(model_poly,target,math.radians(float(deg)))
+                inter=float(p.intersection(target).area)
+                union=float(p.union(target).area)
+                iou=inter/union if union>0 else 0.0
+                hd=float(p.boundary.hausdorff_distance(target.boundary))
+                score=5.0*(1.0-iou)+0.35*hd+0.65*abs(math.log(max(area_ratio,1e-9)))
+                if score<local_best[0]:
+                    local_best=(score,float(deg)%360.0,p,R,t,iou,hd)
+
+            score,deg,fitted,R,t,iou,hd=local_best
+
+            # Krawędzie modelu kontra rzeczywisty gradient ortofotomapy.
+            boundary=_sample_polygon_boundary(model_poly,0.20)
+            qbd=boundary@R.T+t
+            cidx=np.rint((qbd[:,0]-minx)/max(maxx-minx,1e-9)*(w-1)).astype(int)
+            ridx=np.rint((maxy-qbd[:,1])/max(maxy-miny,1e-9)*(h-1)).astype(int)
+            ok=(ridx>=0)&(ridx<h)&(cidx>=0)&(cidx<w)
+            edge_score=float(np.mean(grad[ridx[ok],cidx[ok]])) if np.any(ok) else 0.0
+
+            fitted_inside=float(fitted.intersection(parcel_geom).area/max(float(fitted.area),1e-9))
+            centroid=np.asarray([target.centroid.x,target.centroid.y],dtype=float)
+            pzt_distance=float(np.linalg.norm(centroid-pzt_center))
+
+            # Edge score jest potwierdzeniem; pozycja/obrót nadal wynikają z kształtu.
+            total=score-0.8*edge_score
+            candidates.append((total,mi,target,fitted,R,t,iou,hd,edge_score,fitted_inside,area_ratio,pzt_distance))
 
     if not candidates:
-        return None,{
-            "status":"no_roof_component",
-            "project_area_m2":round(model_area,3),
-            "seed_color_rgb":[round(float(v),4) for v in roof_color],
-        }
+        return None,{"status":"no_shape_candidate","project_area_m2":round(model_area,3)}
 
     candidates.sort(key=lambda x:x[0])
-    _,thr,lab,labels,rr,cc,component_area,component_center,component_seed_dist,area_ratio=candidates[0]
-    target_mask=(labels==lab)
-    target_soft=ndimage.gaussian_filter(target_mask.astype(np.float32),sigma=1.6)
+    total,mi,target,fitted,R,t,iou,hd,edge_score,fitted_inside,area_ratio,pzt_distance=candidates[0]
 
-    target_pts=np.column_stack([
-        minx+(cc.astype(float)+0.5)/w*(maxx-minx),
-        maxy-(rr.astype(float)+0.5)/h*(maxy-miny),
-    ])
-    centered=target_pts-target_pts.mean(axis=0)
-    cov=np.cov(centered.T)
-    vals,vecs=np.linalg.eigh(cov)
-    axis=vecs[:,int(np.argmax(vals))]
-    roof_axis=math.atan2(float(axis[1]),float(axis[0]))
-    roof_axis_mod=(math.degrees(roof_axis)%180.0)
-
-    model_axis=_polygon_long_axis_angle(model_poly)
-    pzt_M,_=derive_house_model_to_geo_local_affine()
-    pzt_theta=math.atan2(float(pzt_M[1,0]),float(pzt_M[0,0]))
-
-    # Dwie orientacje różniące się 180° mają tę samą oś dachu.
-    raw=roof_axis-model_axis
-    orient_candidates=[raw+k*math.pi for k in range(-3,4)]
-    def angle_diff(a,b):
-        return abs((a-b+math.pi)%(2*math.pi)-math.pi)
-    base_theta=min(orient_candidates,key=lambda a:angle_diff(a,pzt_theta))
-
-    interior=_sample_polygon_interior(model_poly,0.45)
-    boundary=_sample_polygon_boundary(model_poly,0.20)
-    if len(interior)==0 or len(boundary)==0:
-        return None,{"status":"sampling_failed"}
-
-    # Krawędź komponentu dachu, nie ogólny gradient całej fotografii.
-    eroded=ndimage.binary_erosion(target_mask,iterations=2)
-    target_edge=(target_mask & ~eroded).astype(np.float32)
-    target_edge=ndimage.gaussian_filter(target_edge,sigma=1.2)
-
-    def sample_grid(arr,pts):
-        cidx=np.rint((pts[:,0]-minx)/max(maxx-minx,1e-9)*(w-1)).astype(int)
-        ridx=np.rint((maxy-pts[:,1])/max(maxy-miny,1e-9)*(h-1)).astype(int)
-        ok=(ridx>=0)&(ridx<h)&(cidx>=0)&(cidx<w)
-        out=np.zeros(len(pts),dtype=float)
-        if np.any(ok):
-            out[ok]=arr[ridx[ok],cidx[ok]]
-        return out
-
-    best=None
-    # Drobna korekta względem osi/centroidu wyznaczonych z samego dachu.
-    for ddeg in np.arange(-4.0,4.0001,0.25):
-        theta=base_theta+math.radians(float(ddeg))
-        c,sn=math.cos(theta),math.sin(theta)
-        R=np.asarray([[c,-sn],[sn,c]],dtype=float)
-        base_t=component_center-R@model_center
-        for de in np.arange(-2.5,2.5001,0.25):
-            for dn in np.arange(-2.5,2.5001,0.25):
-                t=base_t+np.asarray([float(de),float(dn)])
-                qin=interior@R.T+t
-                qbd=boundary@R.T+t
-                hit=float(np.mean(sample_grid(target_soft,qin)))
-                edge=float(np.mean(sample_grid(target_edge,qbd)))
-                center_fit=R@model_center+t
-                center_err=float(np.linalg.norm(center_fit-component_center))
-                score=1.55*hit+0.85*edge-0.035*center_err
-                if best is None or score>best[0]:
-                    best=(score,theta,R,t,hit,edge,center_err)
-
-    score,theta,R,t,hit,edge,center_err=best
-    coords=[]
-    for x,y in model_poly.exterior.coords:
-        q=R@np.asarray([float(x),float(y)])+t
-        coords.append((float(q[0]),float(q[1])))
-    fitted=Polygon(coords)
-    inside=float(fitted.intersection(parcel_geom).area/max(float(fitted.area),1e-9))
-    fitted_axis=(math.degrees(_polygon_long_axis_angle(fitted))%180.0)
-    seed_dist=float(np.linalg.norm(np.asarray([fitted.centroid.x,fitted.centroid.y])-pzt_center))
-
-    accepted=(
-        inside>=0.95
-        and 0.55<=area_ratio<=1.90
-        and hit>=0.28
-        and edge>=0.07
-        and seed_dist<=20.0
-        and abs(((fitted_axis-roof_axis_mod+90.0)%180.0)-90.0)<=7.0
-    )
+    accepted=(iou>=0.42 and hd<=5.5 and fitted_inside>=0.95)
     meta={
         "status":"accepted" if accepted else "rejected",
+        "method":"full_parcel_shape_match_no_pzt_constraint",
         "project_area_m2":round(model_area,3),
-        "roof_component_threshold":thr,
-        "roof_component_area_m2":round(float(component_area),3),
-        "roof_component_area_ratio":round(float(area_ratio),6),
-        "roof_component_centroid_epsg2180":[round(float(component_center[0]),3),round(float(component_center[1]),3)],
-        "roof_component_seed_distance_m":round(float(component_seed_dist),3),
-        "roof_axis_deg":round(float(roof_axis_mod),4),
-        "fitted_long_axis_deg":round(float(fitted_axis),4),
+        "target_area_m2":round(float(target.area),3),
+        "target_area_ratio":round(float(area_ratio),6),
+        "target_centroid_epsg2180":[round(float(target.centroid.x),3),round(float(target.centroid.y),3)],
         "fitted_centroid_epsg2180":[round(float(fitted.centroid.x),3),round(float(fitted.centroid.y),3)],
-        "pzt_seed_centroid_epsg2180":[round(float(pzt_center[0]),3),round(float(pzt_center[1]),3)],
-        "pzt_seed_distance_m":round(float(seed_dist),3),
-        "rotation_deg":round(float(math.degrees(theta)%360.0),4),
-        "roof_mask_hit":round(float(hit),6),
-        "roof_edge_score":round(float(edge),6),
-        "parcel_inside_fraction":round(float(inside),6),
-        "score":round(float(score),6),
-        "seed_color_rgb":[round(float(v),4) for v in roof_color],
-        "pixel_resolution_m":[round(float(px_e),4),round(float(px_n),4)],
-        "candidate_components":len(candidates),
+        "rotation_deg":round(float(math.degrees(math.atan2(R[1,0],R[0,0]))%360.0),4),
+        "iou":round(float(iou),6),
+        "hausdorff_m":round(float(hd),4),
+        "edge_score":round(float(edge_score),6),
+        "parcel_inside_fraction":round(float(fitted_inside),6),
+        "pzt_seed_distance_m_diagnostic_only":round(float(pzt_distance),3),
+        "candidate_count":len(candidates),
+        "mask_family":int(mi),
+        "score":round(float(total),6),
+        "note":"Pozycja/obrót wybrane wyłącznie z dopasowania kształtu do ortofotomapy na całej działce; PZT nie ogranicza wyszukiwania.",
     }
     if not accepted:
         return None,meta
@@ -1032,6 +996,7 @@ def fit_house_to_orthophoto(ortho_img, bbox, parcel_geom):
     ],dtype=float)
     meta["model_to_geo_local_affine_mm"]=np.round(M,12).tolist()
     return M,meta
+
 
 def house_footprint_epsg2180():
     # Until the house itself is calibrated to the map, do not use the old PZT affine
