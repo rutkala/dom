@@ -242,27 +242,6 @@
         ]
       },
       {
-        "id": "KUCH_WINE_RACK",
-        "room": 11,
-        "primitive": "box",
-        "bbox_mm": [
-          [
-            12060,
-            8760,
-            100
-          ],
-          [
-            12560,
-            9360,
-            2500
-          ]
-        ],
-        "role": "winiarka/witryna zintegrowana w strefie wysokiej; bez dodatkowego wolnostojącego footprintu",
-        "source_pages": [
-          24
-        ]
-      },
-      {
         "id": "KUCH_CHALKBOARD",
         "room": 11,
         "primitive": "box",
@@ -1010,6 +989,15 @@
     "Korekta v5: rzut s.49 jest nadrzędnym źródłem pozycji XY. Rysunki 21–41 definiują wysokości, podziały i wygląd, ale nie nadpisują położenia w rzucie.",
     "Korekta v5: spiżarnia ma układ U: 3,00×0,60 m na ścianie południowej, 2,40×0,45 m na północnej oraz 0,60×1,41 m na zachodniej.",
     "Korekta v5: wiatrołap — szafa w niszy 2,50×1,16 m; lamele na zachodniej ścianie 1,50 m; konsola 0,80×0,20 i lustro 1,15 m na ścianie wschodniej; pufa 1,15×0,50.",
-    "Korekta v5: w kuchni nie ma dodatkowej wolnostojącej szafki przy wejściu; witryna/winiarka jest detalem zintegrowanym w wysokiej zabudowie."
+    "Korekta v5: w kuchni nie ma dodatkowej wolnostojącej szafki przy wejściu; witryna/winiarka jest detalem zintegrowanym w wysokiej zabudowie.",
+    "Korekta v5.1: samodzielna winiarka została usunięta z geometrii XY — detal s.24 pozostaje w danych, ale bez położenia dopóki rzut nie potwierdzi jego footprintu."
+  ],
+  "unplaced_details": [
+    {
+      "id": "KUCH_WINE_RACK",
+      "room": 11,
+      "description": "witryna/winiarka 0,60 m z rysunku s.24",
+      "reason": "rysunek detalu podaje wymiary i wygląd, ale rzut s.49 nie wskazuje jednoznacznego samodzielnego footprintu; element nie jest renderowany jako osobna szafka"
+    }
   ]
 }
