@@ -73,13 +73,24 @@
         "GeoTIFF",
         "image/tiff",
         "TIFF"
-      ]
+      ],
+      "note": "WCS pozostawiony wyłącznie jako informacja; nie używany do modelu, ponieważ bieżące GetCapabilities może wskazywać coverage PL-KRON86-NH."
     },
     "ortho_wms": {
       "high_resolution_url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/HighResolution",
       "standard_resolution_url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/StandardResolution",
       "layer": "Raster",
       "width_px": 1800
+    },
+    "nmt_evrf_wms": {
+      "url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/NMT/WMS/SkorowidzeUkladEVRF2007",
+      "fallback_5m_url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/NMT/WMS/SheetsGrid5mEVRF2007",
+      "info_format": "text/html",
+      "note": "WMS GetFeatureInfo udostępnia atrybut nazwa_pliku z linkiem do pobrania NMT w PL-EVRF2007-NH."
+    },
+    "nmt_evrf_wfs": {
+      "url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/NumerycznyModelTerenuEVRF2007/WFS/Skorowidze",
+      "note": "Skorowidz zapasowy / referencyjny; podstawowe pobieranie automatyczne używa WMS GetFeatureInfo."
     }
   }
 }
