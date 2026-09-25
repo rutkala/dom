@@ -32,6 +32,7 @@ import numpy as np
 import rasterio
 import requests
 from PIL import Image
+from scipy import ndimage
 from pyproj import Transformer
 from rasterio.merge import merge as raster_merge
 from rasterio.warp import reproject, Resampling
@@ -777,6 +778,211 @@ def fit_house_to_egib(buildings, parcel_geom):
     # q_epsg = R * p_model_m + t ; geoLocal_mm = anchor_mm + 1000*(q_epsg - geo_center)
     center=np.asarray(GEO_CENTER_2180,dtype=float)
     trans_mm=GEO_ANCHOR_MODEL_MM + 1000.0*(t-center)
+    M=np.asarray([
+        [R[0,0],R[0,1],trans_mm[0]],
+        [R[1,0],R[1,1],trans_mm[1]],
+        [0.0,0.0,1.0],
+    ],dtype=float)
+    meta["model_to_geo_local_affine_mm"]=np.round(M,12).tolist()
+    return M,meta
+
+
+def _sample_polygon_interior(poly, step_m=0.5):
+    minx,miny,maxx,maxy=poly.bounds
+    pts=[]
+    for y in np.arange(miny+step_m/2.0,maxy,step_m):
+        for x in np.arange(minx+step_m/2.0,maxx,step_m):
+            if poly.contains(Point(float(x),float(y))):
+                pts.append((float(x),float(y)))
+    return np.asarray(pts,dtype=float)
+
+
+def _sample_polygon_boundary(poly, step_m=0.25):
+    ring=poly.exterior
+    length=float(ring.length)
+    if length<=0:
+        return np.empty((0,2),dtype=float)
+    return np.asarray([ring.interpolate(float(d)).coords[0] for d in np.arange(0.0,length,step_m)],dtype=float)
+
+
+def _polygon_long_axis_angle(poly):
+    rect=poly.minimum_rotated_rectangle
+    pts=[np.asarray(p,dtype=float) for p in list(rect.exterior.coords)[:-1]]
+    if len(pts)!=4:
+        return 0.0
+    edges=[pts[(i+1)%4]-pts[i] for i in range(4)]
+    v=max(edges,key=lambda q:float(np.linalg.norm(q)))
+    return math.atan2(float(v[1]),float(v[0]))
+
+
+def _geo_affine_to_house_polygon_epsg2180(M):
+    pts=[]
+    for x_mm,y_mm in MODEL_DATA["facade_reference_outline"]["polygon_mm"]:
+        q=np.asarray(M,dtype=float) @ np.asarray([float(x_mm),float(y_mm),1.0],dtype=float)
+        pts.append(geo_local_to_epsg2180(float(q[0]),float(q[1])))
+    return Polygon(pts)
+
+
+def fit_house_to_orthophoto(ortho_img, bbox, parcel_geom):
+    """Dopasuj dom do widocznego dachu na ortofotomapie, ograniczając wybór do działki.
+
+    PZT jest używany wyłącznie jako słaby seed do wyboru właściwego skupiska.
+    Wynik jest sztywną transformacją rotation+translation ze skalą dokładnie 1.
+    """
+    if parcel_geom is None or parcel_geom.is_empty:
+        return None,{"status":"no_parcel"}
+
+    img=np.asarray(ortho_img.convert("RGB")).astype(np.float32)/255.0
+    h,w=img.shape[:2]
+    minx,miny,maxx,maxy=map(float,bbox)
+    px_e=(maxx-minx)/max(float(w),1.0)
+    px_n=(maxy-miny)/max(float(h),1.0)
+    pixel_area=px_e*px_n
+
+    transform_img=rasterio.transform.from_bounds(minx,miny,maxx,maxy,w,h)
+    parcel_mask=geometry_mask([mapping(parcel_geom)],out_shape=(h,w),transform=transform_img,invert=True,all_touched=True)
+
+    bright=img.mean(axis=2)
+    spread=img.max(axis=2)-img.min(axis=2)
+    green_excess=img[:,:,1]-0.5*(img[:,:,0]+img[:,:,2])
+
+    # Dach domu na aktualnej ortofotomapie jest neutralny/szary. Próg jest celowo
+    # szeroki; geometria działki, pole i seed PZT rozstrzygają wybór komponentu.
+    roof_seed=(
+        parcel_mask
+        & (bright>0.16) & (bright<0.80)
+        & (spread<0.22)
+        & (green_excess<0.11)
+    )
+    roof_seed=ndimage.binary_closing(roof_seed,iterations=3)
+    roof_seed=ndimage.binary_opening(roof_seed,iterations=1)
+    roof_seed=ndimage.binary_fill_holes(roof_seed)
+
+    labels,count=ndimage.label(roof_seed)
+    model_poly=model_house_polygon_local_m()
+    model_area=float(model_poly.area)
+    pzt_poly=project_house_polygon_epsg2180()
+    pzt_center=np.asarray([pzt_poly.centroid.x,pzt_poly.centroid.y],dtype=float)
+
+    candidates=[]
+    for lab in range(1,int(count)+1):
+        rows,cols=np.nonzero(labels==lab)
+        if len(rows)<20:
+            continue
+        area=float(len(rows))*pixel_area
+        if area < max(35.0,model_area*0.16) or area > model_area*2.2:
+            continue
+        e=minx+(cols.astype(float)+0.5)/w*(maxx-minx)
+        n=maxy-(rows.astype(float)+0.5)/h*(maxy-miny)
+        centroid=np.asarray([float(np.mean(e)),float(np.mean(n))])
+        dist=float(np.linalg.norm(centroid-pzt_center))
+        if dist>35.0:
+            continue
+        area_pen=abs(math.log(max(area/model_area,1e-9)))
+        score=area_pen+dist/18.0
+        candidates.append((score,lab,rows,cols,area,centroid))
+
+    if not candidates:
+        return None,{
+            "status":"no_candidate",
+            "project_area_m2":round(model_area,3),
+            "raw_components":int(count),
+        }
+
+    candidates.sort(key=lambda x:x[0])
+    _,lab,rows,cols,component_area,component_center=candidates[0]
+    target_mask=(labels==lab)
+    target_soft=ndimage.gaussian_filter(target_mask.astype(np.float32),sigma=1.5)
+
+    # Kierunek dachu z PCA pikseli w rzeczywistym układzie east/north.
+    target_pts=np.column_stack([
+        minx+(cols.astype(float)+0.5)/w*(maxx-minx),
+        maxy-(rows.astype(float)+0.5)/h*(maxy-miny),
+    ])
+    centered=target_pts-target_pts.mean(axis=0)
+    cov=np.cov(centered.T)
+    vals,vecs=np.linalg.eigh(cov)
+    axis=vecs[:,int(np.argmax(vals))]
+    target_angle=math.atan2(float(axis[1]),float(axis[0]))
+    model_angle=_polygon_long_axis_angle(model_poly)
+
+    interior=_sample_polygon_interior(model_poly,0.5)
+    boundary=_sample_polygon_boundary(model_poly,0.25)
+    if len(interior)==0 or len(boundary)==0:
+        return None,{"status":"sampling_failed"}
+
+    gray=bright.astype(float)
+    gx=ndimage.sobel(gray,axis=1,mode="nearest")
+    gy=ndimage.sobel(gray,axis=0,mode="nearest")
+    grad=np.hypot(gx,gy)
+    gscale=float(np.nanpercentile(grad[parcel_mask],95)) if np.any(parcel_mask) else float(np.nanpercentile(grad,95))
+    grad=np.clip(grad/max(gscale,1e-6),0.0,1.0)
+
+    model_center=np.asarray([model_poly.centroid.x,model_poly.centroid.y],dtype=float)
+
+    def sample_grid(arr,pts):
+        cc=np.rint((pts[:,0]-minx)/max(maxx-minx,1e-9)*(w-1)).astype(int)
+        rr=np.rint((maxy-pts[:,1])/max(maxy-miny,1e-9)*(h-1)).astype(int)
+        ok=(rr>=0)&(rr<h)&(cc>=0)&(cc<w)
+        out=np.zeros(len(pts),dtype=float)
+        if np.any(ok):
+            out[ok]=arr[rr[ok],cc[ok]]
+        return out
+
+    best=None
+    base_theta=target_angle-model_angle
+    angle_offsets=np.arange(-12.0,12.0001,1.0)
+    shifts=np.arange(-4.0,4.0001,0.5)
+    for flip in (0.0,math.pi):
+        for ddeg in angle_offsets:
+            theta=base_theta+flip+math.radians(float(ddeg))
+            c,sn=math.cos(theta),math.sin(theta)
+            R=np.asarray([[c,-sn],[sn,c]],dtype=float)
+            base_t=component_center-R@model_center
+            for de in shifts:
+                for dn in shifts:
+                    t=base_t+np.asarray([float(de),float(dn)])
+                    qin=interior@R.T+t
+                    qbd=boundary@R.T+t
+                    hit=float(np.mean(sample_grid(target_soft,qin)))
+                    edge=float(np.mean(sample_grid(grad,qbd)))
+                    fitted_center=R@model_center+t
+                    seed_dist=float(np.linalg.norm(fitted_center-pzt_center))
+                    score=1.45*hit+0.35*edge-0.012*seed_dist
+                    if best is None or score>best[0]:
+                        best=(score,theta,R,t,hit,edge,seed_dist)
+
+    score,theta,R,t,hit,edge,seed_dist=best
+    coords=[]
+    for x,y in model_poly.exterior.coords:
+        q=R@np.asarray([float(x),float(y)])+t
+        coords.append((float(q[0]),float(q[1])))
+    fitted=Polygon(coords)
+    inside=float(fitted.intersection(parcel_geom).area/max(float(fitted.area),1e-9))
+    accepted=(inside>=0.95 and hit>=0.20 and seed_dist<=25.0)
+
+    meta={
+        "status":"accepted" if accepted else "rejected",
+        "project_area_m2":round(model_area,3),
+        "orthophoto_component_area_m2":round(float(component_area),3),
+        "candidate_count":len(candidates),
+        "raw_components":int(count),
+        "candidate_centroid_epsg2180":[round(float(component_center[0]),3),round(float(component_center[1]),3)],
+        "fitted_centroid_epsg2180":[round(float(fitted.centroid.x),3),round(float(fitted.centroid.y),3)],
+        "pzt_seed_centroid_epsg2180":[round(float(pzt_center[0]),3),round(float(pzt_center[1]),3)],
+        "pzt_seed_distance_m":round(float(seed_dist),3),
+        "rotation_deg":round(float(math.degrees(theta)%360.0),4),
+        "roof_hit_fraction":round(float(hit),6),
+        "edge_score":round(float(edge),6),
+        "parcel_inside_fraction":round(float(inside),6),
+        "score":round(float(score),6),
+        "pixel_resolution_m":[round(float(px_e),4),round(float(px_n),4)],
+    }
+    if not accepted:
+        return None,meta
+
+    center=np.asarray(GEO_CENTER_2180,dtype=float)
+    trans_mm=GEO_ANCHOR_MODEL_MM+1000.0*(t-center)
     M=np.asarray([
         [R[0,0],R[0,1],trans_mm[0]],
         [R[1,0],R[1,1],trans_mm[1]],
@@ -1534,27 +1740,48 @@ def main():
         building_geoms = []
         building_stats = {"count":0}
         own_building_id=None
+        egib_affine=None
+        egib_fit_meta={"status":"not_available"}
         try:
             building_records, building_meta = fetch_egib_buildings(bbox)
-            egib_affine,house_fit_meta=fit_house_to_egib(building_records,parcel_geom)
-            if egib_affine is not None:
-                house_geo_affine=egib_affine
-                own_building_id=house_fit_meta.get("candidate_id")
-                validation["house_alignment_source"]="EGiB_building_footprint"
-            else:
-                validation["house_alignment_source"]="PZT_survey_grid_fallback"
-            validation["house_egib_fit"]=house_fit_meta
-            building_parts, building_geoms, building_stats = build_context_buildings(
-                building_records, arr, nmpt_aligned, transform, nodata, zero_m, (cx,cy), ortho_img, bbox,
-                excluded_building_id=own_building_id
-            )
-            building_meta["rendered"] = building_stats.get("count",0)
-            building_meta["own_building_id"] = own_building_id
+            egib_affine,egib_fit_meta=fit_house_to_egib(building_records,parcel_geom)
         except Exception as exc:
             building_meta = {"service":CFG["services"]["egib_wfs"]["url"],"error":repr(exc)}
-            validation["house_alignment_source"]="PZT_survey_grid_fallback_EGiB_error"
-            validation["house_egib_fit"]={"status":"error","error":repr(exc)}
+            egib_fit_meta={"status":"error","error":repr(exc)}
             print(f"UWAGA: EGiB budynki niedostępne: {exc}")
+
+        ortho_fit_meta={"status":"not_needed"}
+        if egib_affine is not None:
+            house_geo_affine=egib_affine
+            own_building_id=egib_fit_meta.get("candidate_id")
+            validation["house_alignment_source"]="EGiB_building_footprint"
+        else:
+            ortho_affine,ortho_fit_meta=fit_house_to_orthophoto(ortho_img,bbox,parcel_geom)
+            if ortho_affine is None:
+                raise RuntimeError(
+                    "Nie znaleziono wiarygodnego rzeczywistego położenia domu. "
+                    f"EGiB={egib_fit_meta}; ortho={ortho_fit_meta}. "
+                    "Celowo nie wracam do starego PZT."
+                )
+            house_geo_affine=ortho_affine
+            validation["house_alignment_source"]="orthophoto_roof_within_parcel"
+
+        validation["house_egib_fit"]=egib_fit_meta
+        validation["house_ortho_fit"]=ortho_fit_meta
+        calibrated_house=_geo_affine_to_house_polygon_epsg2180(house_geo_affine)
+        calibrated_inside=float(calibrated_house.intersection(parcel_geom).area/max(float(calibrated_house.area),1e-9))
+        validation["calibrated_house_inside_parcel_fraction"]=round(calibrated_inside,6)
+        validation["calibrated_house_centroid_epsg2180"]=[
+            round(float(calibrated_house.centroid.x),3),
+            round(float(calibrated_house.centroid.y),3),
+        ]
+
+        building_parts, building_geoms, building_stats = build_context_buildings(
+            building_records, arr, nmpt_aligned, transform, nodata, zero_m, (cx,cy), ortho_img, bbox,
+            excluded_building_id=own_building_id
+        )
+        building_meta["rendered"] = building_stats.get("count",0)
+        building_meta["own_building_id"] = own_building_id
 
         if nmpt_aligned is not None:
             tree_parts, tree_stats = build_context_trees(
@@ -1593,15 +1820,20 @@ def main():
                 "geo_context_anchor_model_mm": [round(float(GEO_ANCHOR_MODEL_MM[0]),3), round(float(GEO_ANCHOR_MODEL_MM[1]),3)],
                 "geo_context_rule": "native EPSG:2180 east/north -> local x/y, no rotation; shared by NMT/ortho/parcel/EGiB",
                 "house_calibration": {
-                    "status": "reality_georeferenced" if house_fit_meta.get("status")=="accepted" else "survey_georeferenced_fallback",
-                    "method": "EGiB footprint rigid fit (rotation+translation, scale=1)" if house_fit_meta.get("status")=="accepted" else "PZT map-to-design survey grid -> EPSG:2177 -> EPSG:2180",
+                    "status": "reality_georeferenced",
+                    "method": (
+                        "EGiB footprint rigid fit (rotation+translation, scale=1)"
+                        if validation["house_alignment_source"]=="EGiB_building_footprint"
+                        else "orthophoto roof fit inside cadastral parcel (rotation+translation, scale=1)"
+                    ),
                     "manual_rotation_deg": 0.0,
                     "manual_offset_m": [0.0,0.0],
                     "model_to_epsg2177_affine_derived": np.round(M2177,12).tolist(),
                     "model_to_geo_local_affine_mm": np.round(house_geo_affine,12).tolist(),
                     "pzt_affine_linearization_error_mm": round(float(house_geo_affine_err_mm),6),
-                    "egib_fit": house_fit_meta,
-                    "note": "Preferowany jest rzeczywisty obrys budynku EGiB na działce. Dopasowanie jest automatyczne, sztywne i bez zmiany skali; PZT jest fallbackiem."
+                    "egib_fit": egib_fit_meta,
+                    "orthophoto_fit": ortho_fit_meta,
+                    "note": "Brak cichego fallbacku do PZT. EGiB jest pierwszym źródłem; gdy brak obrysu domu, położenie jest dopasowywane do dachu na ortofotomapie wewnątrz działki. PZT służy wtedy tylko jako słaby seed wyboru."
                 },
                 "control": CFG["control"],
             },
