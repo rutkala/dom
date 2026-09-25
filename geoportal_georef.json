@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "source_project_file": "DWK_2021-001-PZT_PAB.pdf",
+  "control": {
+    "pdf_page": 15,
+    "sheet": "L-AA-0-01",
+    "map_scale": "1:500",
+    "map_horizontal_system": "PL-2000 strefa 6 / EPSG:2177",
+    "map_vertical_system": "PL-EVRF2007-NH",
+    "page_control_point_pt": [
+      841.8597412109375,
+      104.163818359375
+    ],
+    "page_control_coordinates": {
+      "northing_X_m": 5635850,
+      "easting_Y_m": 6576650
+    },
+    "basis": "Kontrolny krzyż współrzędnych na PZT oraz skala 1:500; transformacja strony PDF->model pochodzi z dopasowania projektowanego budynku do geometrii modelu."
+  },
+  "page_to_model_affine": {
+    "x_mm": [
+      28.82385165311411,
+      -174.0172462781275,
+      118163.24019121926
+    ],
+    "y_mm": [
+      -174.0181508380125,
+      -28.822816459209434,
+      100201.81543502511
+    ]
+  },
+  "model_to_epsg2177_affine": [
+    [
+      0.0001634054485607076,
+      -0.0009865575151414778,
+      6576581.051632429
+    ],
+    [
+      0.000986562643370843,
+      0.0001634113173946774,
+      5635735.423790925
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "vertical": {
+    "system": "PL-EVRF2007-NH",
+    "model_zero_elevation_m": 254,
+    "source": "PZT s.15: rzędna wejścia 254.0 m n.p.m."
+  },
+  "parcel": {
+    "id": "246401_1.0430.4/13",
+    "uldk_url": "https://uldk.gugik.gov.pl/"
+  },
+  "fetch": {
+    "center_model_mm": [
+      14148.5,
+      5960
+    ],
+    "radius_m": 90,
+    "mesh_step_m": 2,
+    "ortho_tile_m": 6,
+    "parcel_line_width_m": 0.12
+  },
+  "services": {
+    "nmt_wcs": {
+      "url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/NMT/GRID1/WCS/DigitalTerrainModelFormatTIFF",
+      "request_resolution_m": 1,
+      "formats": [
+        "GeoTIFF",
+        "image/tiff",
+        "TIFF"
+      ]
+    },
+    "ortho_wms": {
+      "high_resolution_url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/HighResolution",
+      "standard_resolution_url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/StandardResolution",
+      "layer": "Raster",
+      "width_px": 1800
+    }
+  }
+}
