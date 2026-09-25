@@ -34,6 +34,8 @@ EXTERIOR_JOINERY = json.loads((ROOT / 'stolarka_zewnetrzna.json').read_text(enco
 SITE = json.loads((ROOT / 'pzt_zagospodarowanie.json').read_text(encoding='utf-8'))
 ELEVATIONS = json.loads((ROOT / 'elewacje_materialy.json').read_text(encoding='utf-8'))
 INTERIOR = json.loads((ROOT / 'wnetrze_projekt.json').read_text(encoding='utf-8'))
+GEO_REAL_PATH = ROOT / 'geoportal_teren.json'
+GEO_REAL = json.loads(GEO_REAL_PATH.read_text(encoding='utf-8')) if GEO_REAL_PATH.exists() else None
 
 COLORS = {
     'sciany': [0.84, 0.83, 0.80, 1.0],
@@ -72,6 +74,9 @@ COLORS = {
     'interior_metal': [0.025, 0.025, 0.025, 1.0],
     'interior_glass': [0.62, 0.72, 0.75, 0.35],
     'interior_flame': [0.95, 0.42, 0.08, 0.9],
+    'teren_rzeczywisty': [0.40, 0.47, 0.34, 1.0],
+    'ortofoto': [0.62, 0.62, 0.62, 1.0],
+    'granica_dzialki': [0.97, 0.48, 0.05, 1.0],
 }
 
 GROUP_NAMES = {
@@ -90,6 +95,9 @@ GROUP_NAMES = {
     'schody': '13_SCHODY_ZEWNETRZNE',
     'wnetrze_bloki': '14_WNETRZE_BLOKI',
     'wnetrze_elementy': '15_WNETRZE_ELEMENTY',
+    'teren_rzeczywisty': '16_GEO_NMT_RZECZYWISTY',
+    'ortofoto': '17_GEO_ORTOFOTOMAPA',
+    'granica_dzialki': '18_GEO_GRANICA_DZIALKI',
 }
 
 parts: list[dict[str, Any]] = []
@@ -555,6 +563,44 @@ def add_interior_layers():
         _interior_box(f'SEL_ENTRY_HOOK_RAIL_{idx}','wnetrze_elementy','interior_metal',
             [[x,south_y,180],[x+28,south_y+35,2750]],source,1,'selected','pionowy wieszak metalowy',[40],'wieszak metalowy')
 
+
+def add_geoportal_real_layers():
+    """Dodaje pobrany NMT, ortofotomapę i granicę działki do wspólnej sceny."""
+    if not GEO_REAL or GEO_REAL.get('status') != 'fetched':
+        print('Geoportal: brak geoportal_teren.json - pomijam warstwę rzeczywistą.')
+        return
+    count=0
+    for item in GEO_REAL.get('parts',[]):
+        vertices=np.asarray(item.get('positions_m',[]),dtype=float)
+        faces=np.asarray(item.get('faces',[]),dtype=int)
+        if len(vertices)<3 or len(faces)<1:
+            continue
+        mesh=trimesh.Trimesh(vertices=vertices,faces=faces,process=False)
+        extras={
+            'geoportal_real': True,
+            'geoportal_generated_at_utc': GEO_REAL.get('generated_at_utc'),
+            'geoportal_alignment': GEO_REAL.get('alignment'),
+            'geoportal_validation': GEO_REAL.get('validation'),
+        }
+        add_mesh_record(
+            item.get('name',f'GEO_{count:04d}'),
+            item.get('category','teren_rzeczywisty'),
+            item.get('material','teren_rzeczywisty'),
+            mesh,
+            item.get('source','Geoportal / GUGiK'),
+            bool(item.get('assumed',False)),
+            item.get('note',''),
+            item.get('source_id','GEO'),
+            extras,
+            item.get('reference_area_m2')
+        )
+        # Kafle ortofoto mają własny kolor pobrany z rastra; GLB/HTML zachowują go per obiekt.
+        if item.get('color'):
+            parts[-1]['color']=[float(v) for v in item['color']]
+        count+=1
+    print(f'Geoportal: dodano {count} elementów rzeczywistego terenu / ortofoto.')
+
+
 def main():
     print("Rozpoczynanie generowania geometrii z aktualnym zestawieniem okien...")
     facade = Polygon(DATA['facade_reference_outline']['polygon_mm'])
@@ -901,7 +947,10 @@ def main():
             top=ttop-i*rise; x0=start+(i-1)*run; x1=start+i*run
             add(f'SCHODY_tarasu_{i:02}','schody','schody',box(x0,cy-width/2,x1,cy+width/2),base,top,'DWK_2021-001-PZT_PAB.pdf s.26-27 - schody przy tarasie',True,st.get('note',''),'STAIRS_NORTH')
 
-    # 11. Wnętrze z projektu — dwie niezależne warstwy: bloki i elementy.
+    # 11. Geoportal / rzeczywisty NMT + ortofotomapa.
+    add_geoportal_real_layers()
+
+    # 12. Wnętrze z projektu — dwie niezależne warstwy: bloki i elementy.
     add_interior_layers()
 
     print(f"Wygenerowano {len(parts)} elementow.")
@@ -913,7 +962,7 @@ def main():
         for rec in parts:
             if rec['category'] == 'sufity':
                 continue
-            if not include_roof and rec['category'] in ['dach','strop','elewacja','daszek','teren','nawierzchnie','schody']:
+            if not include_roof and rec['category'] in ['dach','strop','elewacja','daszek','teren','nawierzchnie','schody','teren_rzeczywisty','ortofoto','granica_dzialki']:
                 continue
             mesh = meshes[rec['name']].copy()
             mesh.unmerge_vertices()
