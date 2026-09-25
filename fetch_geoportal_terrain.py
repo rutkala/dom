@@ -390,13 +390,116 @@ def fetch_nmt_evrf(bbox):
                 pass
 
 
-def fetch_orthophoto(bbox: tuple[float, float, float, float]):
+def discover_wcs_coverages(url: str) -> list[tuple[str, str]]:
+    params = {"SERVICE": "WCS", "VERSION": "1.0.0", "REQUEST": "GetCapabilities"}
+    r = request_get(url, params=params, timeout=60, attempts=4)
+    r.raise_for_status()
+    root = ET.fromstring(r.content)
+    result = []
+    for brief in root.iter():
+        if local_name(brief.tag) != "coverageofferingbrief":
+            continue
+        name, label = "", ""
+        for child in brief.iter():
+            ln = local_name(child.tag)
+            if ln == "name" and not name and child.text:
+                name = child.text.strip()
+            elif ln == "label" and not label and child.text:
+                label = child.text.strip()
+        if name:
+            result.append((name, label))
+    return result
+
+
+def fetch_orthophoto_wcs(bbox: tuple[float, float, float, float]):
+    cfg = CFG["services"].get("ortho_wcs", {})
+    url = cfg.get("standard_resolution_url")
+    if not url:
+        raise RuntimeError("Brak ortho_wcs.standard_resolution_url w konfiguracji.")
+    minx, miny, maxx, maxy = bbox
+    width = int(CFG["services"]["ortho_wms"].get("width_px", 1800))
+    height = max(256, int(round(width * (maxy - miny) / (maxx - minx))))
+
+    coverages = discover_wcs_coverages(url)
+    preferred = cfg.get("preferred_coverage", "Orthoimagery_StandardResolution")
+    ordered = sorted(
+        coverages,
+        key=lambda x: (
+            0 if x[0] == preferred else 1,
+            0 if "standard" in (x[0] + " " + x[1]).lower() else 1,
+            x[0],
+        ),
+    )
+    if not ordered:
+        ordered = [(preferred, "configured fallback")]
+
+    attempts = []
+    formats = [cfg.get("format", "GEOTIFF"), "GeoTIFF", "image/tiff", "TIFF"]
+    for coverage, label in ordered:
+        for fmt in dict.fromkeys(formats):
+            params = {
+                "SERVICE": "WCS",
+                "VERSION": "1.0.0",
+                "REQUEST": "GetCoverage",
+                "COVERAGE": coverage,
+                "CRS": "EPSG:2180",
+                "RESPONSE_CRS": "EPSG:2180",
+                "BBOX": ",".join(f"{v:.3f}" for v in bbox),
+                "WIDTH": str(width),
+                "HEIGHT": str(height),
+                "FORMAT": fmt,
+            }
+            try:
+                r = request_get(url, params=params, timeout=150, attempts=4)
+                ctype = r.headers.get("content-type", "")
+                head = r.content[:700].decode("utf-8", errors="ignore")
+                attempts.append((url, coverage, fmt, r.status_code, ctype, len(r.content), head[:220]))
+                if not r.ok or len(r.content) < 1024:
+                    continue
+                if "<ServiceException" in head or "ExceptionReport" in head:
+                    continue
+                try:
+                    img = Image.open(io.BytesIO(r.content)).convert("RGB")
+                    if float(np.asarray(img).std()) >= 2.0:
+                        return img, f"{url} [{coverage}]", attempts
+                except Exception:
+                    pass
+                try:
+                    with rasterio.io.MemoryFile(r.content) as mem:
+                        with mem.open() as ds:
+                            bands = ds.read()
+                            if bands.shape[0] >= 3:
+                                rgb = np.moveaxis(bands[:3], 0, 2)
+                            else:
+                                band = bands[0].astype(float)
+                                finite = np.isfinite(band)
+                                if not finite.any():
+                                    continue
+                                lo, hi = np.nanpercentile(band[finite], [2, 98])
+                                scaled = np.clip((band - lo) / max(float(hi - lo), 1e-6) * 255, 0, 255).astype(np.uint8)
+                                rgb = np.dstack([scaled, scaled, scaled])
+                            if rgb.dtype != np.uint8:
+                                mx = float(np.nanmax(rgb)) if np.isfinite(rgb).any() else 255.0
+                                if mx <= 1.5:
+                                    rgb = (np.clip(rgb, 0, 1) * 255).astype(np.uint8)
+                                else:
+                                    rgb = np.clip(rgb, 0, 255).astype(np.uint8)
+                            img = Image.fromarray(rgb).convert("RGB")
+                            if float(np.asarray(img).std()) >= 2.0:
+                                return img, f"{url} [{coverage}]", attempts
+                except Exception:
+                    continue
+            except Exception as exc:
+                attempts.append((url, coverage, fmt, "exception", repr(exc), 0, ""))
+    raise RuntimeError(f"Nie udało się pobrać ortofotomapy WCS. Próby: {attempts}")
+
+
+def fetch_orthophoto_wms(bbox: tuple[float, float, float, float]):
     cfg = CFG["services"]["ortho_wms"]
     minx, miny, maxx, maxy = bbox
     width = int(cfg.get("width_px", 1800))
     height = max(256, int(round(width * (maxy - miny) / (maxx - minx))))
     attempts_log = []
-
     specs = [
         {
             "url": cfg.get("standard_resolution_url"),
@@ -433,18 +536,32 @@ def fetch_orthophoto(bbox: tuple[float, float, float, float]):
         }
         try:
             r = request_get(url, params=params, timeout=120, attempts=4)
-            attempts_log.append((url, r.status_code, r.headers.get("content-type", ""), len(r.content)))
+            head = r.content[:700].decode("utf-8", errors="ignore")
+            attempts_log.append((url, r.status_code, r.headers.get("content-type", ""), len(r.content), head[:220]))
             if not r.ok or len(r.content) < 1024:
                 continue
             img = Image.open(io.BytesIO(r.content)).convert("RGB")
-            arr = np.asarray(img)
-            if float(arr.std()) < 2.0:
+            if float(np.asarray(img).std()) < 2.0:
                 continue
             return img, url, attempts_log
         except Exception as exc:
-            attempts_log.append((url, "exception", repr(exc), 0))
-            continue
+            attempts_log.append((url, "exception", repr(exc), 0, ""))
     raise RuntimeError(f"Nie udało się pobrać ortofotomapy WMS. Próby: {attempts_log}")
+
+
+def fetch_orthophoto(bbox: tuple[float, float, float, float]):
+    errors = []
+    try:
+        img, url, attempts = fetch_orthophoto_wcs(bbox)
+        return img, url, {"primary": "WCS", "attempts": attempts}
+    except Exception as exc:
+        errors.append(("WCS", repr(exc)))
+    try:
+        img, url, attempts = fetch_orthophoto_wms(bbox)
+        return img, url, {"primary": "WMS", "attempts": attempts, "wcs_error": errors}
+    except Exception as exc:
+        errors.append(("WMS", repr(exc)))
+    raise RuntimeError(f"Nie udało się pobrać ortofotomapy z WCS ani WMS: {errors}")
 
 
 def raster_value(arr, transform, nodata, e: float, n: float):
