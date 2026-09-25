@@ -57,6 +57,9 @@ jobs:
           assert d["stats"]["terrain_vertices"] > 100
           assert d["stats"]["terrain_triangles"] > 100
           assert d["stats"]["ortho_tiles"] > 10
+          assert d["stats"]["parcel_segments"] > 0, d["stats"]
+          assert d["validation"]["parcel_contains_fetch_center"] is True, d["validation"]
+          assert d["validation"]["distance_fetch_center_to_parcel_m"] == 0.0, d["validation"]
           print(json.dumps(d["stats"], ensure_ascii=False, indent=2))
           print(json.dumps(d.get("validation",{}), ensure_ascii=False, indent=2))
           PY
