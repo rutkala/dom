@@ -695,16 +695,16 @@
           "primitive": "stool",
           "centers_mm": [
             [
-              10250,
-              6620
+              10390,
+              6690
             ],
             [
-              10780,
-              6620
+              10960,
+              6690
             ],
             [
-              11310,
-              6620
+              11530,
+              6690
             ]
           ],
           "seat_height_mm": 690
@@ -724,13 +724,13 @@
           "primitive": "box",
           "bbox_mm": [
             [
-              9280,
-              7080,
+              9160,
+              7060,
               900
             ],
             [
-              9980,
-              7580,
+              9860,
+              7560,
               930
             ]
           ]
@@ -837,14 +837,14 @@
           "primitive": "fireplace",
           "bbox_mm": [
             [
-              19700,
-              7400,
-              480
+              19920,
+              7345,
+              250
             ],
             [
-              19815,
-              8720,
-              930
+              20010,
+              9175,
+              750
             ]
           ]
         },
@@ -995,7 +995,8 @@
     "Korekta v6: stół ma 0,90×2,76 m; narożnik 1,82×2,78 m z ramieniem 1,02 m; ich XY przerejestrowano z rzutu s.49 do geometrii budynku.",
     "Korekta v6: spiżarnia nie jest układem U — ma 3,00 m ciągu na ścianie południowej oraz na zachodniej 0,71 m otwartych półek + 0,70 m wysokiej szafy.",
     "Korekta v6: ściana TV ma 4,71 m wg s.29, a ściana obrazu 4,10 m wg s.31; wcześniejsze krótkie proxy były błędne.",
-    "Korekta v6: lustro w wiatrołapie ma pełną wysokość 2,90 m i szerokość 1,15 m wg s.39."
+    "Korekta v6: lustro w wiatrołapie ma pełną wysokość 2,90 m i szerokość 1,15 m wg s.39.",
+    "Korekta v6.1: hokery i zlew dosunięto do wymiarów wyspy z s.21/25/26; kominek Dimplex 1,83 m osadzono centralnie w polu 2,30 m ze s.29."
   ],
   "unplaced_details": [
     {
