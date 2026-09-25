@@ -673,6 +673,119 @@ def fetch_egib_buildings(bbox):
     }
 
 
+
+def model_house_polygon_local_m():
+    return Polygon([(float(x)/1000.0,float(y)/1000.0) for x,y in MODEL_DATA["facade_reference_outline"]["polygon_mm"]])
+
+
+def _largest_polygon(g):
+    if isinstance(g, Polygon):
+        return g
+    if isinstance(g, MultiPolygon):
+        return max(list(g.geoms), key=lambda p:p.area)
+    return g
+
+
+def _transform_local_house_to_target(model_poly, target_poly, angle_rad):
+    mc=np.asarray([model_poly.centroid.x,model_poly.centroid.y],dtype=float)
+    tc=np.asarray([target_poly.centroid.x,target_poly.centroid.y],dtype=float)
+    c,sn=math.cos(angle_rad),math.sin(angle_rad)
+    R=np.asarray([[c,-sn],[sn,c]],dtype=float)
+    coords=[]
+    for x,y in model_poly.exterior.coords:
+        q=R @ (np.asarray([x,y],dtype=float)-mc) + tc
+        coords.append((float(q[0]),float(q[1])))
+    return Polygon(coords),R,tc-R@mc
+
+
+def fit_house_to_egib(buildings, parcel_geom):
+    """Dopasowanie sztywne modelu domu do rzeczywistego obrysu budynku EGiB.
+
+    Brak ręcznego przesunięcia/obrotu. Kandydat jest wybierany automatycznie
+    spośród budynków leżących na działce, a następnie model jest dopasowywany
+    rotacją + translacją bez zmiany skali.
+    """
+    if parcel_geom is None or parcel_geom.is_empty:
+        return None,None
+    model_poly=model_house_polygon_local_m()
+    model_area=float(model_poly.area)
+    candidates=[]
+    for rec in buildings:
+        geom=_largest_polygon(rec["geometry"])
+        if geom.is_empty or geom.area < 20:
+            continue
+        inside=float(geom.intersection(parcel_geom).area/max(float(geom.area),1e-9))
+        if inside < 0.55:
+            continue
+        area_ratio=float(geom.area/max(model_area,1e-9))
+        if area_ratio < 0.45 or area_ratio > 2.2:
+            continue
+        # Najważniejsza jest zgodność pola; większe budynki są preferowane wobec małych gospodarczych.
+        pre_score=abs(math.log(max(area_ratio,1e-9))) + (0.15 if geom.area < 120 else 0.0)
+        candidates.append((pre_score,rec,geom,inside,area_ratio))
+    if not candidates:
+        return None,{"status":"no_candidate","project_area_m2":round(model_area,3)}
+
+    candidates.sort(key=lambda x:x[0])
+    candidates=candidates[:8]
+    best=None
+    # Coarse + fine angle search, scale fixed at 1.0.
+    for pre,rec,target,inside,area_ratio in candidates:
+        local_best=None
+        for deg in np.arange(0.0,360.0,2.0):
+            p,R,t=_transform_local_house_to_target(model_poly,target,math.radians(float(deg)))
+            inter=float(p.intersection(target).area)
+            union=float(p.union(target).area)
+            iou=inter/union if union>0 else 0.0
+            hd=float(p.boundary.hausdorff_distance(target.boundary))
+            score=hd + 4.0*(1.0-iou)
+            if local_best is None or score<local_best[0]:
+                local_best=(score,float(deg),p,R,t,iou,hd)
+        center_deg=local_best[1]
+        for deg in np.arange(center_deg-2.0,center_deg+2.0001,0.1):
+            p,R,t=_transform_local_house_to_target(model_poly,target,math.radians(float(deg)))
+            inter=float(p.intersection(target).area)
+            union=float(p.union(target).area)
+            iou=inter/union if union>0 else 0.0
+            hd=float(p.boundary.hausdorff_distance(target.boundary))
+            score=hd + 4.0*(1.0-iou)
+            if score<local_best[0]:
+                local_best=(score,float(deg)%360.0,p,R,t,iou,hd)
+        score,deg,p,R,t,iou,hd=local_best
+        total=score + 0.5*pre
+        if best is None or total<best[0]:
+            best=(total,rec,target,deg,R,t,iou,hd,inside,area_ratio,p)
+
+    total,rec,target,deg,R,t,iou,hd,inside,area_ratio,fitted=best
+    accepted=(iou>=0.30 and hd<=5.0)
+    meta={
+        "status":"accepted" if accepted else "rejected",
+        "candidate_id":rec.get("id",""),
+        "candidate_area_m2":round(float(target.area),3),
+        "project_area_m2":round(model_area,3),
+        "candidate_inside_parcel_fraction":round(float(inside),6),
+        "area_ratio":round(float(area_ratio),6),
+        "rotation_deg":round(float(deg),4),
+        "iou":round(float(iou),6),
+        "hausdorff_m":round(float(hd),4),
+        "score":round(float(total),6),
+        "candidate_centroid_epsg2180":[round(float(target.centroid.x),3),round(float(target.centroid.y),3)],
+    }
+    if not accepted:
+        return None,meta
+
+    # q_epsg = R * p_model_m + t ; geoLocal_mm = anchor_mm + 1000*(q_epsg - geo_center)
+    center=np.asarray(GEO_CENTER_2180,dtype=float)
+    trans_mm=GEO_ANCHOR_MODEL_MM + 1000.0*(t-center)
+    M=np.asarray([
+        [R[0,0],R[0,1],trans_mm[0]],
+        [R[1,0],R[1,1],trans_mm[1]],
+        [0.0,0.0,1.0],
+    ],dtype=float)
+    meta["model_to_geo_local_affine_mm"]=np.round(M,12).tolist()
+    return M,meta
+
+
 def house_footprint_epsg2180():
     # Until the house itself is calibrated to the map, do not use the old PZT affine
     # as a hard geospatial constraint. Use only a small exclusion around the geo frame
@@ -691,10 +804,12 @@ def polygon_grid_values(poly, arr, transform, nodata=None):
     return vals[valid]
 
 
-def build_context_buildings(buildings, nmt_arr, nmpt_arr, transform, nmt_nodata, zero_m, center_en, ortho_img, ortho_bbox):
+def build_context_buildings(buildings, nmt_arr, nmpt_arr, transform, nmt_nodata, zero_m, center_en, ortho_img, ortho_bbox, excluded_building_id=None):
     house = house_footprint_epsg2180().buffer(1.0)
     candidates = []
     for rec in buildings:
+        if excluded_building_id and rec.get("id")==excluded_building_id:
+            continue
         geom = rec["geometry"]
         if geom.is_empty or geom.area < 8:
             continue
@@ -1357,7 +1472,9 @@ def main():
         cx, cy = float(seed_cx), float(seed_cy)
         geo_center_source = "legacy_PZT_affine_fallback"
     set_geo_frame(cx, cy)
-    house_geo_affine, house_geo_affine_err_mm = derive_house_model_to_geo_local_affine()
+    pzt_house_geo_affine, house_geo_affine_err_mm = derive_house_model_to_geo_local_affine()
+    house_geo_affine=pzt_house_geo_affine
+    house_fit_meta={"status":"fallback_PZT"}
 
     radius = float(fetch_cfg.get("radius_m", 90.0))
     bbox = (cx - radius, cy - radius, cx + radius, cy + radius)
@@ -1394,7 +1511,7 @@ def main():
         parcel_parts = []
         validation = {
             "pzt_survey_grid_matrix_max_diff": round(M2177_MATRIX_DIFF, 12),
-            "house_geo_affine_max_linearization_error_mm": round(float(house_geo_affine_err_mm), 6),
+            "pzt_house_geo_affine_max_linearization_error_mm": round(float(house_geo_affine_err_mm), 6),
             **house_vs_parcel_validation(parcel_geom),
         }
         center_height = raster_value(arr, transform, nodata, cx, cy)
@@ -1416,14 +1533,27 @@ def main():
         building_parts = []
         building_geoms = []
         building_stats = {"count":0}
+        own_building_id=None
         try:
             building_records, building_meta = fetch_egib_buildings(bbox)
+            egib_affine,house_fit_meta=fit_house_to_egib(building_records,parcel_geom)
+            if egib_affine is not None:
+                house_geo_affine=egib_affine
+                own_building_id=house_fit_meta.get("candidate_id")
+                validation["house_alignment_source"]="EGiB_building_footprint"
+            else:
+                validation["house_alignment_source"]="PZT_survey_grid_fallback"
+            validation["house_egib_fit"]=house_fit_meta
             building_parts, building_geoms, building_stats = build_context_buildings(
-                building_records, arr, nmpt_aligned, transform, nodata, zero_m, (cx,cy), ortho_img, bbox
+                building_records, arr, nmpt_aligned, transform, nodata, zero_m, (cx,cy), ortho_img, bbox,
+                excluded_building_id=own_building_id
             )
             building_meta["rendered"] = building_stats.get("count",0)
+            building_meta["own_building_id"] = own_building_id
         except Exception as exc:
             building_meta = {"service":CFG["services"]["egib_wfs"]["url"],"error":repr(exc)}
+            validation["house_alignment_source"]="PZT_survey_grid_fallback_EGiB_error"
+            validation["house_egib_fit"]={"status":"error","error":repr(exc)}
             print(f"UWAGA: EGiB budynki niedostępne: {exc}")
 
         if nmpt_aligned is not None:
@@ -1463,14 +1593,15 @@ def main():
                 "geo_context_anchor_model_mm": [round(float(GEO_ANCHOR_MODEL_MM[0]),3), round(float(GEO_ANCHOR_MODEL_MM[1]),3)],
                 "geo_context_rule": "native EPSG:2180 east/north -> local x/y, no rotation; shared by NMT/ortho/parcel/EGiB",
                 "house_calibration": {
-                    "status": "survey_georeferenced",
-                    "method": "PZT map-to-design survey grid -> EPSG:2177 -> EPSG:2180",
+                    "status": "reality_georeferenced" if house_fit_meta.get("status")=="accepted" else "survey_georeferenced_fallback",
+                    "method": "EGiB footprint rigid fit (rotation+translation, scale=1)" if house_fit_meta.get("status")=="accepted" else "PZT map-to-design survey grid -> EPSG:2177 -> EPSG:2180",
                     "manual_rotation_deg": 0.0,
                     "manual_offset_m": [0.0,0.0],
                     "model_to_epsg2177_affine_derived": np.round(M2177,12).tolist(),
                     "model_to_geo_local_affine_mm": np.round(house_geo_affine,12).tolist(),
-                    "affine_linearization_error_mm": round(float(house_geo_affine_err_mm),6),
-                    "note": "Położenie domu wynika wyłącznie z geodezyjnej siatki PZT; brak ręcznego dopasowania do ortofotomapy."
+                    "pzt_affine_linearization_error_mm": round(float(house_geo_affine_err_mm),6),
+                    "egib_fit": house_fit_meta,
+                    "note": "Preferowany jest rzeczywisty obrys budynku EGiB na działce. Dopasowanie jest automatyczne, sztywne i bez zmiany skali; PZT jest fallbackiem."
                 },
                 "control": CFG["control"],
             },
