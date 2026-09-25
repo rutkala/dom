@@ -824,10 +824,11 @@ def _geo_affine_to_house_polygon_epsg2180(M):
 
 
 def fit_house_to_orthophoto(ortho_img, bbox, parcel_geom):
-    """Dopasuj dom do widocznego dachu na ortofotomapie, ograniczając wybór do działki.
+    """Dopasuj model domu bezpośrednio do ortofotomapy w granicach działki.
 
-    PZT jest używany wyłącznie jako słaby seed do wyboru właściwego skupiska.
-    Wynik jest sztywną transformacją rotation+translation ze skalą dokładnie 1.
+    PZT nie jest wynikiem ani fallbackiem: dostarcza wyłącznie środek i kierunek
+    startowego okna wyszukiwania. Właściwy wynik maksymalizuje zgodność szarego
+    dachu i jego krawędzi na aktualnej ortofotomapie.
     """
     if parcel_geom is None or parcel_geom.is_empty:
         return None,{"status":"no_parcel"}
@@ -837,88 +838,44 @@ def fit_house_to_orthophoto(ortho_img, bbox, parcel_geom):
     minx,miny,maxx,maxy=map(float,bbox)
     px_e=(maxx-minx)/max(float(w),1.0)
     px_n=(maxy-miny)/max(float(h),1.0)
-    pixel_area=px_e*px_n
 
     transform_img=rasterio.transform.from_bounds(minx,miny,maxx,maxy,w,h)
-    parcel_mask=geometry_mask([mapping(parcel_geom)],out_shape=(h,w),transform=transform_img,invert=True,all_touched=True)
+    parcel_mask=geometry_mask(
+        [mapping(parcel_geom)],out_shape=(h,w),transform=transform_img,
+        invert=True,all_touched=True
+    ).astype(np.float32)
 
     bright=img.mean(axis=2)
     spread=img.max(axis=2)-img.min(axis=2)
     green_excess=img[:,:,1]-0.5*(img[:,:,0]+img[:,:,2])
 
-    # Dach domu na aktualnej ortofotomapie jest neutralny/szary. Próg jest celowo
-    # szeroki; geometria działki, pole i seed PZT rozstrzygają wybór komponentu.
-    roof_seed=(
-        parcel_mask
-        & (bright>0.16) & (bright<0.80)
-        & (spread<0.22)
-        & (green_excess<0.11)
-    )
-    roof_seed=ndimage.binary_closing(roof_seed,iterations=3)
-    roof_seed=ndimage.binary_opening(roof_seed,iterations=1)
-    roof_seed=ndimage.binary_fill_holes(roof_seed)
+    # Ciągła miara "szarego dachu" zamiast progowania binarnego. Dzięki temu
+    # rynny, świetliki, cienie i różne połacie nie rozrywają kandydata.
+    neutral=np.clip(1.0-spread/0.28,0.0,1.0)
+    mid=np.clip(1.0-np.abs(bright-0.43)/0.38,0.0,1.0)
+    nongreen=np.clip(1.0-np.maximum(green_excess,0.0)/0.14,0.0,1.0)
+    roof_like=ndimage.gaussian_filter((neutral*mid*nongreen).astype(np.float32),sigma=1.2)
 
-    labels,count=ndimage.label(roof_seed)
+    gx=ndimage.sobel(bright.astype(float),axis=1,mode="nearest")
+    gy=ndimage.sobel(bright.astype(float),axis=0,mode="nearest")
+    grad=np.hypot(gx,gy)
+    gvals=grad[parcel_mask>0]
+    gscale=float(np.nanpercentile(gvals,95)) if len(gvals) else float(np.nanpercentile(grad,95))
+    grad=np.clip(grad/max(gscale,1e-6),0.0,1.0).astype(np.float32)
+
     model_poly=model_house_polygon_local_m()
-    model_area=float(model_poly.area)
     pzt_poly=project_house_polygon_epsg2180()
+    model_area=float(model_poly.area)
+    model_center=np.asarray([model_poly.centroid.x,model_poly.centroid.y],dtype=float)
     pzt_center=np.asarray([pzt_poly.centroid.x,pzt_poly.centroid.y],dtype=float)
-
-    candidates=[]
-    for lab in range(1,int(count)+1):
-        rows,cols=np.nonzero(labels==lab)
-        if len(rows)<20:
-            continue
-        area=float(len(rows))*pixel_area
-        if area < max(35.0,model_area*0.16) or area > model_area*2.2:
-            continue
-        e=minx+(cols.astype(float)+0.5)/w*(maxx-minx)
-        n=maxy-(rows.astype(float)+0.5)/h*(maxy-miny)
-        centroid=np.asarray([float(np.mean(e)),float(np.mean(n))])
-        dist=float(np.linalg.norm(centroid-pzt_center))
-        if dist>35.0:
-            continue
-        area_pen=abs(math.log(max(area/model_area,1e-9)))
-        score=area_pen+dist/18.0
-        candidates.append((score,lab,rows,cols,area,centroid))
-
-    if not candidates:
-        return None,{
-            "status":"no_candidate",
-            "project_area_m2":round(model_area,3),
-            "raw_components":int(count),
-        }
-
-    candidates.sort(key=lambda x:x[0])
-    _,lab,rows,cols,component_area,component_center=candidates[0]
-    target_mask=(labels==lab)
-    target_soft=ndimage.gaussian_filter(target_mask.astype(np.float32),sigma=1.5)
-
-    # Kierunek dachu z PCA pikseli w rzeczywistym układzie east/north.
-    target_pts=np.column_stack([
-        minx+(cols.astype(float)+0.5)/w*(maxx-minx),
-        maxy-(rows.astype(float)+0.5)/h*(maxy-miny),
-    ])
-    centered=target_pts-target_pts.mean(axis=0)
-    cov=np.cov(centered.T)
-    vals,vecs=np.linalg.eigh(cov)
-    axis=vecs[:,int(np.argmax(vals))]
-    target_angle=math.atan2(float(axis[1]),float(axis[0]))
     model_angle=_polygon_long_axis_angle(model_poly)
+    pzt_angle=_polygon_long_axis_angle(pzt_poly)
+    base_theta=pzt_angle-model_angle
 
-    interior=_sample_polygon_interior(model_poly,0.5)
-    boundary=_sample_polygon_boundary(model_poly,0.25)
+    interior=_sample_polygon_interior(model_poly,0.6)
+    boundary=_sample_polygon_boundary(model_poly,0.30)
     if len(interior)==0 or len(boundary)==0:
         return None,{"status":"sampling_failed"}
-
-    gray=bright.astype(float)
-    gx=ndimage.sobel(gray,axis=1,mode="nearest")
-    gy=ndimage.sobel(gray,axis=0,mode="nearest")
-    grad=np.hypot(gx,gy)
-    gscale=float(np.nanpercentile(grad[parcel_mask],95)) if np.any(parcel_mask) else float(np.nanpercentile(grad,95))
-    grad=np.clip(grad/max(gscale,1e-6),0.0,1.0)
-
-    model_center=np.asarray([model_poly.centroid.x,model_poly.centroid.y],dtype=float)
 
     def sample_grid(arr,pts):
         cc=np.rint((pts[:,0]-minx)/max(maxx-minx,1e-9)*(w-1)).astype(int)
@@ -929,82 +886,92 @@ def fit_house_to_orthophoto(ortho_img, bbox, parcel_geom):
             out[ok]=arr[rr[ok],cc[ok]]
         return out
 
-    def evaluate(theta,t):
+    def evaluate(theta,center):
         c,sn=math.cos(theta),math.sin(theta)
         R=np.asarray([[c,-sn],[sn,c]],dtype=float)
+        t=np.asarray(center,dtype=float)-R@model_center
         qin=interior@R.T+t
         qbd=boundary@R.T+t
-        hit=float(np.mean(sample_grid(target_soft,qin)))
+        roof=float(np.mean(sample_grid(roof_like,qin)))
         edge=float(np.mean(sample_grid(grad,qbd)))
-        fitted_center=R@model_center+t
-        seed_dist=float(np.linalg.norm(fitted_center-pzt_center))
-        score=1.45*hit+0.35*edge-0.012*seed_dist
-        return score,R,hit,edge,seed_dist,fitted_center
+        vals=sample_grid(bright,qin)
+        texture=float(np.std(vals))
+        parcel_sample=float(np.mean(sample_grid(parcel_mask,qin)))
+        seed_dist=float(np.linalg.norm(np.asarray(center,dtype=float)-pzt_center))
+        score=1.15*roof+0.72*edge-0.32*texture+0.16*parcel_sample-0.010*seed_dist
+        if parcel_sample<0.90:
+            score-=2.0*(0.90-parcel_sample)
+        return score,R,t,roof,edge,texture,parcel_sample,seed_dist
 
-    # Etap 1: szybkie przeszukanie zgrubne.
+    # Zgrubne wyszukiwanie: do 14 m translacji i 20° względem PZT.
     best=None
-    base_theta=target_angle-model_angle
-    for flip in (0.0,math.pi):
-        for ddeg in np.arange(-12.0,12.0001,2.0):
-            theta=base_theta+flip+math.radians(float(ddeg))
-            c,sn=math.cos(theta),math.sin(theta)
-            R0=np.asarray([[c,-sn],[sn,c]],dtype=float)
-            base_t=component_center-R0@model_center
-            for de in np.arange(-4.0,4.0001,1.0):
-                for dn in np.arange(-4.0,4.0001,1.0):
-                    t=base_t+np.asarray([float(de),float(dn)])
-                    score,R,hit,edge,seed_dist,fitted_center=evaluate(theta,t)
-                    if best is None or score>best[0]:
-                        best=(score,theta,R,t,hit,edge,seed_dist,fitted_center)
+    for ddeg in np.arange(-20.0,20.0001,4.0):
+        theta=base_theta+math.radians(float(ddeg))
+        for de in np.arange(-14.0,14.0001,2.0):
+            for dn in np.arange(-14.0,14.0001,2.0):
+                center=pzt_center+np.asarray([float(de),float(dn)])
+                ev=evaluate(theta,center)
+                if best is None or ev[0]>best[0]:
+                    best=(*ev,theta,center)
 
-    # Etap 2: doprecyzowanie wokół najlepszego wyniku.
-    coarse=best
-    fine_center=np.asarray(coarse[7],dtype=float)
-    fine_theta=float(coarse[1])
+    # Precyzyjny etap wokół najlepszego punktu.
+    coarse_theta=float(best[8])
+    coarse_center=np.asarray(best[9],dtype=float)
+    fine=None
+    for ddeg in np.arange(-3.0,3.0001,0.5):
+        theta=coarse_theta+math.radians(float(ddeg))
+        for de in np.arange(-3.0,3.0001,0.5):
+            for dn in np.arange(-3.0,3.0001,0.5):
+                center=coarse_center+np.asarray([float(de),float(dn)])
+                ev=evaluate(theta,center)
+                if fine is None or ev[0]>fine[0]:
+                    fine=(*ev,theta,center)
+
+    # Ostatnie 25 cm / 0.25°.
+    fine_theta=float(fine[8])
+    fine_center=np.asarray(fine[9],dtype=float)
     best=None
-    for ddeg in np.arange(-1.5,1.5001,0.25):
+    for ddeg in np.arange(-0.75,0.7501,0.25):
         theta=fine_theta+math.radians(float(ddeg))
-        c,sn=math.cos(theta),math.sin(theta)
-        R0=np.asarray([[c,-sn],[sn,c]],dtype=float)
-        base_t=fine_center-R0@model_center
-        for de in np.arange(-1.0,1.0001,0.25):
-            for dn in np.arange(-1.0,1.0001,0.25):
-                t=base_t+np.asarray([float(de),float(dn)])
-                score,R,hit,edge,seed_dist,fitted_center=evaluate(theta,t)
-                if best is None or score>best[0]:
-                    best=(score,theta,R,t,hit,edge,seed_dist,fitted_center)
+        for de in np.arange(-0.75,0.7501,0.25):
+            for dn in np.arange(-0.75,0.7501,0.25):
+                center=fine_center+np.asarray([float(de),float(dn)])
+                ev=evaluate(theta,center)
+                if best is None or ev[0]>best[0]:
+                    best=(*ev,theta,center)
 
-    score,theta,R,t,hit,edge,seed_dist,_=best
+    score,R,t,roof,edge,texture,parcel_sample,seed_dist,theta,center=best
     coords=[]
     for x,y in model_poly.exterior.coords:
         q=R@np.asarray([float(x),float(y)])+t
         coords.append((float(q[0]),float(q[1])))
     fitted=Polygon(coords)
     inside=float(fitted.intersection(parcel_geom).area/max(float(fitted.area),1e-9))
-    accepted=(inside>=0.95 and hit>=0.20 and seed_dist<=25.0)
 
+    # Kryteria są celowo konserwatywne. Ich niespełnienie zatrzymuje publikację,
+    # zamiast przywracać stare położenie PZT.
+    accepted=(inside>=0.95 and roof>=0.42 and edge>=0.10 and seed_dist<=22.0)
     meta={
         "status":"accepted" if accepted else "rejected",
         "project_area_m2":round(model_area,3),
-        "orthophoto_component_area_m2":round(float(component_area),3),
-        "candidate_count":len(candidates),
-        "raw_components":int(count),
-        "candidate_centroid_epsg2180":[round(float(component_center[0]),3),round(float(component_center[1]),3)],
         "fitted_centroid_epsg2180":[round(float(fitted.centroid.x),3),round(float(fitted.centroid.y),3)],
         "pzt_seed_centroid_epsg2180":[round(float(pzt_center[0]),3),round(float(pzt_center[1]),3)],
         "pzt_seed_distance_m":round(float(seed_dist),3),
         "rotation_deg":round(float(math.degrees(theta)%360.0),4),
-        "roof_hit_fraction":round(float(hit),6),
+        "roof_likelihood":round(float(roof),6),
         "edge_score":round(float(edge),6),
+        "interior_texture_std":round(float(texture),6),
+        "parcel_sample_fraction":round(float(parcel_sample),6),
         "parcel_inside_fraction":round(float(inside),6),
         "score":round(float(score),6),
         "pixel_resolution_m":[round(float(px_e),4),round(float(px_n),4)],
+        "search_window":{"translation_m":14.0,"rotation_deg":20.0},
     }
     if not accepted:
         return None,meta
 
-    center=np.asarray(GEO_CENTER_2180,dtype=float)
-    trans_mm=GEO_ANCHOR_MODEL_MM+1000.0*(t-center)
+    center_geo=np.asarray(GEO_CENTER_2180,dtype=float)
+    trans_mm=GEO_ANCHOR_MODEL_MM+1000.0*(t-center_geo)
     M=np.asarray([
         [R[0,0],R[0,1],trans_mm[0]],
         [R[1,0],R[1,1],trans_mm[1]],
@@ -1012,7 +979,6 @@ def fit_house_to_orthophoto(ortho_img, bbox, parcel_geom):
     ],dtype=float)
     meta["model_to_geo_local_affine_mm"]=np.round(M,12).tolist()
     return M,meta
-
 
 def house_footprint_epsg2180():
     # Until the house itself is calibrated to the map, do not use the old PZT affine
