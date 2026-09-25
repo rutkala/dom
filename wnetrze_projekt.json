@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "v1 extraction from interior PDF; geometry proxies, not manufacturer models",
+  "status": "v2 dimensions corrected against furniture plan p.49; geometry proxies, not manufacturer models",
   "source": {
     "file": "Projekt wnętrza 20,10,2023.pdf",
     "pages": {
@@ -310,13 +310,13 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            13380,
+            13480,
             6550,
             720
           ],
           [
-            14480,
-            9300,
+            14380,
+            9330,
             790
           ]
         ],
@@ -336,8 +336,8 @@
             220
           ],
           [
-            16550,
-            9150,
+            16450,
+            9430,
             540
           ]
         ],
@@ -362,8 +362,8 @@
             220
           ],
           [
-            17900,
-            7550,
+            17370,
+            7850,
             540
           ]
         ],
@@ -432,7 +432,7 @@
           8150,
           425
         ],
-        "radius_mm": 420,
+        "radius_mm": 450,
         "height_mm": 50,
         "role": "stolik kawowy Ø90 proxy",
         "source_pages": [
@@ -449,7 +449,7 @@
           7720,
           355
         ],
-        "radius_mm": 320,
+        "radius_mm": 300,
         "height_mm": 50,
         "role": "stolik kawowy Ø60 proxy",
         "source_pages": [
@@ -996,6 +996,7 @@
     "Pozycje bazowe oparto na rzucie umeblowania s.49 oraz wcześniejszym dopasowaniu do geometrii pomieszczeń.",
     "Rysunki techniczne są nadrzędne dla wymiarów zabudów; wizualizacje służą do wyglądu i podziałów.",
     "Warstwa selected zawiera proxy wybranych produktów; nie są to modele producentów 1:1.",
-    "Okno kuchenne pozostaje zgodne z aktualnym modelem budynku, nie z historycznym rysunkiem wnętrza."
+    "Okno kuchenne pozostaje zgodne z aktualnym modelem budynku, nie z historycznym rysunkiem wnętrza.",
+    "Salon: stół 0,90 × 2,78 m, narożnik 1,82 × 2,78 m z częścią 1,20 m oraz stoliki Ø0,90/Ø0,60 m skorygowano bezpośrednio z rzutu umeblowania s.49."
   ]
 }
