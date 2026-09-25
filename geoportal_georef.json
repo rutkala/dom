@@ -91,6 +91,12 @@
     "nmt_evrf_wfs": {
       "url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/NumerycznyModelTerenuEVRF2007/WFS/Skorowidze",
       "note": "Skorowidz zapasowy / referencyjny; podstawowe pobieranie automatyczne używa WMS GetFeatureInfo."
+    },
+    "ortho_wcs": {
+      "standard_resolution_url": "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WCS/StandardResolution",
+      "preferred_coverage": "Orthoimagery_StandardResolution",
+      "format": "GEOTIFF",
+      "note": "Podstawowe źródło obrazu ortofotomapy do modelu; WMS pozostaje fallbackiem."
     }
   }
 }
