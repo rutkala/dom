@@ -62,6 +62,9 @@ jobs:
           assert d["validation"]["parcel_contains_fetch_center"] is True, d["validation"]
           assert d["validation"]["distance_fetch_center_to_parcel_m"] == 0.0, d["validation"]
           assert d["validation"].get("ortho_uv_roundtrip_max_error_mm", 999) < 0.01, d["validation"]
+          assert d["alignment"]["house_calibration"]["status"] == "reality_georeferenced", d["alignment"]["house_calibration"]
+          assert d["validation"]["house_alignment_source"] in {"EGiB_building_footprint","orthophoto_roof_within_parcel"}, d["validation"]
+          assert d["validation"].get("calibrated_house_inside_parcel_fraction",0) >= 0.95, d["validation"]
           print(json.dumps(d["stats"], ensure_ascii=False, indent=2))
           print(json.dumps(d.get("validation",{}), ensure_ascii=False, indent=2))
           PY
