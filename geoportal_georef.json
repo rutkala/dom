@@ -52,8 +52,9 @@
     "source": "PZT s.15: rzędna wejścia 254.0 m n.p.m."
   },
   "parcel": {
-    "id": "246401_1.0430.4/13",
-    "uldk_url": "https://uldk.gugik.gov.pl/"
+    "id": "246401_1.0430.AR_8.4/13",
+    "uldk_url": "https://uldk.gugik.gov.pl/",
+    "note": "Pełny identyfikator działki z mapy do celów projektowych: obręb 0430 Kiedrzyn, arkusz mapy 8, działka 4/13."
   },
   "fetch": {
     "center_model_mm": [
