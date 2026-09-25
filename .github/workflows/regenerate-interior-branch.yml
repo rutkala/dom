@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: interior-two-layer-model
+  cancel-in-progress: true
+
 jobs:
   regenerate:
     runs-on: ubuntu-latest
