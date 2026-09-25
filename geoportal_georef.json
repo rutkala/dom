@@ -117,10 +117,37 @@
       "note": "Zbiorcza usługa WFS EGiB; obrysy budynków używane do kontekstu 3D."
     }
   },
-  "orientation_correction_deg": 90,
+  "orientation_correction_deg": 0,
   "orientation_correction_pivot_model_mm": [
     14148.5,
     5960
   ],
-  "orientation_correction_note": "Korekta +90° po wizualnej kontroli ortofotomapy względem modelu: bryła domu na mapie była obrócona o ok. 90° względem rzutu modelu. Korekta obraca georeferencję wokół środka modelu, bez zmiany punktu centralnego."
+  "orientation_correction_note": "Brak ręcznej korekty. Orientacja modelu względem układu państwowego wynika wyłącznie z siatki współrzędnych mapy do celów projektowych i transformacji strona PDF -> model.",
+  "survey_grid": {
+    "source_file": "Projekt budowlany PZT_PAB_2024.02.01.pdf",
+    "pdf_page": 15,
+    "scale": "1:500",
+    "control_cross_page_pt": [
+      841.8597412109375,
+      104.163818359375
+    ],
+    "control_cross_epsg2177": {
+      "easting_Y_m": 6576650,
+      "northing_X_m": 5635850
+    },
+    "grid_spacing_page_pt": 283.46453857421875,
+    "grid_spacing_ground_m": 50,
+    "page_axis_mapping": "page +x = easting +Y; page +y = northing -X",
+    "note": "Siatka mapy ma skrzyżowania co 50 m. Współrzędne są odczytane z opisu X=5635850, Y=6576650 przy kontrolnym krzyżu. Transformacja model->EPSG:2177 jest wyliczana w kodzie z tej siatki i odwrotności page_to_model_affine."
+  },
+  "house_georeference": {
+    "method": "PZT_survey_grid",
+    "crs": "EPSG:2177 -> EPSG:2180",
+    "manual_offset_m": [
+      0,
+      0
+    ],
+    "manual_rotation_deg": 0,
+    "note": "Położenie domu nie jest kalibrowane do ortofotomapy ręcznie. Wynika z georeferencji zatwierdzonej mapy do celów projektowych."
+  }
 }
