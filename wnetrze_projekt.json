@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "v5 XY placement rebuilt from top furniture plan p.49; elevations used only for heights/details",
+  "status": "v6 full-PDF audit: XY from p49; technical elevations/sections control dimensions and wall details",
   "source": {
     "file": "Projekt wnętrza 20,10,2023.pdf",
     "pages": {
@@ -182,16 +182,16 @@
         "bbox_mm": [
           [
             7010,
-            5920,
+            7120,
             30
           ],
           [
             7610,
-            8160,
+            9360,
             900
           ]
         ],
-        "role": "niska zabudowa zachodnia 2,24 m, gł. 0,60 m",
+        "role": "niska zabudowa zachodnia 2,24 m od wieży piekarnika do ściany północnej",
         "source_pages": [
           21,
           23
@@ -204,16 +204,16 @@
         "bbox_mm": [
           [
             7010,
-            8160,
+            5920,
             30
           ],
           [
             7610,
-            9360,
+            7120,
             2600
           ]
         ],
-        "role": "wysoka zabudowa zachodnia 1,20 m",
+        "role": "wysoka zabudowa zachodnia 1,20 m przy południowym końcu ściany",
         "source_pages": [
           23
         ]
@@ -289,17 +289,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            13480,
-            6550,
+            14330,
+            6730,
             720
           ],
           [
-            14380,
-            9330,
+            15230,
+            9490,
             790
           ]
         ],
-        "role": "stół jadalniany",
+        "role": "stół 0,90 × 2,76 m wg rzutu s.49",
         "source_pages": [
           49
         ]
@@ -310,17 +310,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            15550,
-            6650,
+            16530,
+            6660,
             220
           ],
           [
-            16450,
-            9430,
+            17430,
+            9440,
             540
           ]
         ],
-        "role": "główna część narożnika",
+        "role": "długi moduł narożnika, 0,90 × 2,78 m",
         "source_pages": [
           11,
           12,
@@ -336,17 +336,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            15550,
-            6650,
+            16530,
+            6660,
             220
           ],
           [
-            17370,
-            7850,
+            18350,
+            7680,
             540
           ]
         ],
-        "role": "szezlong narożnika",
+        "role": "szezlong: całość narożnika 1,82 × 2,78 m, głębokość ramienia 1,02 m",
         "source_pages": [
           11,
           12,
@@ -362,17 +362,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            17780,
-            8780,
+            17650,
+            9120,
             350
           ],
           [
-            18720,
-            9550,
+            18900,
+            10220,
             1220
           ]
         ],
-        "role": "fotel akcentowy",
+        "role": "fotel akcentowy — pozycja z rzutu s.49, obrót uproszczony w proxy",
         "source_pages": [
           11,
           14,
@@ -386,17 +386,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            16550,
+            16350,
             7050,
             18
           ],
           [
-            19050,
-            9550,
+            19350,
+            9050,
             30
           ]
         ],
-        "role": "dywan",
+        "role": "dywan Hector 2,00 × 3,00 m, ustawienie wg strefy wypoczynkowej",
         "source_pages": [
           49,
           51
@@ -407,8 +407,8 @@
         "room": 10,
         "primitive": "cylinder",
         "center_mm": [
-          17550,
-          8150,
+          18010,
+          8655,
           425
         ],
         "radius_mm": 450,
@@ -424,8 +424,8 @@
         "room": 10,
         "primitive": "cylinder",
         "center_mm": [
-          18150,
-          7720,
+          18170,
+          8040,
           355
         ],
         "radius_mm": 300,
@@ -442,17 +442,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            19820,
-            6680,
+            20020,
+            5650,
             30
           ],
           [
-            19990,
-            9550,
-            2550
+            20060,
+            10360,
+            2900
           ]
         ],
-        "role": "zabudowa TV / kominek",
+        "role": "ściana TV 4,71 m wg s.29",
         "source_pages": [
           29,
           30
@@ -464,17 +464,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            18500,
-            5940,
+            15960,
+            5920,
             30
           ],
           [
-            19480,
-            5985,
-            2520
+            20060,
+            5960,
+            2900
           ]
         ],
-        "role": "lamele / ściana obrazu",
+        "role": "ściana obrazu 4,10 m: beton 2,75 m + lamele 1,35 m wg s.31",
         "source_pages": [
           31
         ]
@@ -495,7 +495,7 @@
             900
           ]
         ],
-        "role": "ciąg południowy 3,00 m × 0,60 m",
+        "role": "ciąg dolny 3,00 × 0,60 m na ścianie południowej",
         "source_pages": [
           33,
           34,
@@ -509,16 +509,16 @@
         "bbox_mm": [
           [
             7010,
-            4210,
+            4920,
             30
           ],
           [
             7610,
             5620,
-            2800
+            2900
           ]
         ],
-        "role": "zabudowa zachodnia 0,60 m × 1,41 m (półki + wysoki moduł)",
+        "role": "wysoka szafa 0,70 m na północnym końcu ściany zachodniej",
         "source_pages": [
           35,
           36
@@ -530,17 +530,17 @@
         "primitive": "box",
         "bbox_mm": [
           [
-            7610,
-            5170,
-            30
+            7010,
+            4210,
+            900
           ],
           [
-            10010,
-            5620,
-            2385
+            7360,
+            4920,
+            2900
           ]
         ],
-        "role": "ciąg/półki północne 2,40 m × 0,45 m",
+        "role": "otwarte półki 0,71 m na ścianie zachodniej, gł. ok. 0,35 m",
         "source_pages": [
           34,
           36
@@ -562,7 +562,7 @@
             2900
           ]
         ],
-        "role": "szafa 2,50 m w niszy 2,50 × 1,16 m",
+        "role": "szafa 2,50 × 1,16 m dokładnie w północnej wnęce",
         "source_pages": [
           38
         ]
@@ -574,16 +574,16 @@
         "bbox_mm": [
           [
             14920,
-            2960,
-            320
+            3310,
+            0
           ],
           [
             14960,
-            4110,
-            2320
+            4460,
+            2900
           ]
         ],
-        "role": "lustro 1,15 m na wschodniej ścianie",
+        "role": "lustro 2,90 × 1,15 m na ścianie wschodniej wg s.39",
         "source_pages": [
           39
         ]
@@ -595,16 +595,16 @@
         "bbox_mm": [
           [
             14760,
-            2960,
+            3485,
             750
           ],
           [
             14960,
-            3760,
+            4285,
             900
           ]
         ],
-        "role": "konsola 0,80 × 0,20 m na wschodniej ścianie",
+        "role": "konsola 0,80 × 0,20 m, wys. ok. 0,90 m pod lustrem",
         "source_pages": [
           39
         ]
@@ -625,7 +625,7 @@
             2900
           ]
         ],
-        "role": "lamele 1,50 m na zachodniej ścianie z drzwiami ukrytymi do gabinetu",
+        "role": "lamele 1,50 m na zachodniej ścianie, drzwi ukryte wg s.41",
         "source_pages": [
           40,
           41
@@ -990,7 +990,12 @@
     "Korekta v5: spiżarnia ma układ U: 3,00×0,60 m na ścianie południowej, 2,40×0,45 m na północnej oraz 0,60×1,41 m na zachodniej.",
     "Korekta v5: wiatrołap — szafa w niszy 2,50×1,16 m; lamele na zachodniej ścianie 1,50 m; konsola 0,80×0,20 i lustro 1,15 m na ścianie wschodniej; pufa 1,15×0,50.",
     "Korekta v5: w kuchni nie ma dodatkowej wolnostojącej szafki przy wejściu; witryna/winiarka jest detalem zintegrowanym w wysokiej zabudowie.",
-    "Korekta v5.1: samodzielna winiarka została usunięta z geometrii XY — detal s.24 pozostaje w danych, ale bez położenia dopóki rzut nie potwierdzi jego footprintu."
+    "Korekta v5.1: samodzielna winiarka została usunięta z geometrii XY — detal s.24 pozostaje w danych, ale bez położenia dopóki rzut nie potwierdzi jego footprintu.",
+    "Korekta v6: zachodnia zabudowa kuchni była odwrócona — wieża piekarnika 1,20 m jest przy południowym końcu, a niski ciąg 2,24 m biegnie na północ.",
+    "Korekta v6: stół ma 0,90×2,76 m; narożnik 1,82×2,78 m z ramieniem 1,02 m; ich XY przerejestrowano z rzutu s.49 do geometrii budynku.",
+    "Korekta v6: spiżarnia nie jest układem U — ma 3,00 m ciągu na ścianie południowej oraz na zachodniej 0,71 m otwartych półek + 0,70 m wysokiej szafy.",
+    "Korekta v6: ściana TV ma 4,71 m wg s.29, a ściana obrazu 4,10 m wg s.31; wcześniejsze krótkie proxy były błędne.",
+    "Korekta v6: lustro w wiatrołapie ma pełną wysokość 2,90 m i szerokość 1,15 m wg s.39."
   ],
   "unplaced_details": [
     {
@@ -999,5 +1004,12 @@
       "description": "witryna/winiarka 0,60 m z rysunku s.24",
       "reason": "rysunek detalu podaje wymiary i wygląd, ale rzut s.49 nie wskazuje jednoznacznego samodzielnego footprintu; element nie jest renderowany jako osobna szafka"
     }
+  ],
+  "source_priority": [
+    "s.49: rzut umeblowania — nadrzędny dla pozycji XY mebli wolnostojących i stref zabudowy",
+    "s.21-27 / 29-31 / 33-36 / 38-41: rysunki techniczne — nadrzędne dla wymiarów, wysokości, podziałów i zabudów przyściennych",
+    "s.3-18: wizualizacje — kontrola orientacji, materiałów i wyglądu; nie służą do zgadywania pozycji",
+    "s.43-48: rysunki ogólne — instalacje/oświetlenie/sufity; nie nadpisują geometrii mebli z s.49",
+    "s.50-52: wykaz materiałów — nazwy produktów i wykończeń"
   ]
 }
