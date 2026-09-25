@@ -116,5 +116,11 @@
       "srs": "EPSG:2180",
       "note": "Zbiorcza usługa WFS EGiB; obrysy budynków używane do kontekstu 3D."
     }
-  }
+  },
+  "orientation_correction_deg": 90,
+  "orientation_correction_pivot_model_mm": [
+    14148.5,
+    5960
+  ],
+  "orientation_correction_note": "Korekta +90° po wizualnej kontroli ortofotomapy względem modelu: bryła domu na mapie była obrócona o ok. 90° względem rzutu modelu. Korekta obraca georeferencję wokół środka modelu, bez zmiany punktu centralnego."
 }
