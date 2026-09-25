@@ -398,14 +398,21 @@ def add_interior_layers():
     # Kitchen wall elements grounded in the top plan / elevation drawings.
     clone_block('KITCHEN_CHALKBOARD','KUCH_CHALKBOARD','interior_black','farba tablicowa Jeger')
     clone_block('KITCHEN_SLIDING_DOOR','KUCH_SLIDING_DOOR','interior_oak','drzwi przesuwne drewniane')
-    # The wine display from p.24 has no unambiguous standalone footprint on p.49,
-    # so it is intentionally not rendered as a separate cabinet.
+    # The wine display from p.24 is the glazed SIDE of the 0.60 m-deep tall cabinet,
+    # not a separate floor-standing cabinet. It is drawn on the east face of KUCH_TALL_ZONE.
+    _interior_box('SEL_WINE_side_glass','wnetrze_elementy','interior_glass',
+        [[12532,8760,100],[12560,9360,2500]],source,11,'selected',
+        'przeszklony bok/winiarka 0,60 m',[24],'witryna / winiarka')
+    for idx,z in enumerate((300,700,1100,1500,1900,2300),1):
+        _interior_box(f'SEL_WINE_side_shelf_{idx}','wnetrze_elementy','interior_oak',
+            [[12505,8785,z],[12560,9335,z+20]],source,11,'selected',
+            'półka bocznej witryny',[24],'witryna / winiarka')
 
     # Kitchen worktops / sink make the selected layer visually different from plain blocks.
     _interior_box('SEL_KITCHEN_top_window','wnetrze_elementy','interior_oak',
         [[7610,8760,900],[11010,9360,960]],source,11,'selected','blat ciągu północnego 3,40 m',[21,22],'dąb craft złoty')
     _interior_box('SEL_KITCHEN_top_left','wnetrze_elementy','interior_oak',
-        [[7010,5920,900],[7610,8160,960]],source,11,'selected','blat ciągu zachodniego 2,24 m',[21,23],'dąb craft złoty')
+        [[7010,7120,900],[7610,9360,960]],source,11,'selected','blat ciągu zachodniego 2,24 m',[21,23],'dąb craft złoty')
     _interior_box('SEL_KITCHEN_top_island','wnetrze_elementy','interior_oak',
         [[8880,6830,900],[11840,7790,960]],source,11,'selected','blat wyspy 2900×900',[21,25,26],'dąb craft złoty')
     sink_rec=next((x for x in INTERIOR['layers']['selected'] if x['id']=='SEL_KITCHEN_SINK'),None)
@@ -425,91 +432,99 @@ def add_interior_layers():
                 _interior_box(f"SEL_HOKER_{idx}_leg_{dx}_{dy}",'wnetrze_elementy','interior_metal',
                     [[cx+dx-12,cy+dy-12,40],[cx+dx+12,cy+dy+12,660]],source,11,'selected','noga hokera',[50],stool_rec['product'])
 
-    # Dining table: exact 0.90 × 2.78 m top from plan p.49 + four black legs.
+    # Dining table: exact 0.90 × 2.76 m from p.49; XY registered to the building plan.
     clone_block('DINING','SAL_DINING_TABLE','interior_oak','stół - zamówienie indywidualne')
-    for idx,(lx,ly) in enumerate(((13560,6740),(14300,6740),(13560,9140),(14300,9140)),1):
+    tb=block_map['SAL_DINING_TABLE']['bbox_mm']
+    tx0,ty0=map(float,tb[0][:2]); tx1,ty1=map(float,tb[1][:2])
+    for idx,(lx,ly) in enumerate(((tx0+80,ty0+160),(tx1-80,ty0+160),(tx0+80,ty1-160),(tx1-80,ty1-160)),1):
         _interior_box(f'SEL_DINING_leg_{idx}','wnetrze_elementy','interior_metal',
             [[lx-25,ly-25,30],[lx+25,ly+25,720]],source,10,'selected','noga stołu',[49],'stół - zamówienie indywidualne')
-    chair_y=[6830,7570,8310,9050]
-    for side,cx in (('L',13080),('R',14780)):
+    chair_y=[7070,7750,8440,9120]
+    for side,cx in (('W',13950),('E',15610)):
         for idx,cy in enumerate(chair_y,1):
             _interior_box(f"SEL_CHAIR_{side}_{idx}_seat",'wnetrze_elementy','interior_cream',
-                [[cx-240,cy-230,430],[cx+240,cy+230,510]],source,10,'selected','siedzisko krzesła',[49,51],'Alaska beżowe, nogi czarne')
-            back_y0=cy-50 if side=='L' else cy-50
+                [[cx-230,cy-220,430],[cx+230,cy+220,510]],source,10,'selected','siedzisko krzesła',[49,51],'Alaska beżowe, nogi czarne')
+            # back faces away from the table
+            bx0,bx1=(cx-300,cx-210) if side=='W' else (cx+210,cx+300)
             _interior_box(f"SEL_CHAIR_{side}_{idx}_back",'wnetrze_elementy','interior_cream',
-                [[cx-240,back_y0,510],[cx+240,back_y0+100,940]],source,10,'selected','oparcie krzesła',[49,51],'Alaska beżowe, nogi czarne')
-            for dx,dy in ((-180,-160),(-180,160),(180,-160),(180,160)):
+                [[bx0,cy-220,510],[bx1,cy+220,940]],source,10,'selected','oparcie krzesła',[49,51],'Alaska beżowe, nogi czarne')
+            for dx,dy in ((-170,-150),(-170,150),(170,-150),(170,150)):
                 _interior_box(f"SEL_CHAIR_{side}_{idx}_leg_{dx}_{dy}",'wnetrze_elementy','interior_metal',
                     [[cx+dx-15,cy+dy-15,30],[cx+dx+15,cy+dy+15,430]],source,10,'selected','noga krzesła',[51],'Alaska beżowe, nogi czarne')
 
-    # Sofa Liquid / Soro 21: dimensions corrected from p.49 (overall 1.82 × 2.78 m, chaise depth 1.20 m).
+    # Sofa Liquid / Soro 21 from p.49: 1.82 × 2.78 m, chaise arm depth 1.02 m.
     clone_block('SOFA','SAL_SOFA_LONG','interior_cream','Liquid / tkanina Soro 21')
     clone_block('SOFA','SAL_SOFA_CHAISE','interior_cream','Liquid / tkanina Soro 21')
-    _interior_box('SEL_SOFA_back_long','wnetrze_elementy','interior_cream',[[15420,6650,400],[15620,9430,930]],source,10,'selected','oparcie narożnika',[11,14,15,49,51],'Liquid / tkanina Soro 21')
-    _interior_box('SEL_SOFA_back_chaise','wnetrze_elementy','interior_cream',[[15550,6580,400],[17370,6780,830]],source,10,'selected','oparcie szezlonga',[11,14,15,49,51],'Liquid / tkanina Soro 21')
-    _interior_box('SEL_SOFA_arm_end','wnetrze_elementy','interior_cream',[[16270,9200,420],[16520,9430,780]],source,10,'selected','podłokietnik',[11,14,15,49,51],'Liquid / tkanina Soro 21')
-    for idx,(y0,y1) in enumerate(((6940,7670),(7770,8500),(8600,9330)),1):
-        _interior_box(f'SEL_SOFA_seat_{idx}','wnetrze_elementy','interior_cream',[[15620,y0,545],[16380,y1,610]],source,10,'selected','poduszka siedziska',[14,15,49,51],'Liquid / tkanina Soro 21')
-    _interior_box('SEL_SOFA_chaise_seat','wnetrze_elementy','interior_cream',[[16420,6850,545],[17280,7750,610]],source,10,'selected','poduszka szezlonga',[14,15,49,51],'Liquid / tkanina Soro 21')
+    _interior_box('SEL_SOFA_back_long','wnetrze_elementy','interior_cream',
+        [[16530,6660,400],[16730,9440,930]],source,10,'selected','oparcie długiego modułu',[11,14,15,49,51],'Liquid / Soro 21')
+    _interior_box('SEL_SOFA_back_chaise','wnetrze_elementy','interior_cream',
+        [[16530,6660,400],[18350,6860,830]],source,10,'selected','oparcie szezlonga',[11,14,15,49,51],'Liquid / Soro 21')
+    _interior_box('SEL_SOFA_arm_end','wnetrze_elementy','interior_cream',
+        [[17200,9200,420],[17430,9440,780]],source,10,'selected','podłokietnik',[11,14,15,49,51],'Liquid / Soro 21')
+    for idx,(y0,y1) in enumerate(((6920,7650),(7750,8480),(8580,9310)),1):
+        _interior_box(f'SEL_SOFA_seat_{idx}','wnetrze_elementy','interior_cream',
+            [[16730,y0,545],[17360,y1,610]],source,10,'selected','poduszka siedziska',[14,15,49,51],'Liquid / Soro 21')
+    _interior_box('SEL_SOFA_chaise_seat','wnetrze_elementy','interior_cream',
+        [[17420,6880,545],[18280,7580,610]],source,10,'selected','poduszka szezlonga',[14,15,49,51],'Liquid / Soro 21')
 
-    # Mustard accent armchair.
-    _interior_box('SEL_ARMCHAIR_seat','wnetrze_elementy','interior_mustard',[[17850,8780,350],[18650,9500,550]],source,10,'selected','siedzisko fotela',[11,14,15,51],'Sensi / Soro 40')
-    _interior_box('SEL_ARMCHAIR_back','wnetrze_elementy','interior_mustard',[[17950,9320,520],[18550,9550,1220]],source,10,'selected','oparcie fotela',[11,14,15,51],'Sensi / Soro 40')
-    _interior_box('SEL_ARMCHAIR_arm_L','wnetrze_elementy','interior_mustard',[[17780,8780,500],[18020,9450,860]],source,10,'selected','podłokietnik',[11,14,15,51],'Sensi / Soro 40')
-    _interior_box('SEL_ARMCHAIR_arm_R','wnetrze_elementy','interior_mustard',[[18480,8780,500],[18720,9450,860]],source,10,'selected','podłokietnik',[11,14,15,51],'Sensi / Soro 40')
+    # Mustard accent armchair — position from p.49; rotation remains simplified in the proxy.
+    _interior_box('SEL_ARMCHAIR_seat','wnetrze_elementy','interior_mustard',[[17720,9200,350],[18840,10020,550]],source,10,'selected','siedzisko fotela',[11,14,15,49,51],'Sensi / Soro 40')
+    _interior_box('SEL_ARMCHAIR_back','wnetrze_elementy','interior_mustard',[[17820,9880,520],[18740,10220,1220]],source,10,'selected','oparcie fotela',[11,14,15,49,51],'Sensi / Soro 40')
+    _interior_box('SEL_ARMCHAIR_arm_L','wnetrze_elementy','interior_mustard',[[17650,9240,500],[17920,9960,860]],source,10,'selected','podłokietnik',[11,14,15,49,51],'Sensi / Soro 40')
+    _interior_box('SEL_ARMCHAIR_arm_R','wnetrze_elementy','interior_mustard',[[18620,9240,500],[18900,9960,860]],source,10,'selected','podłokietnik',[11,14,15,49,51],'Sensi / Soro 40')
 
     # Rug and coffee tables.
     clone_block('RUG','SAL_RUG','interior_cream','Hector 200×300 cm')
     for block_id in ('SAL_COFFEE_60','SAL_COFFEE_90'):
         clone_block('COFFEE',block_id,'interior_black','okrągły stolik kawowy 60/90 cm')
 
-    # TV/fireplace wall: central concrete, black side zones, screen, fireplace and flame.
-    _interior_box('SEL_TV_concrete','wnetrze_elementy','interior_concrete',[[19820,7180,40],[19980,8940,2530]],source,10,'selected','centralny panel betonowy',[29,30],'beton architektoniczny / SAFARI')
-    _interior_box('SEL_TV_left','wnetrze_elementy','interior_black',[[19820,6680,30],[19990,7180,2550]],source,10,'selected','lewa zabudowa TV',[29,30],'zabudowa meblowa')
-    _interior_box('SEL_TV_right','wnetrze_elementy','interior_black',[[19820,8940,30],[19990,9550,2550]],source,10,'selected','prawa zabudowa TV',[29,30],'zabudowa meblowa')
-    _interior_box('SEL_TV_screen','wnetrze_elementy','interior_black',[[19720,7420,1250],[19815,8700,2020]],source,10,'selected','telewizor',[29,30],'TV')
-    _interior_box('SEL_FIREPLACE_body','wnetrze_elementy','interior_black',[[19700,7400,480],[19815,8720,930]],source,10,'selected','kominek',[29,30,51],'Dimplex Sierra 72"')
-    _interior_box('SEL_FIREPLACE_flame','wnetrze_elementy','interior_flame',[[19685,7520,600],[19700,8600,790]],source,10,'selected','płomień - proxy',[29,30,51],'Dimplex Sierra 72"')
+    # TV / fireplace wall from p.29. Whole composition = 4.710 m on east wall.
+    # From north to south: 0.20 black wall + 0.75 cabinet + 2.30 concrete + 0.75 cabinet + 0.71 slats.
+    x0,x1=20020.0,20060.0
+    _interior_box('SEL_TV_black_return','wnetrze_elementy','interior_black',[[x0,10160,0],[x1,10360,2900]],source,10,'selected','ściana czarna 0,20 m',[29],'czarny mat')
+    _interior_box('SEL_TV_cab_north','wnetrze_elementy','interior_black',[[x0,9410,0],[x1,10160,2900]],source,10,'selected','zabudowa meblowa 0,75 m',[29,30],'zabudowa meblowa')
+    _interior_box('SEL_TV_concrete','wnetrze_elementy','interior_concrete',[[x0,7110,0],[x1,9410,2900]],source,10,'selected','beton architektoniczny 2,30 m',[29,30],'beton architektoniczny / SAFARI')
+    _interior_box('SEL_TV_cab_south','wnetrze_elementy','interior_black',[[x0,6360,0],[x1,7110,2900]],source,10,'selected','zabudowa meblowa 0,75 m',[29,30],'zabudowa meblowa')
+    _interior_box('SEL_TV_slats','wnetrze_elementy','interior_black',[[x0,5650,0],[x1,6360,2900]],source,10,'selected','lamele 0,71 m',[29,30],'czarny mat')
+    # TV and 1.83 m fireplace centered in the 2.30 m concrete panel (0.235 m margins).
+    _interior_box('SEL_TV_screen','wnetrze_elementy','interior_black',[[19915,7480,1250],[20015,9040,2050]],source,10,'selected','telewizor',[29,30],'TV')
+    _interior_box('SEL_FIREPLACE_body','wnetrze_elementy','interior_black',[[19910,7345,250],[20015,9175,750]],source,10,'selected','kominek 1,83 m',[29,30,51],'Dimplex Sierra 72"')
+    _interior_box('SEL_FIREPLACE_flame','wnetrze_elementy','interior_flame',[[19895,7440,390],[19910,9080,620]],source,10,'selected','płomień - proxy',[29,30,51],'Dimplex Sierra 72"')
 
-    # Pantry selected layer — U-layout from top plan p.49.
-    # South run: 3.00 x 0.60; north run: 2.40 x 0.45; west strip: 0.60 x 1.41.
-    south=block_map['SPI_BASE']; north=block_map['SPI_SHELVES']; west=block_map['SPI_TALL']
+    # South art wall p.31 = 4.10 m: concrete 2.75 m + wood slats 1.35 m.
+    # Looking south, left side of the elevation is east in plan coordinates.
+    _interior_box('SEL_ART_concrete','wnetrze_elementy','interior_concrete',[[17310,5920,0],[20060,5960,2900]],source,10,'selected','beton architektoniczny 2,75 m',[31],'beton architektoniczny / SAFARI')
+    _interior_box('SEL_ART_slats','wnetrze_elementy','interior_oak',[[15960,5920,0],[17310,5960,2900]],source,10,'selected','lamele 1,35 m',[31],'dąb craft złoty')
+    _interior_box('SEL_ART_picture','wnetrze_elementy','interior_black',[[17480,5895,700],[19480,5920,2200]],source,10,'selected','obraz 2,00 × 1,50 m',[31,51],'obraz 200×150 - zamówienie indywidualne')
+
+    # Pantry p.33-p.36 — exact L-layout, NOT a U-layout.
+    # South wall: 3.00 m base run, depth 0.60 m.
+    # West wall: from south corner 0.71 m open shelves, then 0.70 m tall cabinet to the north.
+    south=block_map['SPI_BASE']; side_open=block_map['SPI_SHELVES']; side_tall=block_map['SPI_TALL']
     clone_block('PANTRY_SOUTH','SPI_BASE','interior_black','zabudowa spiżarni - czarny mat')
-
-    # South wall oak countertop and upper shelving from elevation p.34.
+    clone_block('PANTRY_TALL','SPI_TALL','interior_oak','wysoka szafa spiżarni - dąb craft złoty')
     sb=south['bbox_mm']
-    _interior_box('SEL_PANTRY_south_top','wnetrze_elementy','interior_oak',
+    _interior_box('SEL_PANTRY_countertop','wnetrze_elementy','interior_oak',
         [[sb[0][0],sb[0][1],900],[sb[1][0],sb[1][1],950]],source,14,'selected','blat 3,00 m',[33,34,36],'dąb craft złoty')
-    # 3.00 m open shelf wall above the south base, 0.35 m deep.
+
+    # Open wall shelves above the 3.00 m south run, depth about 0.45 m per p.33.
     sx0,sy0=float(sb[0][0]),float(sb[0][1]); sx1=float(sb[1][0])
-    shelf_depth=350.0
     for idx,z in enumerate((1500,1850,2200,2550,2875),1):
         _interior_box(f'SEL_PANTRY_south_shelf_{idx}','wnetrze_elementy','interior_black',
-            [[sx0,sy0,z],[sx1,sy0+shelf_depth,z+25]],source,14,'selected','otwarta półka południowa',[34,36],'zabudowa spiżarni')
-    for idx,x in enumerate((sx0,sx0+900,sx0+1800,sx1-25),1):
+            [[sx0,sy0,z],[sx1,sy0+450,z+25]],source,14,'selected','otwarta półka nad ciągiem 3,00 m',[33,34,36],'zabudowa spiżarni')
+    for idx,x in enumerate((sx0,sx0+600,sx0+1200,sx0+1800,sx0+2400,sx1-25),1):
         _interior_box(f'SEL_PANTRY_south_v_{idx}','wnetrze_elementy','interior_black',
-            [[x,sy0,1450],[x+25,sy0+shelf_depth,2900]],source,14,'selected','pion półek południowych',[34,36],'zabudowa spiżarni')
+            [[x,sy0,1450],[x+25,sy0+450,2900]],source,14,'selected','pion półek',[34,36],'zabudowa spiżarni')
     _interior_box('SEL_PANTRY_south_back','wnetrze_elementy','interior_oak',
         [[sx0,sy0,1450],[sx1,sy0+18,2900]],source,14,'selected','drewniany tył półek',[34,36],'dąb craft złoty')
 
-    # North 2.40 m run opposite the south run.
-    nb=north['bbox_mm']
-    _interior_box('SEL_PANTRY_north_base','wnetrze_elementy','interior_black',
-        [[nb[0][0],nb[0][1],100],[nb[1][0],nb[1][1],900]],source,14,'selected','ciąg północny 2,40 × 0,45 m',[33,49],'zabudowa spiżarni')
-    _interior_box('SEL_PANTRY_north_top','wnetrze_elementy','interior_oak',
-        [[nb[0][0],nb[0][1],900],[nb[1][0],nb[1][1],950]],source,14,'selected','blat północny 2,40 m',[33,49],'dąb craft złoty')
-
-    # West 1.41 m wall from p.35: 0.70 m tall cabinet + 0.71 m open shelving.
-    wb=west['bbox_mm']; wx0,wy0=map(float,wb[0][:2]); wx1,wy1=map(float,wb[1][:2])
-    split=wy0+700.0
-    _interior_box('SEL_PANTRY_west_tall','wnetrze_elementy','interior_oak',
-        [[wx0,wy0,100],[wx1,split,2800]],source,14,'selected','wysoka szafa 0,70 m',[35,36],'dąb craft złoty')
-    # open shelves on remaining 0.71 m
+    # West-side open shelves, 0.71 m long and approx. 0.35 m deep.
+    ob=side_open['bbox_mm']; ox0,oy0,oz0=map(float,ob[0]); ox1,oy1,oz1=map(float,ob[1])
     for idx,z in enumerate((900,1300,1700,2100,2500,2875),1):
         _interior_box(f'SEL_PANTRY_west_shelf_{idx}','wnetrze_elementy','interior_black',
-            [[wx0,split,z],[wx1,wy1,z+25]],source,14,'selected','półka zachodnia',[35,36],'zabudowa spiżarni')
+            [[ox0,oy0,z],[ox1,oy1,z+25]],source,14,'selected','półka zachodnia 0,71 m',[35,36],'zabudowa spiżarni')
     _interior_box('SEL_PANTRY_west_back','wnetrze_elementy','interior_oak',
-        [[wx0,split,900],[wx0+18,wy1,2900]],source,14,'selected','drewniany tył półek zachodnich',[35,36],'dąb craft złoty')
+        [[ox0,oy0,900],[ox0+18,oy1,2900]],source,14,'selected','drewniany tył półek zachodnich',[35,36],'dąb craft złoty')
 
     # Entry selected layer.
     clone_block('ENTRY_WARDROBE','HOL_WARDROBE','interior_black','zabudowa na wymiar')
@@ -525,7 +540,7 @@ def add_interior_layers():
         sy=y0+i*step+step*0.18
         ey=y0+(i+1)*step-step*0.18
         _interior_box(f'SEL_ENTRY_SLAT_{i+1:02}','wnetrze_elementy','interior_oak',
-            [[sl[0][0],sy,30],[sl[1][0],ey,2820]],source,1,'selected','lamela / drzwi ukryte',[40,41],'dąb craft złoty')
+            [[sl[0][0],sy,30],[sl[1][0],ey,2900]],source,1,'selected','lamela / drzwi ukryte',[40,41],'dąb craft złoty')
 
     # South entrance wall p.40: 0.65 m slatted return at the west end + vertical metal hangers.
     # Elevation is mirrored relative to plan coordinates, hence the west-side placement.
