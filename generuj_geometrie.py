@@ -77,6 +77,9 @@ COLORS = {
     'teren_rzeczywisty': [0.40, 0.47, 0.34, 1.0],
     'ortofoto': [0.62, 0.62, 0.62, 1.0],
     'granica_dzialki': [0.97, 0.48, 0.05, 1.0],
+    'budynki_otoczenia': [0.62, 0.60, 0.56, 1.0],
+    'drzewa_korony': [0.22, 0.43, 0.16, 1.0],
+    'drzewa_pnie': [0.28, 0.18, 0.10, 1.0],
 }
 
 GROUP_NAMES = {
@@ -98,6 +101,8 @@ GROUP_NAMES = {
     'teren_rzeczywisty': '16_GEO_NMT_RZECZYWISTY',
     'ortofoto': '17_GEO_ORTOFOTOMAPA',
     'granica_dzialki': '18_GEO_GRANICA_DZIALKI',
+    'budynki_otoczenia': '19_GEO_BUDYNKI_OTOCZENIA',
+    'drzewa': '20_GEO_DRZEWA',
 }
 
 parts: list[dict[str, Any]] = []
@@ -962,7 +967,7 @@ def main():
         for rec in parts:
             if rec['category'] == 'sufity':
                 continue
-            if not include_roof and rec['category'] in ['dach','strop','elewacja','daszek','teren','nawierzchnie','schody','teren_rzeczywisty','ortofoto','granica_dzialki']:
+            if not include_roof and rec['category'] in ['dach','strop','elewacja','daszek','teren','nawierzchnie','schody','teren_rzeczywisty','ortofoto','granica_dzialki','budynki_otoczenia','drzewa']:
                 continue
             mesh = meshes[rec['name']].copy()
             mesh.unmerge_vertices()
