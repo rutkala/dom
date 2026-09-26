@@ -34,6 +34,8 @@ EXTERIOR_JOINERY = json.loads((ROOT / 'stolarka_zewnetrzna.json').read_text(enco
 SITE = json.loads((ROOT / 'pzt_zagospodarowanie.json').read_text(encoding='utf-8'))
 ELEVATIONS = json.loads((ROOT / 'elewacje_materialy.json').read_text(encoding='utf-8'))
 INTERIOR = json.loads((ROOT / 'wnetrze_projekt.json').read_text(encoding='utf-8'))
+GEO_REAL_PATH = ROOT / 'geoportal_teren.json'
+GEO_REAL = json.loads(GEO_REAL_PATH.read_text(encoding='utf-8')) if GEO_REAL_PATH.exists() else None
 
 COLORS = {
     'sciany': [0.84, 0.83, 0.80, 1.0],
@@ -72,6 +74,13 @@ COLORS = {
     'interior_metal': [0.025, 0.025, 0.025, 1.0],
     'interior_glass': [0.62, 0.72, 0.75, 0.35],
     'interior_flame': [0.95, 0.42, 0.08, 0.9],
+    'teren_rzeczywisty': [0.40, 0.47, 0.34, 1.0],
+    'ortofoto': [0.62, 0.62, 0.62, 1.0],
+    'granica_dzialki': [0.97, 0.48, 0.05, 1.0],
+    'budynki_otoczenia': [0.73, 0.71, 0.67, 1.0],
+    'budynki_dachy': [0.48, 0.38, 0.30, 1.0],
+    'drzewa_korony': [0.22, 0.43, 0.16, 1.0],
+    'drzewa_pnie': [0.28, 0.18, 0.10, 1.0],
 }
 
 GROUP_NAMES = {
@@ -90,6 +99,12 @@ GROUP_NAMES = {
     'schody': '13_SCHODY_ZEWNETRZNE',
     'wnetrze_bloki': '14_WNETRZE_BLOKI',
     'wnetrze_elementy': '15_WNETRZE_ELEMENTY',
+    'teren_rzeczywisty': '16_GEO_NMT_RZECZYWISTY',
+    'ortofoto': '17_GEO_ORTOFOTOMAPA',
+    'granica_dzialki': '18_GEO_GRANICA_DZIALKI',
+    'budynki_otoczenia': '19_GEO_BUDYNKI_OTOCZENIA',
+    'drzewa': '20_GEO_DRZEWA',
+    'dom_geo': '21_DOM_GEOREFERENCJONOWANY',
 }
 
 parts: list[dict[str, Any]] = []
@@ -555,6 +570,74 @@ def add_interior_layers():
         _interior_box(f'SEL_ENTRY_HOOK_RAIL_{idx}','wnetrze_elementy','interior_metal',
             [[x,south_y,180],[x+28,south_y+35,2750]],source,1,'selected','pionowy wieszak metalowy',[40],'wieszak metalowy')
 
+
+def apply_georeference_to_all_project_layers():
+    """Transformuje wszystkie elementy projektu (dom, wnętrze, zagospodarowanie) do układu georeferencyjnego."""
+    if not GEO_REAL or GEO_REAL.get('status') != 'fetched':
+        return
+    cal=((GEO_REAL.get('alignment') or {}).get('house_calibration') or {})
+    M=cal.get('model_to_geo_local_affine_mm')
+    if not M:
+        print('Geo: brak geodezyjnej macierzy domu - pomijam transformację.')
+        return
+    M=np.asarray(M,dtype=float)
+    already_geo={'teren_rzeczywisty','ortofoto','granica_dzialki','budynki_otoczenia','drzewa','dom_geo'}
+    count=0
+    for rec in parts:
+        if rec.get('category') in already_geo:
+            continue
+        mesh=meshes[rec['name']]
+        vv=np.asarray(mesh.vertices,dtype=float).copy()
+        xy_mm=np.column_stack([vv[:,0]*1000.0,vv[:,1]*1000.0,np.ones(len(vv))])
+        out=(M @ xy_mm.T).T
+        vv[:,0]=out[:,0]/1000.0
+        vv[:,1]=out[:,1]/1000.0
+        mesh.vertices=vv
+        if 'bbox_mm' in rec and len(vv):
+            xs,ys,zs=vv[:,0]*1000.0,vv[:,1]*1000.0,vv[:,2]*1000.0
+            rec['bbox_mm']=[[round(float(np.min(xs)),1),round(float(np.min(ys)),1),round(float(np.min(zs)),1)],
+                            [round(float(np.max(xs)),1),round(float(np.max(ys)),1),round(float(np.max(zs)),1)]]
+        count+=1
+    print(f'Geo: przetransformowano {count} elementow projektu do georeferencji.')
+
+
+def add_geoportal_real_layers():
+    """Dodaje pobrany NMT, ortofotomapę i granicę działki do wspólnej sceny."""
+    if not GEO_REAL or GEO_REAL.get('status') != 'fetched':
+        print('Geoportal: brak geoportal_teren.json - pomijam warstwę rzeczywistą.')
+        return
+    count=0
+    for item in GEO_REAL.get('parts',[]):
+        vertices=np.asarray(item.get('positions_m',[]),dtype=float)
+        faces=np.asarray(item.get('faces',[]),dtype=int)
+        if len(vertices)<3 or len(faces)<1:
+            continue
+        mesh=trimesh.Trimesh(vertices=vertices,faces=faces,process=False)
+        extras={
+            'geoportal_real': True,
+            'geoportal_generated_at_utc': GEO_REAL.get('generated_at_utc'),
+            'geoportal_alignment': GEO_REAL.get('alignment'),
+            'geoportal_validation': GEO_REAL.get('validation'),
+        }
+        add_mesh_record(
+            item.get('name',f'GEO_{count:04d}'),
+            item.get('category','teren_rzeczywisty'),
+            item.get('material','teren_rzeczywisty'),
+            mesh,
+            item.get('source','Geoportal / GUGiK'),
+            bool(item.get('assumed',False)),
+            item.get('note',''),
+            item.get('source_id','GEO'),
+            extras,
+            item.get('reference_area_m2')
+        )
+        # Kafle ortofoto mają własny kolor pobrany z rastra; GLB/HTML zachowują go per obiekt.
+        if item.get('color'):
+            parts[-1]['color']=[float(v) for v in item['color']]
+        count+=1
+    print(f'Geoportal: dodano {count} elementów rzeczywistego terenu / ortofoto.')
+
+
 def main():
     print("Rozpoczynanie generowania geometrii z aktualnym zestawieniem okien...")
     facade = Polygon(DATA['facade_reference_outline']['polygon_mm'])
@@ -904,6 +987,12 @@ def main():
     # 11. Wnętrze z projektu — dwie niezależne warstwy: bloki i elementy.
     add_interior_layers()
 
+    # 12. Transformacja wszystkich elementów projektu (bryła, wnętrze, otoczenie) do georeferencji.
+    apply_georeference_to_all_project_layers()
+
+    # 13. Geoportal / rzeczywisty NMT + ortofotomapa.
+    add_geoportal_real_layers()
+
     print(f"Wygenerowano {len(parts)} elementow.")
 
     # GLB
@@ -911,9 +1000,9 @@ def main():
     def export_glb(filename: str, include_roof: bool):
         scene = trimesh.Scene(base_frame='DOM')
         for rec in parts:
-            if rec['category'] == 'sufity':
+            if rec['category'] in ['sufity','dom_geo']:
                 continue
-            if not include_roof and rec['category'] in ['dach','strop','elewacja','daszek','teren','nawierzchnie','schody']:
+            if not include_roof and rec['category'] in ['dach','strop','elewacja','daszek','teren','nawierzchnie','schody','teren_rzeczywisty','ortofoto','granica_dzialki','budynki_otoczenia','drzewa']:
                 continue
             mesh = meshes[rec['name']].copy()
             mesh.unmerge_vertices()
@@ -940,7 +1029,7 @@ def main():
     obj = ['# Model roboczy domu z aktualnymi oknami. Units: meters. Z-up.', 'mtllib dom_materialy.mtl']
     offset = 0
     for rec in parts:
-        if rec['category'] == 'sufity':
+        if rec['category'] in ['sufity','dom_geo']:
             continue
         m = meshes[rec['name']]
         obj += [f"o {rec['name']}", f"g {GROUP_NAMES[rec['category']]}", f"usemtl {rec['material']}"]
@@ -960,7 +1049,7 @@ def main():
         m = meshes[rec['name']]
         scene_records.append({**rec, 'positions_m': np.round(m.vertices, 7).tolist(), 'faces': m.faces.tolist()})
     (ROOT / 'scena_modelu.json').write_text(
-        json.dumps({'units': 'm', 'up_axis': 'Z', 'parts': scene_records}, ensure_ascii=False, separators=(',', ':')),
+        json.dumps({'units': 'm', 'up_axis': 'Z', 'geo_alignment': (GEO_REAL or {}).get('alignment'), 'geo_validation': (GEO_REAL or {}).get('validation'), 'parts': scene_records}, ensure_ascii=False, separators=(',', ':')),
         encoding='utf-8'
     )
     print("Zapisano: scena_modelu.json")

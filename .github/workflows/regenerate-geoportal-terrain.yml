@@ -1,0 +1,99 @@
+name: Regenerate Geoportal real terrain
+
+on:
+  push:
+    branches:
+      - geoportal-real-terrain
+    paths:
+      - ".github/workflows/regenerate-geoportal-terrain.yml"
+      - "fetch_geoportal_terrain.py"
+      - "geoportal_georef.json"
+      - "generuj_geometrie.py"
+      - "podglad_szablon.html"
+      - "aktualizuj_podglad.py"
+      - "dane_zrodlowe.json"
+      - "pzt_zagospodarowanie.json"
+      - "parametry_modelu.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: geoportal-real-terrain
+  cancel-in-progress: true
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: geoportal-real-terrain
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Geoportal/model dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy scipy shapely trimesh mapbox-earcut requests pyproj rasterio pillow
+
+      - name: Download Geoportal NMT, orthophoto and parcel
+        run: python fetch_geoportal_terrain.py
+
+      - name: Regenerate model assets
+        run: |
+          python generuj_geometrie.py
+          python aktualizuj_podglad.py
+
+      - name: Validate generated Geoportal data
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("geoportal_teren.json")
+          d=json.loads(p.read_text(encoding="utf-8"))
+          assert d.get("status") == "fetched", d.get("status")
+          assert d["stats"]["terrain_vertices"] > 100
+          assert d["stats"]["terrain_triangles"] > 100
+          assert d["stats"]["ortho_tiles"] > 0
+          assert d["stats"]["parcel_segments"] > 0, d["stats"]
+          assert d["stats"]["context_buildings"] > 0, d["stats"]
+          assert d["validation"]["parcel_contains_fetch_center"] is True, d["validation"]
+          assert d["validation"]["distance_fetch_center_to_parcel_m"] == 0.0, d["validation"]
+          assert d["validation"].get("ortho_uv_roundtrip_max_error_mm", 999) < 0.01, d["validation"]
+          assert d["alignment"]["house_calibration"]["status"] == "reality_georeferenced", d["alignment"]["house_calibration"]
+          assert d["validation"]["house_alignment_source"] in {"EGiB_building_footprint","orthophoto_roof_within_parcel"}, d["validation"]
+          assert d["validation"].get("calibrated_house_inside_parcel_fraction",0) >= 0.95, d["validation"]
+          if d["validation"]["house_alignment_source"] == "orthophoto_roof_within_parcel":
+              fit=d["validation"].get("house_ortho_fit") or {}
+              assert fit.get("status") == "accepted", fit
+              assert 0.80 <= float(fit.get("roof_component_area_ratio",0)) <= 1.40, fit
+              assert float(fit.get("roof_mask_hit",0)) >= 0.80, fit
+              assert float(fit.get("roof_edge_score",0)) >= 0.15, fit
+              assert float(fit.get("pzt_seed_distance_m",999)) <= 10.0, fit
+          scene=json.loads(Path("scena_modelu.json").read_text(encoding="utf-8"))
+          assert len(scene.get("parts",[])) > 100, "Brak elementów w scenie"
+          html=Path("index.html").read_text(encoding="utf-8")
+          assert "Mapa / Geoportal" in html
+          assert "Wnętrze" in html
+          assert "Bryła z dachem" in html
+          assert "Rzut z góry" in html
+          print(json.dumps(d["stats"], ensure_ascii=False, indent=2))
+          print(json.dumps(d.get("validation",{}), ensure_ascii=False, indent=2))
+          print(f"Total scene parts: {len(scene.get('parts',[]))}")
+          PY
+
+      - name: Commit regenerated terrain and model assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add geoportal_teren.json geoportal_ortho.jpg dom_wnetrze.glb dom_bryla.glb dom_model.obj dom_materialy.mtl scena_modelu.json index.html podglad_3d.html
+          if git diff --cached --quiet; then
+            echo "No generated changes."
+          else
+            git commit -m "Regenerate Geoportal real terrain assets [skip ci]"
+            git push
+          fi
