@@ -44,7 +44,9 @@ jobs:
         run: python fetch_geoportal_terrain.py
 
       - name: Regenerate model assets
-        run: python generuj_geometrie.py
+        run: |
+          python generuj_geometrie.py
+          python aktualizuj_podglad.py
 
       - name: Validate generated Geoportal data
         run: |
@@ -73,18 +75,15 @@ jobs:
               assert float(fit.get("roof_edge_score",0)) >= 0.15, fit
               assert float(fit.get("pzt_seed_distance_m",999)) <= 10.0, fit
           scene=json.loads(Path("scena_modelu.json").read_text(encoding="utf-8"))
-          geo_parts=[x for x in scene.get("parts",[]) if x.get("category")=="dom_geo"]
-          assert geo_parts, "Brak warstwy dom_geo w scenie"
+          assert len(scene.get("parts",[])) > 100, "Brak elementów w scenie"
           html=Path("index.html").read_text(encoding="utf-8")
-          assert "Dom dopasowany do ortofotomapy" in html
-          assert "Dom wg geodezyjnego PZT" not in html
-          assert "if(mode==='geo')" in html
-          assert "$('#geoHouse').checked=true" in html
-          assert "$('#walls').checked=false" in html
-          assert "$('#contextTrees').checked=false" in html
+          assert "Mapa / Geoportal" in html
+          assert "Wnętrze" in html
+          assert "Bryła z dachem" in html
+          assert "Rzut z góry" in html
           print(json.dumps(d["stats"], ensure_ascii=False, indent=2))
           print(json.dumps(d.get("validation",{}), ensure_ascii=False, indent=2))
-          print(f"Geo house parts: {len(geo_parts)}")
+          print(f"Total scene parts: {len(scene.get('parts',[]))}")
           PY
 
       - name: Commit regenerated terrain and model assets

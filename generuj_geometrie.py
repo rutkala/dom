@@ -571,54 +571,34 @@ def add_interior_layers():
             [[x,south_y,180],[x+28,south_y+35,2750]],source,1,'selected','pionowy wieszak metalowy',[40],'wieszak metalowy')
 
 
-def add_georeferenced_house_overlay():
-    """Tworzy kopię zewnętrznej bryły domu w aktualnej pozycji georeferencyjnej.
-
-    Transformacja pochodzi z geoportal_teren.json. Preferowany jest obrys EGiB,
-    a przy jego braku — dopasowanie do rzeczywistego dachu na ortofotomapie.
-    """
+def apply_georeference_to_all_project_layers():
+    """Transformuje wszystkie elementy projektu (dom, wnętrze, zagospodarowanie) do układu georeferencyjnego."""
     if not GEO_REAL or GEO_REAL.get('status') != 'fetched':
         return
     cal=((GEO_REAL.get('alignment') or {}).get('house_calibration') or {})
     M=cal.get('model_to_geo_local_affine_mm')
     if not M:
-        print('Geo house: brak geodezyjnej macierzy domu - pomijam overlay.')
+        print('Geo: brak geodezyjnej macierzy domu - pomijam transformację.')
         return
     M=np.asarray(M,dtype=float)
-    allowed={'sciany','uzupelnienia','stolarka','elewacja','daszek','strop','dach'}
-    snapshot=[rec for rec in parts if rec.get('category') in allowed]
+    already_geo={'teren_rzeczywisty','ortofoto','granica_dzialki','budynki_otoczenia','drzewa','dom_geo'}
     count=0
-    for rec in snapshot:
-        src_mesh=meshes[rec['name']]
-        m=src_mesh.copy()
-        vv=np.asarray(m.vertices,dtype=float).copy()
+    for rec in parts:
+        if rec.get('category') in already_geo:
+            continue
+        mesh=meshes[rec['name']]
+        vv=np.asarray(mesh.vertices,dtype=float).copy()
         xy_mm=np.column_stack([vv[:,0]*1000.0,vv[:,1]*1000.0,np.ones(len(vv))])
         out=(M @ xy_mm.T).T
         vv[:,0]=out[:,0]/1000.0
         vv[:,1]=out[:,1]/1000.0
-        m.vertices=vv
-        add_mesh_record(
-            'GEO_DOM_'+rec['name'],
-            'dom_geo',
-            rec['material'],
-            m,
-            'Geoportal / dopasowanie domu do danych rzeczywistych',
-            False,
-            'Georeferencjonowana kopia elementu domu; transformacja wg bieżącej kalibracji EGiB/ortofotomapy.',
-            rec.get('source_id',''),
-            {
-                'geo_house':True,
-                'geo_house_original_name':rec['name'],
-                'geo_house_method':cal.get('method'),
-                'geo_house_manual_rotation_deg':cal.get('manual_rotation_deg',0.0),
-                'geo_house_manual_offset_m':cal.get('manual_offset_m',[0.0,0.0]),
-                'geo_house_affine_error_mm':cal.get('affine_linearization_error_mm'),
-            },
-            rec.get('plan_area_m2')
-        )
-        parts[-1]['color']=list(rec['color'])
+        mesh.vertices=vv
+        if 'bbox_mm' in rec and len(vv):
+            xs,ys,zs=vv[:,0]*1000.0,vv[:,1]*1000.0,vv[:,2]*1000.0
+            rec['bbox_mm']=[[round(float(np.min(xs)),1),round(float(np.min(ys)),1),round(float(np.min(zs)),1)],
+                            [round(float(np.max(xs)),1),round(float(np.max(ys)),1),round(float(np.max(zs)),1)]]
         count+=1
-    print(f'Geo house: dodano {count} georeferencjonowanych elementow domu.')
+    print(f'Geo: przetransformowano {count} elementow projektu do georeferencji.')
 
 
 def add_geoportal_real_layers():
@@ -1004,14 +984,14 @@ def main():
             top=ttop-i*rise; x0=start+(i-1)*run; x1=start+i*run
             add(f'SCHODY_tarasu_{i:02}','schody','schody',box(x0,cy-width/2,x1,cy+width/2),base,top,'DWK_2021-001-PZT_PAB.pdf s.26-27 - schody przy tarasie',True,st.get('note',''),'STAIRS_NORTH')
 
-    # 11. Geodezyjna kopia bryły domu na bazie siatki PZT.
-    add_georeferenced_house_overlay()
-
-    # 12. Geoportal / rzeczywisty NMT + ortofotomapa.
-    add_geoportal_real_layers()
-
-    # 13. Wnętrze z projektu — dwie niezależne warstwy: bloki i elementy.
+    # 11. Wnętrze z projektu — dwie niezależne warstwy: bloki i elementy.
     add_interior_layers()
+
+    # 12. Transformacja wszystkich elementów projektu (bryła, wnętrze, otoczenie) do georeferencji.
+    apply_georeference_to_all_project_layers()
+
+    # 13. Geoportal / rzeczywisty NMT + ortofotomapa.
+    add_geoportal_real_layers()
 
     print(f"Wygenerowano {len(parts)} elementow.")
 
